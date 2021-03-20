@@ -7,29 +7,28 @@ import 'hardhat/console.sol';
 
 contract PriceFeed is PriceModel {
 
-    uint256 price = 0;
+    mapping(bytes32 => uint256) prices;
     PriceVerifier priceVerifier;
 
     constructor(PriceVerifier _priceVerifier) {
         priceVerifier = _priceVerifier;
     }
 
-    function setPrice(PriceData calldata priceData, bytes calldata signature) external {
+    function setPrices(PriceData calldata priceData, bytes calldata signature) external {
         require(priceVerifier.verifyPriceData(priceData, signature), "Incorrect price data");
-        price = priceData.prices[0];
+        for(uint256 i=0; i < priceData.symbols.length; i++) {
+            prices[priceData.symbols[i]] = priceData.prices[i];
+        }
     }
 
 
     function clearPrice() external {
-        price = 0;
+
     }
 
-    function getPrice() public view returns(uint256) {
-        return price;
-    }
-
-    function test(uint256 t) public {
-        console.log("Test: ", t);
+    function getPrice(bytes32 symbol) public view returns(uint256) {
+        require(prices[symbol] > 0, "No pricing data");
+        return prices[symbol];
     }
 
 }

@@ -20,7 +20,7 @@ contract MockDefi {
         require(amount > 0, "Amount must be greater than zero");
 
         // Transfer the amount.
-        uint256 price = priceFeed.getPrice();
+        uint256 price = priceFeed.getPrice("ETH");
 
         console.log("Depositing with price: ", price);
 

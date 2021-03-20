@@ -28,12 +28,18 @@ contract PriceVerifier is PriceModel {
     }
 
 
-    function hashPrices(uint256[] calldata array) internal pure returns (bytes32 result) {
-        bytes32[] memory _array = new bytes32[](array.length);
-        for (uint256 i = 0; i < array.length; ++i) {
-            _array[i] = keccak256(abi.encodePacked(array[i]));
-        }
-        result = keccak256(abi.encodePacked(_array));
+    function hashPrices(uint256[] calldata array) internal view returns (bytes32) {
+console.log("*** Array on-chain");
+        //bytes32[] memory _array = new bytes32[](array.length);
+        //for (uint256 i = 0; i < array.length; ++i) {
+        //    _array[i] = abi.encodePacked(array[i]);
+        //}
+        bytes memory encoded = abi.encodePacked(array);
+        console.logBytes(encoded);
+        bytes32 result = keccak256(encoded);
+
+        console.logBytes32(result);
+        return result;
     }
 
 
@@ -43,8 +49,8 @@ contract PriceVerifier is PriceModel {
             DOMAIN_SEPARATOR,
             keccak256(abi.encode(
                 PRICE_DATA__TYPEHASH,
-                //priceData.symbol,
-                priceData.prices,
+                keccak256(abi.encodePacked(priceData.symbols)),
+                keccak256(abi.encodePacked(priceData.prices)),
                 priceData.timestamp,
                 priceData.signer
             ))

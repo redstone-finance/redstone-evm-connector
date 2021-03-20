@@ -3,7 +3,7 @@ const {toBuffer} = require('ethereumjs-util')
 
 
 const PriceData = [
-  //{name: 'symbol', type: 'string'},
+  {name: 'symbols', type: 'bytes32[]'},
   {name: 'prices', type: 'uint256[]'},
   {name: 'timestamp', type: 'uint256'},
   {name: 'signer', type: 'address'},
@@ -20,9 +20,10 @@ const EIP712Domain = [
 
 
 function toMessage(priceData) {
-  const serializeBN = (value) => value.toString()
+  const serializeBN = (value) => value.toString();
 
   return {
+    symbols: priceData.symbols,
     prices: priceData.prices.map(serializeBN),
     timestamp: serializeBN(priceData.timestamp),
     signer: priceData.signer

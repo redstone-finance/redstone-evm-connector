@@ -25,7 +25,8 @@ describe("Price data verification", function() {
 
 
       let priceData = {
-        prices: [3,4],
+        symbols: ["ETH", "AR"].map(ethers.utils.formatBytes32String),
+        prices: [1800, 15],
         timestamp: 1111,
         signer: signerAddress
       };

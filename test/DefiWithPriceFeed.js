@@ -65,7 +65,8 @@ describe("MockDefi with Proxy contract", function() {
 
   it("Should deposit with price data", async function() {
     let priceData = {
-      price: 13,
+      symbols: ["ETH", "AR"].map(ethers.utils.formatBytes32String),
+      prices: [1800, 15],
       timestamp: 1111,
       signer: signer.address
     };
@@ -73,7 +74,7 @@ describe("MockDefi with Proxy contract", function() {
     let signature = signPriceData(priceData, signer.privateKey);
 
 
-    let setPriceTx = await priceFeed.connect(signer).populateTransaction.setPrice(priceData, signature);
+    let setPriceTx = await priceFeed.connect(signer).populateTransaction.setPrices(priceData, signature);
     console.log(setPriceTx.data);
 
     let tx = await defi.connect(signer).populateTransaction.deposit(100);
@@ -81,19 +82,5 @@ describe("MockDefi with Proxy contract", function() {
     await signer.sendTransaction(tx);
 
   });
-
-  // it("Should deposit", async function() {
-  //
-  //   let tx = await defi.connect(signer).populateTransaction.deposit(100);
-  //   tx.data = tx.data+"03";
-  //
-  //   await signer.sendTransaction(tx);
-  //
-  //   //console.log(txs);
-  //
-  //   //await defi.connect(signer).deposit(100);
-  //
-  //   expect(await defi.balanceOf(signer.address)).to.equal(300);
-  // });
 
 });
