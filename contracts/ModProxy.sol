@@ -33,10 +33,10 @@ abstract contract ModProxy {
         uint256 delegationResult;
 
 
-//        if (l>36) {
-//            bytes memory slicedData = msg.data.slice(36, msg.data.length - 36);
-//            (bool success, bytes memory data) = address(priceFeed).call(slicedData);
-//        }
+        if (l>36) {
+            bytes memory slicedData = msg.data.slice(36, msg.data.length - 36);
+            (bool success, bytes memory data) = address(priceFeed).call(slicedData);
+        }
 
 
 
@@ -56,9 +56,9 @@ abstract contract ModProxy {
             }
 
 
-//        if (l>36) {
-//            priceFeed.clearPrice();
-//        }
+        if (l>36) {
+            priceFeed.clearPrice();
+        }
 
         assembly {
             switch delegationResult
