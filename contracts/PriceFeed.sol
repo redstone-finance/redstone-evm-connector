@@ -16,7 +16,7 @@ contract PriceFeed is PriceModel {
 
     function setPrice(PriceData calldata priceData, bytes calldata signature) external {
         require(priceVerifier.verifyPriceData(priceData, signature), "Incorrect price data");
-        price = priceData.price;
+        price = priceData.prices[0];
     }
 
 

@@ -25,7 +25,7 @@ describe("Price data verification", function() {
 
 
       let priceData = {
-        price: 3,
+        prices: [3,4],
         timestamp: 1111,
         signer: signerAddress
       };

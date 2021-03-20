@@ -28,6 +28,15 @@ contract PriceVerifier is PriceModel {
     }
 
 
+    function hashPrices(uint256[] calldata array) internal pure returns (bytes32 result) {
+        bytes32[] memory _array = new bytes32[](array.length);
+        for (uint256 i = 0; i < array.length; ++i) {
+            _array[i] = keccak256(abi.encodePacked(array[i]));
+        }
+        result = keccak256(abi.encodePacked(_array));
+    }
+
+
     function hashPriceData(PriceData calldata priceData) public view returns (bytes32) {
         return keccak256(abi.encodePacked(
             "\x19\x01",
@@ -35,7 +44,7 @@ contract PriceVerifier is PriceModel {
             keccak256(abi.encode(
                 PRICE_DATA__TYPEHASH,
                 //priceData.symbol,
-                priceData.price,
+                priceData.prices,
                 priceData.timestamp,
                 priceData.signer
             ))

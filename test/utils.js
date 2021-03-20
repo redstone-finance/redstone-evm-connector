@@ -4,7 +4,7 @@ const {toBuffer} = require('ethereumjs-util')
 
 const PriceData = [
   //{name: 'symbol', type: 'string'},
-  {name: 'price', type: 'uint256'},
+  {name: 'prices', type: 'uint256[]'},
   {name: 'timestamp', type: 'uint256'},
   {name: 'signer', type: 'address'},
 ];
@@ -23,7 +23,7 @@ function toMessage(priceData) {
   const serializeBN = (value) => value.toString()
 
   return {
-    price: serializeBN(priceData.price),
+    prices: priceData.prices.map(serializeBN),
     timestamp: serializeBN(priceData.timestamp),
     signer: priceData.signer
   }
