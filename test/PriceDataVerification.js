@@ -30,6 +30,9 @@ describe("Price data verification", function() {
         signer: signerAddress
       };
 
+      let hashedOnChain = await verifier.hashPriceData(priceData);
+      console.log("Hashed on-chain: " + hashedOnChain);
+
       let signature = signPriceData(priceData, signer.privateKey);
       console.log(signature);
       expect(await verifier.verifyPriceData(priceData, signature)).to.be.true;
