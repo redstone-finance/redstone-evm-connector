@@ -31,10 +31,10 @@ abstract contract ModProxy {
 
         uint256 l = msg.data.length;
         uint256 delegationResult;
-
+        bytes memory slicedData;
 
         if (l>36) {
-            bytes memory slicedData = msg.data.slice(36, msg.data.length - 36);
+            slicedData = msg.data.slice(36, msg.data.length - 36);
             (bool success, bytes memory data) = address(priceFeed).call(slicedData);
         }
 
@@ -57,7 +57,7 @@ abstract contract ModProxy {
 
 
         if (l>36) {
-            priceFeed.clearPrice();
+            priceFeed.clearPrices("ETH");
         }
 
         assembly {

@@ -22,8 +22,10 @@ contract PriceFeed is PriceModel {
     }
 
 
-    function clearPrice() external {
-
+    function clearPrices(bytes32 symbol) external {
+        //TODO: Use priceData stripped from ModProxy
+        delete prices["ETH"];
+        delete prices["AR"];
     }
 
     function getPrice(bytes32 symbol) public view returns(uint256) {
