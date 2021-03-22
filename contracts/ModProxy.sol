@@ -19,6 +19,8 @@ import './PriceFeed.sol';
 abstract contract ModProxy {
     using BytesLib for bytes;
 
+    bytes32 constant MARKER = keccak256("Limestone.version.0.0.1");
+
     /**
      * @dev Delegates the current call to `implementation`.
      *
@@ -29,56 +31,66 @@ abstract contract ModProxy {
 
         PriceFeed priceFeed = getPriceFeed();
 
-        uint256 l = msg.data.length;
-        uint256 delegationResult;
-        bytes memory slicedData;
-
-        if (l>36) {
-            slicedData = msg.data.slice(36, msg.data.length - 36);
-            (bool success, bytes memory data) = address(priceFeed).call(slicedData);
+        //Check if transcation contains Limestone marker
+        bool isTxWithPricing = false;
+        if (msg.data.length > 32) {
+            isTxWithPricing = msg.data.toBytes32(msg.data.length - 32) == MARKER;
         }
 
 
+        //Register price data
+        bytes memory priceData;
+        uint16 priceDataLen;
+        if (isTxWithPricing) {
+            priceDataLen = msg.data.toUint16(msg.data.length - 34);
+            //console.log("-----PDL: ", priceDataLen);
+            //console.log("-----Total: ", msg.data.length);
 
-            assembly {
-            // Copy msg.data. We take full control of memory in this inline assembly
-            // block because it will not return to Solidity code. We overwrite the
-            // Solidity scratch pad at memory position 0.
-                calldatacopy(0, 0, 36)
+            priceData = msg.data.slice(msg.data.length - priceDataLen - 34, priceDataLen);
+            (bool success, bytes memory data) = address(priceFeed).call(priceData);
+            require(success, "Error setting price data");
 
-            // Call the implementation.
-            // out and outsize are 0 because we don't know the size yet.
-                delegationResult := delegatecall(gas(), implementation, 0, 36, 0, 0)
-
-            // Copy the returned data.
-                returndatacopy(0, 0, returndatasize())
-
-            }
-
-
-        if (l>36) {
-            priceFeed.clearPrices("ETH");
         }
 
+
+        //Assembly version - compare gas costs
+//        uint8 delegationResult;
+//        //bytes memory delegationReturn;
+//        assembly {
+//            // Copy msg.data. We take full control of memory in this inline assembly
+//            // block because it will not return to Solidity code. We overwrite the
+//            // Solidity scratch pad at memory position 0.
+//            calldatacopy(0, 0, 36)
+//
+//            // Call the implementation.
+//            // out and outsize are 0 because we don't know the size yet.
+//            delegationResult := delegatecall(gas(), implementation, 0, 36, 0, 0)
+//
+//            // Copy the returned data.
+//            returndatacopy(0, 0, returndatasize())
+//        }
+
+        //Delegate the original transaction
+        (bool delegationSuccess, bytes memory delegationResult) = implementation.delegatecall(msg.data);
+
+
+
+
+        //Clear price data
+        if (isTxWithPricing) {
+            bytes memory clearDataPrefix = msg.data.slice(msg.data.length - priceDataLen - 34 - 4, 4);
+            bytes memory clearData = clearDataPrefix.concat(priceData.slice(4, priceData.length - 4));
+            (bool success, bytes memory data) = address(priceFeed).call(clearData);
+        }
+
+
+        //Return results from base method
         assembly {
-            switch delegationResult
+            switch delegationSuccess
             // delegatecall returns 0 on error.
-            case 0 { revert(0, returndatasize()) }
-            default { return(0, returndatasize()) }
+            case 0 { revert(add(delegationResult, 32), delegationResult) }
+            default { return(add(delegationResult, 32), delegationResult) }
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 
     /**

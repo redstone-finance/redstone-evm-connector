@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^3.4.1",
+    "@openzeppelin/test-helpers": "^0.5.10",
     "eth-sig-util": "^3.0.1",
     "solidity-bytes-utils": "^0.1.2"
   }

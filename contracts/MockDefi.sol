@@ -35,4 +35,8 @@ contract MockDefi {
     function balanceOf(address account) external view returns (uint256) {
         return balances[account];
     }
+
+    function getCurrentTime() public view returns(uint256) {
+        return block.timestamp;
+    }
 }
