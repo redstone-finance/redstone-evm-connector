@@ -1,10 +1,9 @@
 const { expect } = require("chai");
-const {signPriceData} = require("./utils");
+const {signPriceData} = require("../utils/price-signer");
 
 describe("Price data verification", function() {
 
-  const PRIV = "0xae2b81c1fe9e3b01f060362f03abd0c80a6447cfe00ff7fc7fcf1fa55c45add3";
-
+  const PRIV = "0xae2b81c1fe9e3b01f060362f03abd0c80a6447cfe00ff7fc7fcf000000000000";
 
   var owner, signer, verifier;
 
@@ -15,28 +14,59 @@ describe("Price data verification", function() {
 
     signer = new ethers.Wallet(PRIV, owner.provider);
     verifier = await Verifier.deploy();
-
   });
 
 
-  it("Should sign and verify price data", async function() {
-      let signerAddress = signer.address;
-      console.log("Signer: " + signerAddress);
+  //The verifier shouldn't validate the content - just the signature logic
+  it("Should sign and verify empty price data", async function() {
+    let priceData = {
+      symbols: [].map(ethers.utils.formatBytes32String),
+      prices: [],
+      timestamp: 1111,
+      signer: signer.address
+    };
+
+    let signature = signPriceData(priceData, signer.privateKey);
+    expect(await verifier.verifyPriceData(priceData, signature)).to.be.true;
+  });
 
 
+  it("Should sign and verify single price data", async function() {
       let priceData = {
-        symbols: ["ETH", "AR"].map(ethers.utils.formatBytes32String),
-        prices: [1800, 15],
+        symbols: ["ETH"].map(ethers.utils.formatBytes32String),
+        prices: [1800],
         timestamp: 1111,
-        signer: signerAddress
+        signer: signer.address
       };
 
-      let hashedOnChain = await verifier.hashPriceData(priceData);
-      console.log("Hashed on-chain: " + hashedOnChain);
-
       let signature = signPriceData(priceData, signer.privateKey);
-      console.log(signature);
       expect(await verifier.verifyPriceData(priceData, signature)).to.be.true;
+  });
+
+
+  it("Should sign and verify double price data", async function() {
+    let priceData = {
+      symbols: ["ETH", "AR"].map(ethers.utils.formatBytes32String),
+      prices: [1800, 15],
+      timestamp: 1111,
+      signer: signer.address
+    };
+
+    let signature = signPriceData(priceData, signer.privateKey);
+    expect(await verifier.verifyPriceData(priceData, signature)).to.be.true;
+  });
+
+
+  it("Should sign and verify 10 price data", async function() {
+    let priceData = {
+      symbols: ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10"].map(ethers.utils.formatBytes32String),
+      prices: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      timestamp: 1111,
+      signer: signer.address
+    };
+
+    let signature = signPriceData(priceData, signer.privateKey);
+    expect(await verifier.verifyPriceData(priceData, signature)).to.be.true;
   });
 
 

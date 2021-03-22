@@ -12,11 +12,17 @@ contract PriceVerifier is PriceModel {
     bytes32 DOMAIN_SEPARATOR;
 
     constructor() public {
+        //Get chainId from assembly
+        uint256 chainId;
+        assembly {
+            chainId := chainid()
+        }
+
         DOMAIN_SEPARATOR = keccak256(abi.encode(
                 EIP712_DOMAIN_TYPEHASH,
                 keccak256("Limestone"),
                 keccak256("1.0.0"),
-                1 //chainId -> could be fetched with assembly
+                chainId
             ));
     }
 
@@ -40,9 +46,5 @@ contract PriceVerifier is PriceModel {
             ))
         ));
     }
-
-
-
-
 
 }

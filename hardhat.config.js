@@ -10,5 +10,10 @@ require("hardhat-gas-reporter");
  */
 module.exports = {
   solidity: "0.7.0",
+  networks: {
+    hardhat: {
+      chainId: 7
+    }
+  }
 };
 

@@ -1,5 +1,4 @@
-const {toBuffer} = require('ethereumjs-util')
-
+const {toBuffer} = require('ethereumjs-util');
 
 
 const PriceData = [
@@ -14,9 +13,7 @@ const EIP712Domain = [
   {name: 'name', type: 'string'},
   {name: 'version', type: 'string'},
   {name: 'chainId', type: 'uint256'}
-]
-
-
+];
 
 
 function toMessage(priceData) {
@@ -34,10 +31,10 @@ const Signer = require('eth-sig-util');
 
 function signPriceData(priceData, PK) {
 
-  domainData =  {
+  const domainData =  {
     name: 'Limestone',
     version: '1.0.0',
-    chainId : 1,
+    chainId : 7,
   };
 
   const data = {
