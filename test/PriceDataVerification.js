@@ -18,6 +18,7 @@ describe("Price data verification", function() {
 
 
   //The verifier shouldn't validate the content - just the signature logic
+
   it("Should sign and verify empty price data", async function() {
     let priceData = {
       symbols: [].map(ethers.utils.formatBytes32String),
@@ -28,6 +29,86 @@ describe("Price data verification", function() {
 
     let signature = signPriceData(priceData, signer.privateKey);
     expect(await verifier.verifyPriceData(priceData, signature)).to.be.true;
+  });
+
+
+  it("Should not verify price data with a signature for a different price", async function() {
+    let priceData = {
+      symbols: ["ETH"].map(ethers.utils.formatBytes32String),
+      prices: [1800],
+      timestamp: 1111,
+      signer: signer.address
+    };
+
+    let differentPriceData = {
+      symbols: ["ETH"].map(ethers.utils.formatBytes32String),
+      prices: [1799],
+      timestamp: 1111,
+      signer: signer.address
+    };
+
+    let signature = signPriceData(differentPriceData, signer.privateKey);
+    expect(await verifier.verifyPriceData(priceData, signature)).to.be.false;
+  });
+
+
+  it("Should not verify price data with a signature for a different symbol", async function() {
+    let priceData = {
+      symbols: ["ETH"].map(ethers.utils.formatBytes32String),
+      prices: [1800],
+      timestamp: 1111,
+      signer: signer.address
+    };
+
+    let differentPriceData = {
+      symbols: ["ETH2"].map(ethers.utils.formatBytes32String),
+      prices: [1800],
+      timestamp: 1111,
+      signer: signer.address
+    };
+
+    let signature = signPriceData(differentPriceData, signer.privateKey);
+    expect(await verifier.verifyPriceData(priceData, signature)).to.be.false;
+  });
+
+
+  it("Should not verify price data with a signature for a different timestamp", async function() {
+    let priceData = {
+      symbols: ["ETH"].map(ethers.utils.formatBytes32String),
+      prices: [1800],
+      timestamp: 1111,
+      signer: signer.address
+    };
+
+    let differentPriceData = {
+      symbols: ["ETH"].map(ethers.utils.formatBytes32String),
+      prices: [1800],
+      timestamp: 1112,
+      signer: signer.address
+    };
+
+    let signature = signPriceData(differentPriceData, signer.privateKey);
+    expect(await verifier.verifyPriceData(priceData, signature)).to.be.false;
+  });
+
+
+  it("Should not verify price data with a signature for a different signer", async function() {
+    let priceData = {
+      symbols: ["ETH"].map(ethers.utils.formatBytes32String),
+      prices: [1800],
+      timestamp: 1111,
+      signer: signer.address
+    };
+
+    let differentPriceData = {
+      symbols: ["ETH"].map(ethers.utils.formatBytes32String),
+      prices: [1800],
+      timestamp: 1111,
+      signer: owner.address
+    };
+
+    let signature = signPriceData(differentPriceData, signer.privateKey);
+    expect(await verifier.verifyPriceData(priceData, signature)).to.be.false;
   });
 
 
