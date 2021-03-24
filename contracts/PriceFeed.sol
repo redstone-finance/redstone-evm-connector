@@ -4,9 +4,10 @@ pragma experimental ABIEncoderV2;
 import "@openzeppelin/contracts/proxy/TransparentUpgradeableProxy.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import './PriceVerifier.sol';
+import './IPriceFeed.sol';
 import 'hardhat/console.sol';
 
-contract PriceFeed is PriceModel {
+contract PriceFeed is IPriceFeed, PriceModel {
     using SafeMath for uint256;
 
     mapping(bytes32 => uint256) prices;
@@ -41,7 +42,7 @@ contract PriceFeed is PriceModel {
     }
 
 
-    function getPrice(bytes32 symbol) public view returns(uint256) {
+    function getPrice(bytes32 symbol) external override view returns(uint256) {
         require(prices[symbol] > 0, "No pricing data for given symbol");
         return prices[symbol];
     }

@@ -24,7 +24,7 @@ contract MockDefi {
 
         console.log("Depositing with price: ", price);
 
-        balances[msg.sender] += amount;
+        balances[msg.sender] += amount * price;
     }
 
     function withdraw(uint256 amount) external {
