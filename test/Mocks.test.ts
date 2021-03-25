@@ -3,6 +3,7 @@ import chai from "chai";
 import { solidity } from "ethereum-waffle";
 import { MockDefi } from "../typechain/MockDefi";
 import { MockPriceFeed } from "../typechain/MockPriceFeed";
+import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 
 chai.use(solidity);
 const { expect } = chai;
@@ -10,7 +11,7 @@ const { expect } = chai;
 const toBytes32 = ethers.utils.formatBytes32String;
 
 describe("Mock Defi", function () {
-    let owner:any;
+    let owner:SignerWithAddress;
     let defi: MockDefi;
     let priceFeed: MockPriceFeed;
 

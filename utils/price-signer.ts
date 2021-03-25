@@ -1,4 +1,5 @@
-const {toBuffer} = require('ethereumjs-util');
+import { toBuffer } from 'ethereumjs-util';
+import { signTypedMessage } from "eth-sig-util";
 
 
 const PriceData = [
@@ -16,8 +17,8 @@ const EIP712Domain = [
 ];
 
 
-function toMessage(priceData) {
-  const serializeBN = (value) => value.toString();
+function toMessage(priceData:any): any {
+  const serializeBN = (value:any) => value.toString();
 
   return {
     symbols: priceData.symbols,
@@ -27,9 +28,7 @@ function toMessage(priceData) {
   }
 }
 
-const Signer = require('eth-sig-util');
-
-function signPriceData(priceData, PK) {
+export function signPriceData(priceData: any, primaryKey: string):string {
 
   const domainData =  {
     name: 'Limestone',
@@ -37,7 +36,7 @@ function signPriceData(priceData, PK) {
     chainId : 7,
   };
 
-  const data = {
+  const data:any = {
     types: {
       EIP712Domain,
       PriceData: PriceData,
@@ -47,8 +46,6 @@ function signPriceData(priceData, PK) {
     message: toMessage(priceData),
   };
 
-  const privateKey = toBuffer(PK);
-  return Signer.signTypedMessage(privateKey, {data}, 'V4');
+  const privateKey = toBuffer(primaryKey);
+  return signTypedMessage(privateKey, {data}, 'V4');
 }
-
-module.exports.signPriceData = signPriceData;

@@ -1,11 +1,23 @@
-const { expect } = require("chai");
-const {signPriceData} = require("../utils/price-signer");
+import { ethers } from "hardhat";
+import { Wallet } from "ethers";
+import chai from "chai";
+import { solidity } from "ethereum-waffle";
+import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
+
+import { PriceVerifier } from "../typechain/PriceVerifier";
+import { signPriceData } from "../utils/price-signer";
+
+chai.use(solidity);
+const { expect } = chai;
 
 describe("Price data verification", function() {
 
   const PRIV = "0xae2b81c1fe9e3b01f060362f03abd0c80a6447cfe00ff7fc7fcf000000000000";
 
-  var owner, signer, verifier;
+  let owner: SignerWithAddress;
+  let admin: SignerWithAddress;
+  let signer: Wallet;
+  let verifier: PriceVerifier;
 
   it("Should deploy functions", async function() {
     [owner, admin] = await ethers.getSigners();
@@ -13,7 +25,7 @@ describe("Price data verification", function() {
     const Verifier = await ethers.getContractFactory("PriceVerifier");
 
     signer = new ethers.Wallet(PRIV, owner.provider);
-    verifier = await Verifier.deploy();
+    verifier = (await Verifier.deploy()) as PriceVerifier;
   });
 
 
@@ -149,10 +161,6 @@ describe("Price data verification", function() {
     let signature = signPriceData(priceData, signer.privateKey);
     expect(await verifier.verifyPriceData(priceData, signature)).to.be.true;
   });
-
-
-
-
 
 
 });

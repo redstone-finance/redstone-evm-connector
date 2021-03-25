@@ -1,27 +1,37 @@
-const { expect } = require("chai");
-const {signPriceData} = require("../utils/price-signer");
+import { ethers } from "hardhat";
+import chai from "chai";
+import { solidity } from "ethereum-waffle";
+import { PriceVerifier } from "../typechain/PriceVerifier";
+import { PriceFeed } from "../typechain/PriceFeed";
+import { signPriceData } from "../utils/price-signer";
+import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
+import {Wallet} from "ethers";
+
+chai.use(solidity);
+const { expect } = chai;
 
 describe("Price feed", function() {
 
   const PRIV = "0xae2b81c1fe9e3b01f060362f03abd0c80a6447cfe00ff7fc7fcf000000000000";
 
-  var owner, signer, verifier, priceFeed, PriceFeed, currentTime;
+  let owner: SignerWithAddress;
+  let signer: Wallet;
+  let verifier: PriceVerifier;
+  let priceFeed: PriceFeed;
+  let currentTime: number;
 
   it("Should deploy functions", async function() {
-    [owner, admin] = await ethers.getSigners();
+    [owner] = await ethers.getSigners();
 
     const Verifier = await ethers.getContractFactory("PriceVerifier");
-    PriceFeed = await ethers.getContractFactory("PriceFeed");
 
     signer = new ethers.Wallet(PRIV, owner.provider);
-    verifier = await Verifier.deploy();
-
-    priceFeed = await PriceFeed.deploy(verifier.address, 5 * 60);
+    verifier = (await Verifier.deploy()) as PriceVerifier;
   });
 
 
   it("Should not allow creating price feed with an empty verifier", async function() {
-    [owner, admin] = await ethers.getSigners();
+    const PriceFeed = await ethers.getContractFactory("PriceFeed");
 
     await expect(PriceFeed.deploy(ethers.constants.AddressZero, 5 * 60))
       .to.be.revertedWith('Cannot set an empty verifier');
@@ -29,7 +39,7 @@ describe("Price feed", function() {
 
 
   it("Should not allow creating price feed with a delay shorter than 15s", async function() {
-    [owner, admin] = await ethers.getSigners();
+    const PriceFeed = await ethers.getContractFactory("PriceFeed");
 
     await expect(PriceFeed.deploy(verifier.address, 14))
       .to.be.revertedWith('Maximum price delay must be greater or equal to 15 seconds');
@@ -37,9 +47,9 @@ describe("Price feed", function() {
 
 
   it("Should deploy a price feed", async function() {
-    [owner, admin] = await ethers.getSigners();
+    const PriceFeed = await ethers.getContractFactory("PriceFeed");
 
-    priceFeed = await PriceFeed.deploy(verifier.address, 5 * 60);
+    priceFeed = await PriceFeed.deploy(verifier.address, 5 * 60) as PriceFeed;
     expect(priceFeed.address).not.to.equal(ethers.constants.AddressZero);
   });
 

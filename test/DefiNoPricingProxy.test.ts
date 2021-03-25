@@ -1,10 +1,21 @@
-const { expect } = require("chai");
+import { ethers } from "hardhat";
+import chai from "chai";
+import { solidity } from "ethereum-waffle";
+import { MockDefi } from "../typechain/MockDefi";
+import { MockPriceFeed } from "../typechain/MockPriceFeed";
+import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
+
+chai.use(solidity);
+const { expect } = chai;
 
 
 describe("MockDefi with Proxy contract but no pricing data", function() {
 
 
-  var owner, admin, defi, priceFeed;
+  let owner: SignerWithAddress;
+  let admin: SignerWithAddress;
+  let defi: MockDefi;
+  let priceFeed: MockPriceFeed;
 
   const toBytes32 = ethers.utils.formatBytes32String;
 
@@ -16,12 +27,12 @@ describe("MockDefi with Proxy contract but no pricing data", function() {
     const PriceFeed = await ethers.getContractFactory("MockPriceFeed");
 
 
-    priceFeed = await PriceFeed.deploy();
-    defi = await Defi.deploy(priceFeed.address);
+    priceFeed = (await PriceFeed.deploy()) as MockPriceFeed;
+    defi = (await Defi.deploy(priceFeed.address)) as MockDefi;
 
     const proxy = await Proxy.deploy(defi.address, admin.address, [], priceFeed.address);
 
-    defi = await Defi.attach(proxy.address);
+    defi = (await Defi.attach(proxy.address)) as MockDefi;
   });
 
 
