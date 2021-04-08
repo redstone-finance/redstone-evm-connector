@@ -53,8 +53,7 @@ describe("MockDefi with Proxy contract but no pricing data", function() {
 
   it("Should send a reverted transaction via proxy contract", async function() {
 
-    await expect(priceFeed.getPrice(defi.deposit(0)))
-      .to.be.revertedWith('Amount must be greater than zero');
+    await expect(defi.deposit(0)).to.be.revertedWith('Amount must be greater than zero');
 
   });
 

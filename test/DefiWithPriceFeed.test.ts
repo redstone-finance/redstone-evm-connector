@@ -53,9 +53,8 @@ describe("MockDefi with Proxy contract but no pricing data", function() {
   it("Should deposit with 1 price data", async function() {
 
     defi = wrapContract(defi, priceFeed);
-    await defi.depositWithPrices(10);
 
-    expect(await defi.balanceOf(signer.address)).to.be.equal(18000);
+    await defi.depositWithPrices(100);
 
   });
 

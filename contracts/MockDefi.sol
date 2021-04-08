@@ -15,7 +15,7 @@ contract MockDefi {
 
     mapping(address => uint256) balances;
 
-    function deposit(uint256 amount) external {
+    function deposit(bytes32 symbol, uint256 amount) external {
         //To check proxy in case of reverted tx
         require(amount > 0, "Amount must be greater than zero");
 
