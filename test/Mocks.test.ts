@@ -27,10 +27,42 @@ describe("Mock Defi", function () {
     });
 
 
-    it("should deposit with provided price", async function () {
+    it("should deposit ETH", async function () {
         await priceFeed.setPrice(toBytes32("ETH"), 10);
-        await defi.deposit(100);
+        await defi.deposit(toBytes32("ETH"), 100);
 
-        expect(await defi.balanceOf(owner.address)).to.be.equal(1000);
+        expect(await defi.balanceOf(owner.address, toBytes32("ETH"))).to.be.equal(100);
     });
+
+
+    it("should check ETH value with prices", async function () {
+        expect(await defi.currentValueOf(owner.address, toBytes32("ETH"))).to.be.equal(1000);
+    });
+
+
+    it("should deposit AVAX", async function () {
+        await priceFeed.setPrice(toBytes32("AVAX"), 5);
+        await defi.deposit(toBytes32("AVAX"), 50);
+
+        expect(await defi.balanceOf(owner.address, toBytes32("AVAX"))).to.be.equal(50);
+    });
+
+
+    it("should check AVAX value with prices", async function () {
+        expect(await defi.currentValueOf(owner.address, toBytes32("AVAX"))).to.be.equal(250);
+    });
+
+
+    it("should swap ETH to AVAX", async function () {
+        await defi.swap(toBytes32("ETH"), toBytes32("AVAX"), 10);
+
+        expect(await defi.balanceOf(owner.address, toBytes32("ETH"))).to.be.equal(90);
+        expect(await defi.balanceOf(owner.address, toBytes32("AVAX"))).to.be.equal(70);
+
+        expect(await defi.currentValueOf(owner.address, toBytes32("ETH"))).to.be.equal(900);
+        expect(await defi.currentValueOf(owner.address, toBytes32("AVAX"))).to.be.equal(350);
+    });
+
+
+    //expect(await defi.valueOf(owner.address, toBytes32("ETH"))).to.be.equal(1000);
 });

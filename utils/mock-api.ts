@@ -17,8 +17,8 @@ export function getSignedPrice(): SignedPrice {
     let currentTime = Math.round(new Date().getTime()/1000);
 
     let priceData = {
-        symbols: ["ETH"].map(utils.formatBytes32String),
-        prices: [1800],
+        symbols: ["ETH", "AVAX"].map(utils.formatBytes32String),
+        prices: [10, 5],
         timestamp: currentTime,
         signer: signer.address
     };

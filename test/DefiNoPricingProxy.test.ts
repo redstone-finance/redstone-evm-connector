@@ -39,21 +39,22 @@ describe("MockDefi with Proxy contract but no pricing data", function() {
   it("Should send a simple write transaction via proxy contract", async function() {
 
     await priceFeed.setPrice(toBytes32("ETH"), 10);
-    await defi.deposit(100);
+    await defi.deposit(toBytes32("ETH"),100);
 
   });
 
 
   it("Should send a simple read transaction via proxy contract", async function() {
 
-    expect(await defi.balanceOf(owner.address)).to.be.equal(1000);
+    expect(await defi.balanceOf(owner.address, toBytes32("ETH"))).to.be.equal(100);
+    expect(await defi.currentValueOf(owner.address, toBytes32("ETH"))).to.be.equal(1000);
 
   });
 
 
   it("Should send a reverted transaction via proxy contract", async function() {
 
-    await expect(defi.deposit(0)).to.be.revertedWith('Amount must be greater than zero');
+    await expect(defi.deposit(toBytes32("ETH"), 0)).to.be.revertedWith('Amount must be greater than zero');
 
   });
 

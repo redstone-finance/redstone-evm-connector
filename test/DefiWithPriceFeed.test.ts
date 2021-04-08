@@ -12,6 +12,8 @@ chai.use(solidity);
 
 const { expect } = chai;
 
+const toBytes32 = ethers.utils.formatBytes32String;
+
 describe("MockDefi with Proxy contract but no pricing data", function() {
 
   const PRIV = "0xae2b81c1fe9e3b01f060362f03abd0c80a6447cfe00f00000000000000000000";
@@ -50,11 +52,39 @@ describe("MockDefi with Proxy contract but no pricing data", function() {
   });
 
 
-  it("Should deposit with 1 price data", async function() {
+  it("Should deposit - write no pricing info", async function() {
 
     defi = wrapContract(defi, priceFeed);
 
-    await defi.depositWithPrices(100);
+    await defi.deposit(toBytes32("ETH"), 100);
+    await defi.deposit(toBytes32("AVAX"), 50);
+
+  });
+
+
+  it("Should check balance - read no pricing info", async function() {
+
+    expect(await defi.balanceOf(signer.address, toBytes32("ETH"))).to.be.equal(100);
+    expect(await defi.balanceOf(signer.address, toBytes32("AVAX"))).to.be.equal(50);
+
+  });
+
+
+  //TODO: Fix returning data after clearing prices
+  it("Should check value - read with pricing info", async function() {
+
+    //expect(await defi.currentValueOfWithPrices(signer.address, toBytes32("ETH"))).to.be.equal(1000);
+    //expect(await defi.currentValueOfWithPrices(signer.address, toBytes32("AVAX"))).to.be.equal(250);
+
+  });
+
+
+  it("Should swap - write with pricing info", async function() {
+
+    await defi.swapWithPrices(toBytes32("ETH"), toBytes32("AVAX"), 10);
+
+    expect(await defi.balanceOf(signer.address, toBytes32("ETH"))).to.be.equal(90);
+    expect(await defi.balanceOf(signer.address, toBytes32("AVAX"))).to.be.equal(70);
 
   });
 

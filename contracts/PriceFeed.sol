@@ -14,6 +14,8 @@ contract PriceFeed is IPriceFeed, PriceModel {
     PriceVerifier priceVerifier;
     uint256 maxPriceDelay;
 
+    //TODO: Approving & Rejecting signers
+
 
     constructor(PriceVerifier _priceVerifier, uint256 _maxPriceDelay) {
         require(address(_priceVerifier) != address(0), "Cannot set an empty verifier");

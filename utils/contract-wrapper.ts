@@ -34,7 +34,7 @@ export function wrapContract(contract: any, priceFeed: PriceFeed) {
     if (functionName.indexOf("(") == -1) {
       contract[functionName + "WithPrices"] = async function(...args: any[]) {
 
-        let tx = await contract.populateTransaction[functionName](args);
+        let tx = await contract.populateTransaction[functionName](...args);
 
         tx.data = tx.data + (await getPriceData(priceFeed)) + getMarkerData();
 
