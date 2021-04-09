@@ -6,15 +6,16 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import './PriceVerifier.sol';
 import './IPriceFeed.sol';
 import 'hardhat/console.sol';
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract PriceFeed is IPriceFeed, PriceModel {
+contract PriceFeed is IPriceFeed, PriceModel, Ownable {
     using SafeMath for uint256;
 
     mapping(bytes32 => uint256) prices;
     PriceVerifier priceVerifier;
     uint256 maxPriceDelay;
 
-    //TODO: Approving & Rejecting signers
+    mapping(address => bool) signers;
 
 
     constructor(PriceVerifier _priceVerifier, uint256 _maxPriceDelay) {
@@ -26,6 +27,7 @@ contract PriceFeed is IPriceFeed, PriceModel {
 
 
     function setPrices(PriceData calldata priceData, bytes calldata signature) external {
+        require(isSigner(priceData.signer), "Unauthorized price data signer");
         require(priceVerifier.verifyPriceData(priceData, signature), "Incorrect price data signature");
         require(block.timestamp > priceData.timestamp, "Price data timestamp cannot be from the future");
         require(block.timestamp.sub(priceData.timestamp) < maxPriceDelay, "Price data timestamp too old");
@@ -47,6 +49,21 @@ contract PriceFeed is IPriceFeed, PriceModel {
     function getPrice(bytes32 symbol) external override view returns(uint256) {
         require(prices[symbol] > 0, "No pricing data for given symbol");
         return prices[symbol];
+    }
+
+
+    function authorizeSigner(address signer) external onlyOwner {
+        signers[signer] = true;
+    }
+
+
+    function revokeSigner(address signer) external onlyOwner {
+        signers[signer] = false;
+    }
+
+
+    function isSigner(address potentialSigner) public view returns(bool) {
+        return signers[potentialSigner];
     }
 
 }

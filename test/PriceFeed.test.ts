@@ -15,13 +15,14 @@ describe("Price feed", function() {
   const PRIV = "0xae2b81c1fe9e3b01f060362f03abd0c80a6447cfe00ff7fc7fcf000000000000";
 
   let owner: SignerWithAddress;
+  let other: SignerWithAddress;
   let signer: Wallet;
   let verifier: PriceVerifier;
   let priceFeed: PriceFeed;
   let currentTime: number;
 
   it("Should deploy functions", async function() {
-    [owner] = await ethers.getSigners();
+    [owner, other] = await ethers.getSigners();
 
     const Verifier = await ethers.getContractFactory("PriceVerifier");
 
@@ -53,6 +54,34 @@ describe("Price feed", function() {
     expect(priceFeed.address).not.to.equal(ethers.constants.AddressZero);
   });
 
+
+  it("Should not allow setting the price without authorization", async function() {
+    const Mock = await ethers.getContractFactory("MockDefi");
+    let mock = await Mock.deploy(priceFeed.address);
+    currentTime = await mock.getCurrentTime();
+
+    let priceData = {
+      symbols: ["ETH"].map(ethers.utils.formatBytes32String),
+      prices: [1800],
+      timestamp: currentTime,
+      signer: signer.address
+    };
+
+    let signature = signPriceData(priceData, signer.privateKey);
+    await expect(priceFeed.setPrices(priceData, signature))
+      .to.be.revertedWith('Unauthorized price data signer');
+  });
+
+
+  it("Should not allow authorization from non owner", async function() {
+      await expect(priceFeed.connect(other).authorizeSigner(signer.address))
+        .to.be.revertedWith('Ownable: caller is not the owner');
+  });
+
+
+  it("Should authorize a signer", async function() {
+    await priceFeed.authorizeSigner(signer.address);
+  });
 
 
   it("Should not allow setting a price after delay", async function() {
@@ -123,6 +152,22 @@ describe("Price feed", function() {
 
     await expect(priceFeed.getPrice(priceData.symbols[0]))
       .to.be.revertedWith('No pricing data for given symbol');
+  });
+
+
+  it("Should revoke authorization", async function() {
+      await priceFeed.revokeSigner(signer.address);
+
+      let priceData = {
+          symbols: ["ETH"].map(ethers.utils.formatBytes32String),
+          prices: [1800],
+          timestamp: currentTime,
+          signer: signer.address
+      };
+
+      let signature = signPriceData(priceData, signer.privateKey);
+      await expect(priceFeed.setPrices(priceData, signature))
+          .to.be.revertedWith('Unauthorized price data signer');
   });
 
 

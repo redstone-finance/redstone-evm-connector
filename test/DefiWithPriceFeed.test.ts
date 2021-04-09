@@ -16,7 +16,7 @@ const toBytes32 = ethers.utils.formatBytes32String;
 
 describe("MockDefi with Proxy contract but no pricing data", function() {
 
-  const PRIV = "0xae2b81c1fe9e3b01f060362f03abd0c80a6447cfe00f00000000000000000000";
+  const PRIV = "0xae2b81c1fe9e3b01f060362f03abd0c80a6447cfe00ff7fc7fcf000000000000";
 
 
   let owner: SignerWithAddress;
@@ -38,6 +38,8 @@ describe("MockDefi with Proxy contract but no pricing data", function() {
 
     verifier = (await Verifier.deploy()) as PriceVerifier;
     priceFeed = (await PriceFeed.deploy(verifier.address, 5 * 60)) as PriceFeed;
+    await priceFeed.authorizeSigner(signer.address);
+    console.log("Authorized: ", signer.address);
 
     defi = (await Defi.deploy(priceFeed.address)) as MockDefi;
 
