@@ -70,11 +70,10 @@ describe("MockDefi with Proxy contract but no pricing data", function() {
   });
 
 
-  //TODO: Fix returning data after clearing prices
   it("Should check value - read with pricing info", async function() {
 
-    //expect(await defi.currentValueOfWithPrices(signer.address, toBytes32("ETH"))).to.be.equal(1000);
-    //expect(await defi.currentValueOfWithPrices(signer.address, toBytes32("AVAX"))).to.be.equal(250);
+    expect(await defi.currentValueOfWithPrices(signer.address, toBytes32("ETH"))).to.be.equal(1000);
+    expect(await defi.currentValueOfWithPrices(signer.address, toBytes32("AVAX"))).to.be.equal(250);
 
   });
 

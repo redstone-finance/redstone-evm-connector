@@ -32,16 +32,20 @@ export function wrapContract(contract: any, priceFeed: PriceFeed) {
   let functionNames:string[] = Object.keys(contract.functions);
     functionNames.forEach(functionName => {
     if (functionName.indexOf("(") == -1) {
+      let isCall = contract.interface.getFunction(functionName).constant;
       contract[functionName + "WithPrices"] = async function(...args: any[]) {
 
         let tx = await contract.populateTransaction[functionName](...args);
 
         tx.data = tx.data + (await getPriceData(priceFeed)) + getMarkerData();
 
-        console.log("Tx data: " + tx.data);
-        console.log("Tx data len: " + tx.data.length);
-
-        await contract.signer.sendTransaction(tx);
+        if (isCall) {
+            let result = await contract.signer.call(tx);
+            let decoded =  contract.interface.decodeFunctionResult(functionName, result);
+            return decoded.length == 1 ? decoded[0] : decoded;
+        } else {
+            await contract.signer.sendTransaction(tx);
+        }
       };
     }
   });

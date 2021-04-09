@@ -74,8 +74,6 @@ abstract contract ModProxy {
         (bool delegationSuccess, bytes memory delegationResult) = implementation.delegatecall(msg.data);
 
 
-
-
         //Clear price data
         if (isTxWithPricing) {
             bytes memory clearDataPrefix = msg.data.slice(msg.data.length - priceDataLen - 34 - 4, 4);
@@ -89,7 +87,7 @@ abstract contract ModProxy {
             switch delegationSuccess
             // delegatecall returns 0 on error.
             case 0 { revert(add(delegationResult, 32), delegationResult) }
-            default { return(add(delegationResult, 32), delegationResult) }
+            default { return(add(delegationResult, 32), mload(delegationResult)) }
         }
     }
 
@@ -110,33 +108,30 @@ abstract contract ModProxy {
         _beforeFallback();
 
         _delegate(_implementation());
-
-
-
     }
 
-/**
- * @dev Fallback function that delegates calls to the address returned by `_implementation()`. Will run if no other
- * function in the contract matches the call data.
- */
-fallback () external payable virtual {
-_fallback();
-}
+    /**
+     * @dev Fallback function that delegates calls to the address returned by `_implementation()`. Will run if no other
+     * function in the contract matches the call data.
+     */
+    fallback () external payable virtual {
+    _fallback();
+    }
 
-/**
- * @dev Fallback function that delegates calls to the address returned by `_implementation()`. Will run if call data
- * is empty.
- */
-receive () external payable virtual {
-_fallback();
-}
+    /**
+     * @dev Fallback function that delegates calls to the address returned by `_implementation()`. Will run if call data
+     * is empty.
+     */
+    receive () external payable virtual {
+    _fallback();
+    }
 
-/**
- * @dev Hook that is called before falling back to the implementation. Can happen as part of a manual `_fallback`
- * call, or as part of the Solidity `fallback` or `receive` functions.
- *
- * If overriden should call `super._beforeFallback()`.
- */
-function _beforeFallback() internal virtual {
-}
+    /**
+     * @dev Hook that is called before falling back to the implementation. Can happen as part of a manual `_fallback`
+     * call, or as part of the Solidity `fallback` or `receive` functions.
+     *
+     * If overriden should call `super._beforeFallback()`.
+     */
+    function _beforeFallback() internal virtual {
+    }
 }
