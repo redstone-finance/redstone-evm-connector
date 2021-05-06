@@ -11,16 +11,19 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract PriceFeed is IPriceFeed, PriceModel, Ownable {
     using SafeMath for uint256;
 
-    mapping(bytes32 => uint256) prices;
-    PriceVerifier priceVerifier;
-    uint256 maxPriceDelay;
+    PriceVerifier public priceVerifier;
+    uint256 public maxPriceDelay;
 
-    mapping(address => bool) signers;
+    //A map indicating if a signer could be trusted by a client protocol
+    mapping(address => bool) trustedSigners;
+
+
+    mapping(bytes32 => uint256) private prices;
 
 
     constructor(PriceVerifier _priceVerifier, uint256 _maxPriceDelay) {
         require(address(_priceVerifier) != address(0), "Cannot set an empty verifier");
-        require(_maxPriceDelay >= 15, "Maximum price delay must be greater or equal to 15 seconds");
+        require(_maxPriceDelay > 0, "Maximum price delay must be greater than 0");
         priceVerifier = _priceVerifier;
         maxPriceDelay = _maxPriceDelay;
     }
@@ -33,12 +36,14 @@ contract PriceFeed is IPriceFeed, PriceModel, Ownable {
         require(block.timestamp.sub(priceData.timestamp) < maxPriceDelay, "Price data timestamp too old");
 
         for(uint256 i=0; i < priceData.symbols.length; i++) {
+            //TODO: Change to signer
             require(prices[priceData.symbols[i]] == 0, "Cannot overwrite existing price");
             prices[priceData.symbols[i]] = priceData.prices[i];
         }
     }
 
 
+    //TODO: Prevent clearing prices by a malicious actor -> add priceSetter
     function clearPrices(PriceData calldata priceData) external {
         for(uint256 i=0; i < priceData.symbols.length; i++) {
             delete prices[priceData.symbols[i]];
@@ -53,17 +58,17 @@ contract PriceFeed is IPriceFeed, PriceModel, Ownable {
 
 
     function authorizeSigner(address signer) external onlyOwner {
-        signers[signer] = true;
+        trustedSigners[signer] = true;
     }
 
 
     function revokeSigner(address signer) external onlyOwner {
-        signers[signer] = false;
+        trustedSigners[signer] = false;
     }
 
 
     function isSigner(address potentialSigner) public view returns(bool) {
-        return signers[potentialSigner];
+        return trustedSigners[potentialSigner];
     }
 
 }

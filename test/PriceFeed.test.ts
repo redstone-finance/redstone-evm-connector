@@ -21,7 +21,7 @@ describe("Price feed", function() {
   let priceFeed: PriceFeed;
   let currentTime: number;
 
-  it("Should deploy functions", async function() {
+  it("Should deploy the Verifier", async function() {
     [owner, other] = await ethers.getSigners();
 
     const Verifier = await ethers.getContractFactory("PriceVerifier");
@@ -39,11 +39,11 @@ describe("Price feed", function() {
   });
 
 
-  it("Should not allow creating price feed with a delay shorter than 15s", async function() {
+  it("Should not allow creating price feed with zero delay", async function() {
     const PriceFeed = await ethers.getContractFactory("PriceFeed");
 
-    await expect(PriceFeed.deploy(verifier.address, 14))
-      .to.be.revertedWith('Maximum price delay must be greater or equal to 15 seconds');
+    await expect(PriceFeed.deploy(verifier.address, 0))
+      .to.be.revertedWith('Maximum price delay must be greater than 0');
   });
 
 
@@ -120,7 +120,7 @@ describe("Price feed", function() {
   });
 
 
-  it("Should throw for querying unavailable price", async function() {
+  it("Should throw an error while querying unavailable price", async function() {
     await expect(priceFeed.getPrice(ethers.utils.formatBytes32String("ETH2")))
       .to.be.revertedWith('No pricing data for given symbol');
   });
@@ -155,6 +155,12 @@ describe("Price feed", function() {
   });
 
 
+  it("Should not allow revoking authorization from non owner", async function() {
+      await expect(priceFeed.connect(other).revokeSigner(signer.address))
+          .to.be.revertedWith('Ownable: caller is not the owner');
+  });
+
+
   it("Should revoke authorization", async function() {
       await priceFeed.revokeSigner(signer.address);
 
@@ -171,7 +177,26 @@ describe("Price feed", function() {
   });
 
 
-  //TODO: Add scenarios for multiple prices
+  it("Should authorize again after revoking a signer", async function() {
+    await priceFeed.authorizeSigner(signer.address);
+  });
+
+
+  it("Should set multiple prices", async function() {
+    let priceData = {
+      symbols: ["ETH", "BTX", "AVAX"].map(ethers.utils.formatBytes32String),
+      prices: [1800, 50000, 30],
+      timestamp: currentTime,
+      signer: signer.address
+    };
+
+    let signature = signPriceData(priceData, signer.privateKey);
+    await priceFeed.setPrices(priceData, signature);
+
+    for(let i=0; i<3; i++) {
+        expect(await priceFeed.getPrice(priceData.symbols[i])).to.be.equal(priceData.prices[i]);
+    }
+  });
 
 });
 

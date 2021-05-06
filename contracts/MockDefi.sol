@@ -1,10 +1,12 @@
-// Solidity files have to start with this pragma.
-// It will be used by the Solidity compiler to validate its version.
 pragma solidity ^0.7.0;
 
 import "./PriceFeed.sol";
 import 'hardhat/console.sol';
 
+/***
+ * It simulates a simple defi protocol that allows depositing tokens,
+ * getting their current valuation and swapping between each other based on the current price
+*/
 contract MockDefi {
 
     PriceFeed priceFeed;

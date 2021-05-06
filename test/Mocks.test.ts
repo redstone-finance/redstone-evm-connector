@@ -63,6 +63,4 @@ describe("Mock Defi", function () {
         expect(await defi.currentValueOf(owner.address, toBytes32("AVAX"))).to.be.equal(350);
     });
 
-
-    //expect(await defi.valueOf(owner.address, toBytes32("ETH"))).to.be.equal(1000);
 });
