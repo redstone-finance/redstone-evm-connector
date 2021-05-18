@@ -16,7 +16,9 @@ contract PriceFeed is IPriceFeed, PriceModel, Ownable {
 
     //A map indicating if a signer could be trusted by a client protocol
     mapping(address => bool) trustedSigners;
-
+    
+    //An user that sets the prices in the context of the current transaction
+    address private currentSetter;
 
     mapping(bytes32 => uint256) private prices;
 
@@ -34,20 +36,24 @@ contract PriceFeed is IPriceFeed, PriceModel, Ownable {
         require(priceVerifier.verifyPriceData(priceData, signature), "Incorrect price data signature");
         require(block.timestamp > priceData.timestamp, "Price data timestamp cannot be from the future");
         require(block.timestamp.sub(priceData.timestamp) < maxPriceDelay, "Price data timestamp too old");
+        require(currentSetter == address(0), "The prices could be set only once in the transaction");
 
         for(uint256 i=0; i < priceData.symbols.length; i++) {
-            //TODO: Change to signer
-            require(prices[priceData.symbols[i]] == 0, "Cannot overwrite existing price");
             prices[priceData.symbols[i]] = priceData.prices[i];
         }
+
+        currentSetter = msg.sender;
     }
 
 
-    //TODO: Prevent clearing prices by a malicious actor -> add priceSetter
+
     function clearPrices(PriceData calldata priceData) external {
+        require(currentSetter == msg.sender, "The prices could be cleared only by the address which set them");
         for(uint256 i=0; i < priceData.symbols.length; i++) {
             delete prices[priceData.symbols[i]];
         }
+
+        currentSetter = address(0);
     }
 
 

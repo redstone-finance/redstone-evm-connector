@@ -126,7 +126,7 @@ describe("Price feed", function() {
   });
 
 
-  it("Should not allow overwriting the price", async function() {
+  it("Should not allow changing the price", async function() {
     let priceData = {
       symbols: ["ETH"].map(ethers.utils.formatBytes32String),
       prices: [1900],
@@ -136,7 +136,20 @@ describe("Price feed", function() {
 
     let signature = signPriceData(priceData, signer.privateKey);
     await expect(priceFeed.setPrices(priceData, signature))
-      .to.be.revertedWith('Cannot overwrite existing price');
+      .to.be.revertedWith('The prices could be set only once in the transaction');
+  });
+
+
+  it("Should not allow to clear the price by other users", async function() {
+      let priceData = {
+          symbols: ["ETH"].map(ethers.utils.formatBytes32String),
+          prices: [1900],
+          timestamp: currentTime,
+          signer: signer.address
+      };
+
+      await expect(priceFeed.connect(other).clearPrices(priceData))
+          .to.be.revertedWith('The prices could be cleared only by the address which set them');
   });
 
 
@@ -196,6 +209,25 @@ describe("Price feed", function() {
     for(let i=0; i<3; i++) {
         expect(await priceFeed.getPrice(priceData.symbols[i])).to.be.equal(priceData.prices[i]);
     }
+    
+  });
+
+
+  it("Should clear multiple prices", async function() {
+    let priceData = {
+      symbols: ["ETH", "BTX", "AVAX"].map(ethers.utils.formatBytes32String),
+      prices: [1800, 50000, 30],
+      timestamp: currentTime,
+      signer: signer.address
+    };
+
+    await priceFeed.clearPrices(priceData);
+
+    for(let i=0; i<3; i++) {
+      await expect(priceFeed.getPrice(priceData.symbols[0]))
+        .to.be.revertedWith('No pricing data for given symbol');
+    }
+    
   });
 
 });
