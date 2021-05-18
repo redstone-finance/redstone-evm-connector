@@ -19,7 +19,7 @@ import './PriceFeed.sol';
 abstract contract ModProxy {
     using BytesLib for bytes;
 
-    bytes32 constant MARKER = keccak256("Limestone.version.0.0.1");
+    bytes32 constant MARKER = keccak256("Redstone.version.0.0.1");
 
     /**
      * @dev Delegates the current call to `implementation`.

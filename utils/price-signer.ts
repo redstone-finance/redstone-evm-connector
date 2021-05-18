@@ -31,7 +31,7 @@ function toMessage(priceData:any): any {
 export function signPriceData(priceData: any, primaryKey: string):string {
 
   const domainData =  {
-    name: 'Limestone',
+    name: 'Redstone',
     version: '1.0.0',
     chainId : 7,
   };

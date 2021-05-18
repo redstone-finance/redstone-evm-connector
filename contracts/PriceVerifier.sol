@@ -20,7 +20,7 @@ contract PriceVerifier is PriceModel {
 
         DOMAIN_SEPARATOR = keccak256(abi.encode(
                 EIP712_DOMAIN_TYPEHASH,
-                keccak256("Limestone"),
+                keccak256("Redstone"),
                 keccak256("1.0.0"),
                 chainId
             ));

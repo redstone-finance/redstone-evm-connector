@@ -21,7 +21,7 @@ async function getPriceData(priceFeed: PriceFeed) {
 }
 
 function getMarkerData() {
-    let marker = ethers.utils.id("Limestone.version.0.0.1");
+    let marker = ethers.utils.id("Redstone.version.0.0.1");
     //console.log("Marker: " + marker);
     return marker.substr(2);
 }
