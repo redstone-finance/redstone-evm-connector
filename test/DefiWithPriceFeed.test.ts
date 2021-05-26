@@ -14,7 +14,7 @@ const { expect } = chai;
 
 const toBytes32 = ethers.utils.formatBytes32String;
 
-describe("MockDefi with Proxy contract but no pricing data", function() {
+describe("MockDefi with Proxy contract and pricing Data", function() {
 
   const PRIV = "0xae2b81c1fe9e3b01f060362f03abd0c80a6447cfe00ff7fc7fcf000000000000";
 
@@ -56,6 +56,8 @@ describe("MockDefi with Proxy contract but no pricing data", function() {
 
   it("Should deposit - write no pricing info", async function() {
 
+    defi = wrapContract(defi, priceFeed);
+    
     defi = wrapContract(defi, priceFeed);
 
     await defi.deposit(toBytes32("ETH"), 100);
