@@ -1,8 +1,7 @@
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.0;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts/proxy/TransparentUpgradeableProxy.sol";
-import "@openzeppelin/contracts/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import './PriceModel.sol';
 import 'hardhat/console.sol';
 
@@ -11,7 +10,7 @@ contract PriceVerifier is PriceModel {
 
     bytes32 DOMAIN_SEPARATOR;
 
-    constructor() public {
+    constructor() {
         //Get chainId from assembly
         uint256 chainId;
         assembly {

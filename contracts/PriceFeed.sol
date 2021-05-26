@@ -1,15 +1,12 @@
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.0;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts/proxy/TransparentUpgradeableProxy.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
 import './PriceVerifier.sol';
 import './IPriceFeed.sol';
 import 'hardhat/console.sol';
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract PriceFeed is IPriceFeed, PriceModel, Ownable {
-    using SafeMath for uint256;
 
     PriceVerifier public priceVerifier;
     uint256 public maxPriceDelay;
@@ -35,7 +32,7 @@ contract PriceFeed is IPriceFeed, PriceModel, Ownable {
         require(isSigner(priceData.signer), "Unauthorized price data signer");
         require(priceVerifier.verifyPriceData(priceData, signature), "Incorrect price data signature");
         require(block.timestamp > priceData.timestamp, "Price data timestamp cannot be from the future");
-        require(block.timestamp.sub(priceData.timestamp) < maxPriceDelay, "Price data timestamp too old");
+        require(block.timestamp - priceData.timestamp < maxPriceDelay, "Price data timestamp too old");
         require(currentSetter == address(0), "The prices could be set only once in the transaction");
 
         for(uint256 i=0; i < priceData.symbols.length; i++) {

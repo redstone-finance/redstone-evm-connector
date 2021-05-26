@@ -1,11 +1,9 @@
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
 import './IPriceFeed.sol';
 import 'hardhat/console.sol';
 
 contract MockPriceFeed is IPriceFeed {
-    using SafeMath for uint256;
 
     mapping(bytes32 => uint256) prices;
 

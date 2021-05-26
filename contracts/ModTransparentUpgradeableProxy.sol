@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.0;
 
 import "./ModUpgradeableProxy.sol";
 import './PriceFeed.sol';
@@ -31,7 +31,7 @@ contract ModTransparentUpgradeableProxy is ModUpgradeableProxy {
      * @dev Initializes an upgradeable proxy managed by `_admin`, backed by the implementation at `_logic`, and
      * optionally initialized with `_data` as explained in {UpgradeableProxy-constructor}.
      */
-    constructor(address _logic, address admin_, bytes memory _data, PriceFeed priceFeed) public payable ModUpgradeableProxy(_logic, _data, priceFeed) {
+    constructor(address _logic, address admin_, bytes memory _data, PriceFeed priceFeed) payable ModUpgradeableProxy(_logic, _data, priceFeed) {
         assert(_ADMIN_SLOT == bytes32(uint256(keccak256("eip1967.proxy.admin")) - 1));
         _setAdmin(admin_);
     }

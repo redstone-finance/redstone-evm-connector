@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.7.0;
+pragma solidity ^0.8.0;
 
 import "./BytesLib.sol";
 import 'hardhat/console.sol';
@@ -47,7 +47,7 @@ abstract contract ModProxy {
             //console.log("-----Total: ", msg.data.length);
 
             priceData = msg.data.slice(msg.data.length - priceDataLen - 34, priceDataLen);
-            (bool success, bytes memory data) = address(priceFeed).call(priceData);
+            (bool success,) = address(priceFeed).call(priceData);
             require(success, "Error setting price data");
 
         }
@@ -78,7 +78,7 @@ abstract contract ModProxy {
         if (isTxWithPricing) {
             bytes memory clearDataPrefix = msg.data.slice(msg.data.length - priceDataLen - 34 - 4, 4);
             bytes memory clearData = clearDataPrefix.concat(priceData.slice(4, priceData.length - 4));
-            (bool success, bytes memory data) = address(priceFeed).call(clearData);
+            address(priceFeed).call(clearData);
         }
 
 
