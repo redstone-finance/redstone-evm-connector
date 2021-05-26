@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.0;
 
-import "./ModProxy.sol";
+import "./RedstoneProxy.sol";
 import './PriceFeed.sol';
 import "@openzeppelin/contracts/utils/Address.sol";
 
@@ -15,7 +15,7 @@ import "@openzeppelin/contracts/utils/Address.sol";
  * Upgradeability is only provided internally through {_upgradeTo}. For an externally upgradeable proxy see
  * {TransparentUpgradeableProxy}.
  */
-contract ModUpgradeableProxy is ModProxy {
+contract ModUpgradeableProxy is RedstoneProxy {
     PriceFeed priceFeed;
 
 
@@ -25,13 +25,13 @@ contract ModUpgradeableProxy is ModProxy {
      * If `_data` is nonempty, it's used as data in a delegate call to `_logic`. This will typically be an encoded
      * function call, and allows initializating the storage of the proxy like a Solidity constructor.
      */
-    constructor(address _logic, bytes memory _data, PriceFeed _priceFeed) payable {
+    constructor(address _logic, bytes memory _data, PriceFeed _proxyPriceFeed) payable {
         //assert(_IMPLEMENTATION_SLOT == bytes32(uint256(keccak256("eip1967.proxy.implementation")) - 1));
         _setImplementation(_logic);
         if(_data.length > 0) {
             Address.functionDelegateCall(_logic, _data);
         }
-        priceFeed = _priceFeed;
+        priceFeed = _proxyPriceFeed;
     }
 
     /**
@@ -81,7 +81,7 @@ contract ModUpgradeableProxy is ModProxy {
         }
     }
 
-    function getPriceFeed() internal view override returns (PriceFeed) {
+    function _priceFeed() internal view override returns (PriceFeed) {
         return priceFeed;
     }
 }
