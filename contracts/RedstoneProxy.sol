@@ -1,95 +1,46 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.2;
 
-import "./BytesLib.sol";
-import 'hardhat/console.sol';
-import './PriceFeed.sol';
-import "@openzeppelin/contracts/proxy/Proxy.sol";
+import "./RedstoneCoreProxy.sol";
+import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Upgrade.sol";
 
-abstract contract RedstoneProxy is Proxy {
-    using BytesLib for bytes;
 
-    bytes32 constant MARKER = keccak256("Redstone.version.0.0.1");
-
+/**
+ * @dev This contract implements an upgradeable proxy. It is upgradeable because calls are delegated to an
+ * implementation address that can be changed. This address is stored in storage in the location specified by
+ * https://eips.ethereum.org/EIPS/eip-1967[EIP1967], so that it doesn't conflict with the storage layout of the
+ * implementation behind the proxy.
+ */
+contract RedstoneProxy is RedstoneCoreProxy, ERC1967Upgrade {
+    address priceFeed;
+    
+    
     /**
-     * @dev Delegates the current call to `implementation`.
+     * @dev Initializes the upgradeable proxy with an initial implementation specified by `_logic`.
      *
-     * It extracts the pricing data and keep it in the storage of priceFeed contract. 
-     * Then it forwards the call to the implementation recording the results. 
-     * As the last step it cleans the data from priceFeed to save on gas fees
-     * and forwards the results to the caller.
+     * If `_data` is nonempty, it's used as data in a delegate call to `_logic`. This will typically be an encoded
+     * function call, and allows initializating the storage of the proxy like a Solidity constructor.
      */
-    function _delegate(address implementation) internal override {
-        // solhint-disable-next-line no-inline-assembly
-
-        PriceFeed priceFeed = _priceFeed();
-
-        //Check if transaction contains Limestone marker
-        bool isTxWithPricing = false;
-        if (msg.data.length > 32) {
-            isTxWithPricing = msg.data.toBytes32(msg.data.length - 32) == MARKER;
-        }
-
-
-        //Register price data
-        bytes memory priceData;
-        uint16 priceDataLen;
-        if (isTxWithPricing) {
-            priceDataLen = msg.data.toUint16(msg.data.length - 34);
-            //console.log("-----PDL: ", priceDataLen);
-            //console.log("-----Total: ", msg.data.length);
-
-            priceData = msg.data.slice(msg.data.length - priceDataLen - 34, priceDataLen);
-            (bool success,) = address(priceFeed).call(priceData);
-            require(success, "Error setting price data");
-
-        }
-
-
-        //Assembly version - compare gas costs
-//        uint8 delegationResult;
-//        //bytes memory delegationReturn;
-//        assembly {
-//            // Copy msg.data. We take full control of memory in this inline assembly
-//            // block because it will not return to Solidity code. We overwrite the
-//            // Solidity scratch pad at memory position 0.
-//            calldatacopy(0, 0, 36)
-//
-//            // Call the implementation.
-//            // out and outsize are 0 because we don't know the size yet.
-//            delegationResult := delegatecall(gas(), implementation, 0, 36, 0, 0)
-//
-//            // Copy the returned data.
-//            returndatacopy(0, 0, returndatasize())
-//        }
-
-        //Delegate the original transaction
-        (bool delegationSuccess, bytes memory delegationResult) = implementation.delegatecall(msg.data);
-
-
-        //Clear price data
-        if (isTxWithPricing) {
-            bytes memory clearDataPrefix = msg.data.slice(msg.data.length - priceDataLen - 34 - 4, 4);
-            bytes memory clearData = clearDataPrefix.concat(priceData.slice(4, priceData.length - 4));
-            address(priceFeed).call(clearData);
-        }
-
-
-        //Return results from base method
-        assembly {
-            switch delegationSuccess
-            // delegatecall returns 0 on error.
-            case 0 { revert(add(delegationResult, 32), delegationResult) }
-            default { return(add(delegationResult, 32), mload(delegationResult)) }
-        }
+    constructor(address _logic, address _priceFeedAddress, bytes memory _data) payable {
+        assert(_IMPLEMENTATION_SLOT == bytes32(uint256(keccak256("eip1967.proxy.implementation")) - 1));
+        priceFeed = _priceFeedAddress;
+        _upgradeToAndCall(_logic, _data, false);
     }
-
+    
 
     /**
-     * @dev This is a virtual function that should be overriden
-     * to return the address of the contract which keeps the prices on-chain
+     * @dev Returns the current implementation address.
      */
-    function _priceFeed() internal view virtual returns (PriceFeed);
+    function _implementation() internal view virtual override returns (address impl) {
+        return ERC1967Upgrade._getImplementation();
+    }
+    
 
+    /**
+     * @dev Returns the current price feed address
+     */
+    function _priceFeed() internal view override returns (address) {
+        return priceFeed;
+    }
 }

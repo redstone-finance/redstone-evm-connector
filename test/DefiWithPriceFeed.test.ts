@@ -30,7 +30,7 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
     [owner, admin] = await ethers.getSigners();
 
     const Defi = await ethers.getContractFactory("MockDefi");
-    const Proxy = await ethers.getContractFactory("ModTransparentUpgradeableProxy");
+    const Proxy = await ethers.getContractFactory("RedstoneUpgradeableProxy");
     const PriceFeed = await ethers.getContractFactory("PriceFeed");
     const Verifier = await ethers.getContractFactory("PriceVerifier");
 
@@ -44,7 +44,7 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
     defi = (await Defi.deploy(priceFeed.address)) as MockDefi;
 
     console.log("Defi address: " + defi.address);
-    const proxy = await Proxy.deploy(defi.address, admin.address, [], priceFeed.address);
+    const proxy = await Proxy.deploy(defi.address, priceFeed.address, admin.address, []);
 
     defi = (await Defi.attach(proxy.address)) as MockDefi;
     defi = defi.connect(signer);
