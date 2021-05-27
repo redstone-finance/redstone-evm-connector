@@ -13,7 +13,8 @@ import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Upgrade.sol";
  * implementation behind the proxy.
  */
 contract RedstoneProxy is RedstoneCoreProxy, ERC1967Upgrade {
-    address priceFeed;
+   
+    bytes32 constant _PRICE_FEED_SLOT  = bytes32(uint256(keccak256("redstone.price_feed.implementation")) - 1);
     
     
     /**
@@ -23,8 +24,10 @@ contract RedstoneProxy is RedstoneCoreProxy, ERC1967Upgrade {
      * function call, and allows initializating the storage of the proxy like a Solidity constructor.
      */
     constructor(address _logic, address _priceFeedAddress, bytes memory _data) payable {
+        require(_priceFeedAddress != address(0), "Price feed address cannot be empty");
+        
         assert(_IMPLEMENTATION_SLOT == bytes32(uint256(keccak256("eip1967.proxy.implementation")) - 1));
-        priceFeed = _priceFeedAddress;
+        StorageSlot.getAddressSlot(_PRICE_FEED_SLOT).value = _priceFeedAddress;
         _upgradeToAndCall(_logic, _data, false);
     }
     
@@ -41,6 +44,6 @@ contract RedstoneProxy is RedstoneCoreProxy, ERC1967Upgrade {
      * @dev Returns the current price feed address
      */
     function _priceFeed() internal view override returns (address) {
-        return priceFeed;
+        return StorageSlot.getAddressSlot(_PRICE_FEED_SLOT).value;
     }
 }

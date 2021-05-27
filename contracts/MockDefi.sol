@@ -12,11 +12,14 @@ import 'hardhat/console.sol';
 contract MockDefi {
 
     PriceFeed priceFeed;
+    bool private initialized;
 
     bytes32[2] allowedAssets = [bytes32("ETH"), bytes32("AVAX")];
 
-    constructor(PriceFeed _priceFeed) {
+    function initialize(PriceFeed _priceFeed) external {
+        require(!initialized);
         priceFeed = _priceFeed;
+        initialized = true;
     }
 
     mapping(address =>mapping(bytes32 => uint256)) balances;
@@ -39,7 +42,6 @@ contract MockDefi {
 
     function currentValueOf(address account, bytes32 symbol) external view returns (uint256) {
         uint256 price = priceFeed.getPrice(symbol);
-
         console.log("Price: ", price);
 
         return balances[account][symbol] * price;

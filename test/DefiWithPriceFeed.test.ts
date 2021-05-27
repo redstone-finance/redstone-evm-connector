@@ -41,12 +41,14 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
     await priceFeed.authorizeSigner(signer.address);
     console.log("Authorized: ", signer.address);
 
-    defi = (await Defi.deploy(priceFeed.address)) as MockDefi;
+    defi = (await Defi.deploy()) as MockDefi;
 
     console.log("Defi address: " + defi.address);
     const proxy = await Proxy.deploy(defi.address, priceFeed.address, admin.address, []);
 
     defi = (await Defi.attach(proxy.address)) as MockDefi;
+    await defi.initialize(priceFeed.address);
+    
     defi = defi.connect(signer);
 
     await owner.sendTransaction({to: signer.address, value: ethers.utils.parseEther("1")});

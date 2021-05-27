@@ -28,11 +28,13 @@ describe("MockDefi with Proxy contract but no pricing data", function() {
 
 
     priceFeed = (await PriceFeed.deploy()) as MockPriceFeed;
-    defi = (await Defi.deploy(priceFeed.address)) as MockDefi;
+    defi = (await Defi.deploy()) as MockDefi;
 
     const proxy = await Proxy.deploy(defi.address, priceFeed.address, admin.address, []);
 
     defi = (await Defi.attach(proxy.address)) as MockDefi;
+    await defi.initialize(priceFeed.address);
+    
   });
 
 

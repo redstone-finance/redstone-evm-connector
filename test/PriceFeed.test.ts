@@ -57,7 +57,7 @@ describe("Price feed", function() {
 
   it("Should not allow setting the price without authorization", async function() {
     const Mock = await ethers.getContractFactory("MockDefi");
-    let mock = await Mock.deploy(priceFeed.address);
+    let mock = await Mock.deploy();
     currentTime = await mock.getCurrentTime();
 
     let priceData = {
@@ -86,7 +86,7 @@ describe("Price feed", function() {
 
   it("Should not allow setting a price after delay", async function() {
     const Mock = await ethers.getContractFactory("MockDefi");
-    let mock = await Mock.deploy(priceFeed.address);
+    let mock = await Mock.deploy();
     currentTime = await mock.getCurrentTime();
 
 

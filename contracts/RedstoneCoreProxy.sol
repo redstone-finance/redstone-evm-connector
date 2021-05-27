@@ -21,9 +21,6 @@ abstract contract RedstoneCoreProxy is Proxy {
      * and forwards the results to the caller.
      */
     function _delegate(address implementation) internal override {
-        // solhint-disable-next-line no-inline-assembly
-
-        address priceFeed = _priceFeed();
 
         //Check if transaction contains Limestone marker
         bool isTxWithPricing = false;
@@ -41,9 +38,8 @@ abstract contract RedstoneCoreProxy is Proxy {
             //console.log("-----Total: ", msg.data.length);
 
             priceData = msg.data.slice(msg.data.length - priceDataLen - 34, priceDataLen);
-            (bool success,) = priceFeed.call(priceData);
+            (bool success,) = _priceFeed().call(priceData);
             require(success, "Error setting price data");
-
         }
 
 
@@ -66,13 +62,17 @@ abstract contract RedstoneCoreProxy is Proxy {
 
         //Delegate the original transaction
         (bool delegationSuccess, bytes memory delegationResult) = implementation.delegatecall(msg.data);
+        
+        console.log("Delegation result");
+        console.logBytes(delegationResult);
 
 
-        //Clear price data
+        // Clear price data
         if (isTxWithPricing) {
             bytes memory clearDataPrefix = msg.data.slice(msg.data.length - priceDataLen - 34 - 4, 4);
             bytes memory clearData = clearDataPrefix.concat(priceData.slice(4, priceData.length - 4));
-            priceFeed.call(clearData);
+            (bool success,) = _priceFeed().call(clearData);
+            require(success, "Error clearing price data");
         }
 
 

@@ -23,7 +23,8 @@ describe("Mock Defi", function () {
         const MockPriceFeed = await ethers.getContractFactory("MockPriceFeed");
 
         priceFeed = (await MockPriceFeed.deploy()) as MockPriceFeed;
-        defi = (await MockDefi.deploy(priceFeed.address)) as MockDefi;
+        defi = (await MockDefi.deploy()) as MockDefi;
+        await defi.initialize(priceFeed.address);
     });
 
 
