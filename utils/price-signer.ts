@@ -1,5 +1,5 @@
 import { toBuffer } from 'ethereumjs-util';
-import { signTypedMessage, recoverTypedSignature } from "eth-sig-util";
+import { signTypedMessage, recoverTypedMessage, MsgParams } from "eth-sig-util";
 
 
 export type PriceDataType = {
@@ -67,6 +67,25 @@ export function signPriceData(priceData: PriceDataType, primaryKey: string): Sig
 }
 
 export function verifySignature(signedPriceData: SignedPriceDataType) {
-  //TODO: Fix types
-  //const signer = recoverTypedSignature({message: signedPriceData.priceData, sig: signedPriceData.signature})
+    const domainData =  {
+        name: 'Redstone',
+        version: '1.0.0',
+        chainId : 7,
+    };
+    
+    const data: any = {
+        types: {
+            EIP712Domain,
+            PriceData: PriceData,
+        },
+        domain: domainData,
+        primaryType: 'PriceData',
+        message: toMessage(signedPriceData.priceData),
+    };  
+    
+  const signer = recoverTypedMessage({data: data, sig: signedPriceData.signature});
+  
+  return signer.toUpperCase() === signedPriceData.priceData.signer.toUpperCase();
 }
+
+
