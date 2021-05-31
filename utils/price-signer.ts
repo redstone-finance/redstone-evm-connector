@@ -1,6 +1,18 @@
 import { toBuffer } from 'ethereumjs-util';
-import { signTypedMessage } from "eth-sig-util";
+import { signTypedMessage, recoverTypedSignature } from "eth-sig-util";
 
+
+export type PriceDataType = {
+    symbols: string[],
+    prices: number[],
+    timestamp: number,
+    signer: string
+}
+
+export type SignedPriceDataType = {
+  priceData: PriceDataType,
+  signature: string  
+}
 
 const PriceData = [
   {name: 'symbols', type: 'bytes32[]'},
@@ -17,7 +29,7 @@ const EIP712Domain = [
 ];
 
 
-function toMessage(priceData:any): any {
+function toMessage(priceData: PriceDataType): any {
   const serializeBN = (value:any) => value.toString();
 
   return {
@@ -28,7 +40,7 @@ function toMessage(priceData:any): any {
   }
 }
 
-export function signPriceData(priceData: any, primaryKey: string):string {
+export function signPriceData(priceData: PriceDataType, primaryKey: string): SignedPriceDataType {
 
   const domainData =  {
     name: 'Redstone',
@@ -36,7 +48,7 @@ export function signPriceData(priceData: any, primaryKey: string):string {
     chainId : 7,
   };
 
-  const data:any = {
+  const data: any = {
     types: {
       EIP712Domain,
       PriceData: PriceData,
@@ -47,5 +59,14 @@ export function signPriceData(priceData: any, primaryKey: string):string {
   };
 
   const privateKey = toBuffer(primaryKey);
-  return signTypedMessage(privateKey, {data}, 'V4');
+  
+  return {
+    priceData: priceData,
+    signature: signTypedMessage(privateKey, {data}, 'V4')
+  };
+}
+
+export function verifySignature(signedPriceData: SignedPriceDataType) {
+  //TODO: Fix types
+  //const signer = recoverTypedSignature({message: signedPriceData.priceData, sig: signedPriceData.signature})
 }

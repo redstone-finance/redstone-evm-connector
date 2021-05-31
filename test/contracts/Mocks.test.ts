@@ -1,8 +1,8 @@
 import { ethers } from "hardhat";
 import chai from "chai";
 import { solidity } from "ethereum-waffle";
-import { MockDefi } from "../typechain/MockDefi";
-import { MockPriceFeed } from "../typechain/MockPriceFeed";
+import { MockDefi } from "../../typechain/MockDefi";
+import { MockPriceFeed } from "../../typechain/MockPriceFeed";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 
 chai.use(solidity);

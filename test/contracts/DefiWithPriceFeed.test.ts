@@ -1,13 +1,13 @@
 import { ethers } from "hardhat";
 import chai from "chai";
 import { solidity } from "ethereum-waffle";
-import { MockDefi } from "../typechain/MockDefi";
+import { MockDefi } from "../../typechain/MockDefi";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {Wallet} from "ethers";
-import {PriceVerifier} from "../typechain/PriceVerifier";
-const { wrapContract } = require("../utils/contract-wrapper");
+import {PriceVerifier} from "../../typechain/PriceVerifier";
+const { wrapContract } = require("../../utils/contract-wrapper");
 
-import {PriceFeed} from "../typechain/PriceFeed";
+import {PriceFeed} from "../../typechain/PriceFeed";
 chai.use(solidity);
 
 const { expect } = chai;

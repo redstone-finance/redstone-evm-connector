@@ -4,8 +4,8 @@ import chai from "chai";
 import { solidity } from "ethereum-waffle";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 
-import { PriceVerifier } from "../typechain/PriceVerifier";
-import { signPriceData } from "../utils/price-signer";
+import { PriceVerifier } from "../../typechain/PriceVerifier";
+import { signPriceData } from "../../utils/price-signer";
 
 chai.use(solidity);
 const { expect } = chai;
@@ -39,8 +39,8 @@ describe("Price data verification", function() {
       signer: signer.address
     };
 
-    let signature = signPriceData(priceData, signer.privateKey);
-    expect(await verifier.verifyPriceData(priceData, signature)).to.be.true;
+    const signedData = signPriceData(priceData, signer.privateKey);
+    expect(await verifier.verifyPriceData(priceData, signedData.signature)).to.be.true;
   });
 
 
@@ -59,8 +59,8 @@ describe("Price data verification", function() {
       signer: signer.address
     };
 
-    let signature = signPriceData(differentPriceData, signer.privateKey);
-    expect(await verifier.verifyPriceData(priceData, signature)).to.be.false;
+    const signedData = signPriceData(differentPriceData, signer.privateKey);
+    expect(await verifier.verifyPriceData(priceData, signedData.signature)).to.be.false;
   });
 
 
@@ -79,8 +79,8 @@ describe("Price data verification", function() {
       signer: signer.address
     };
 
-    let signature = signPriceData(differentPriceData, signer.privateKey);
-    expect(await verifier.verifyPriceData(priceData, signature)).to.be.false;
+    const signedData = signPriceData(differentPriceData, signer.privateKey);
+    expect(await verifier.verifyPriceData(priceData, signedData.signature)).to.be.false;
   });
 
 
@@ -99,8 +99,8 @@ describe("Price data verification", function() {
       signer: signer.address
     };
 
-    let signature = signPriceData(differentPriceData, signer.privateKey);
-    expect(await verifier.verifyPriceData(priceData, signature)).to.be.false;
+    const signedData = signPriceData(differentPriceData, signer.privateKey);
+    expect(await verifier.verifyPriceData(priceData, signedData.signature)).to.be.false;
   });
 
 
@@ -119,8 +119,8 @@ describe("Price data verification", function() {
       signer: owner.address
     };
 
-    let signature = signPriceData(differentPriceData, signer.privateKey);
-    expect(await verifier.verifyPriceData(priceData, signature)).to.be.false;
+    const signedData = signPriceData(differentPriceData, signer.privateKey);
+    expect(await verifier.verifyPriceData(priceData, signedData.signature)).to.be.false;
   });
 
 
@@ -132,8 +132,8 @@ describe("Price data verification", function() {
         signer: signer.address
       };
 
-      let signature = signPriceData(priceData, signer.privateKey);
-      expect(await verifier.verifyPriceData(priceData, signature)).to.be.true;
+      const signedData = signPriceData(priceData, signer.privateKey);
+      expect(await verifier.verifyPriceData(priceData, signedData.signature)).to.be.true;
   });
 
 
@@ -145,8 +145,8 @@ describe("Price data verification", function() {
       signer: signer.address
     };
 
-    let signature = signPriceData(priceData, signer.privateKey);
-    expect(await verifier.verifyPriceData(priceData, signature)).to.be.true;
+    const signedData = signPriceData(priceData, signer.privateKey);
+    expect(await verifier.verifyPriceData(priceData, signedData.signature)).to.be.true;
   });
 
 
@@ -158,8 +158,8 @@ describe("Price data verification", function() {
       signer: signer.address
     };
 
-    let signature = signPriceData(priceData, signer.privateKey);
-    expect(await verifier.verifyPriceData(priceData, signature)).to.be.true;
+    const signedData = signPriceData(priceData, signer.privateKey);
+    expect(await verifier.verifyPriceData(priceData, signedData.signature)).to.be.true;
   });
 
 
