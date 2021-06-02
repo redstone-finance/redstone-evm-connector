@@ -5,7 +5,7 @@ import { solidity } from "ethereum-waffle";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 
 import { PriceVerifier } from "../../typechain/PriceVerifier";
-import { signPriceData } from "../../utils/price-signer";
+import { PriceSigner } from "../../utils/price-signer";
 
 chai.use(solidity);
 const { expect } = chai;
@@ -18,6 +18,7 @@ describe("Price data verification", function() {
   let admin: SignerWithAddress;
   let signer: Wallet;
   let verifier: PriceVerifier;
+  const priceSigner = new PriceSigner("1.0.0", 7);
 
   it("Should deploy functions", async function() {
     [owner, admin] = await ethers.getSigners();
@@ -38,7 +39,7 @@ describe("Price data verification", function() {
       timestamp: 1111
     };
 
-    const signedData = signPriceData(priceData, signer.privateKey);
+    const signedData = priceSigner.signPriceData(priceData, signer.privateKey);
     expect(await verifier.recoverDataSigner(priceData, signedData.signature)).equals(signer.address);
   });
 
@@ -56,7 +57,7 @@ describe("Price data verification", function() {
       timestamp: 1111
     };
 
-    const signedData = signPriceData(differentPriceData, signer.privateKey);
+    const signedData = priceSigner.signPriceData(differentPriceData, signer.privateKey);
     expect(await verifier.recoverDataSigner(priceData, signedData.signature)).not.equals(signer.address);
   });
 
@@ -74,7 +75,7 @@ describe("Price data verification", function() {
       timestamp: 1111
     };
 
-    const signedData = signPriceData(differentPriceData, signer.privateKey);
+    const signedData = priceSigner.signPriceData(differentPriceData, signer.privateKey);
     expect(await verifier.recoverDataSigner(priceData, signedData.signature)).not.equals(signer.address);
   });
 
@@ -92,7 +93,7 @@ describe("Price data verification", function() {
       timestamp: 1112
     };
 
-    const signedData = signPriceData(differentPriceData, signer.privateKey);
+    const signedData = priceSigner.signPriceData(differentPriceData, signer.privateKey);
     expect(await verifier.recoverDataSigner(priceData, signedData.signature)).not.equals(signer.address);
   });
 
@@ -104,7 +105,7 @@ describe("Price data verification", function() {
         timestamp: 1111
       };
 
-      const signedData = signPriceData(priceData, signer.privateKey);
+      const signedData = priceSigner.signPriceData(priceData, signer.privateKey);
       expect(await verifier.recoverDataSigner(priceData, signedData.signature)).equals(signer.address);
   });
 
@@ -116,7 +117,7 @@ describe("Price data verification", function() {
       timestamp: 1111
     };
 
-    const signedData = signPriceData(priceData, signer.privateKey);
+    const signedData = priceSigner.signPriceData(priceData, signer.privateKey);
       expect(await verifier.recoverDataSigner(priceData, signedData.signature)).equals(signer.address);
   });
 
@@ -128,7 +129,7 @@ describe("Price data verification", function() {
       timestamp: 1111
     };
 
-    const signedData = signPriceData(priceData, signer.privateKey);
+    const signedData = priceSigner.signPriceData(priceData, signer.privateKey);
     expect(await verifier.recoverDataSigner(priceData, signedData.signature)).equals(signer.address);
   });
 

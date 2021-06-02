@@ -3,7 +3,7 @@ import chai from "chai";
 import { solidity } from "ethereum-waffle";
 import { PriceVerifier } from "../../typechain/PriceVerifier";
 import { PriceFeed } from "../../typechain/PriceFeed";
-import { signPriceData } from "../../utils/price-signer";
+import {PriceSigner} from "../../utils/price-signer";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 import {Wallet} from "ethers";
 
@@ -20,6 +20,7 @@ describe("Price feed", function() {
   let verifier: PriceVerifier;
   let priceFeed: PriceFeed;
   let currentTime: number;
+  const priceSigner = new PriceSigner("1.0.0", 7);
 
   it("Should deploy the Verifier", async function() {
     [owner, other] = await ethers.getSigners();
@@ -63,11 +64,10 @@ describe("Price feed", function() {
     let priceData = {
       symbols: ["ETH"].map(ethers.utils.formatBytes32String),
       prices: [1800],
-      timestamp: currentTime,
-      signer: signer.address
+      timestamp: currentTime
     };
 
-    const signedPriceData = signPriceData(priceData, signer.privateKey);
+    const signedPriceData = priceSigner.signPriceData(priceData, signer.privateKey);
     await expect(priceFeed.setPrices(signedPriceData.priceData, signedPriceData.signature))
       .to.be.revertedWith('Unauthorized price data signer');
   });
@@ -96,7 +96,7 @@ describe("Price feed", function() {
       timestamp: currentTime - 301
     };
 
-    const signedPriceData = signPriceData(priceData, signer.privateKey);
+    const signedPriceData = priceSigner.signPriceData(priceData, signer.privateKey);
     await expect(priceFeed.setPrices(signedPriceData.priceData, signedPriceData.signature))
       .to.be.revertedWith('Price data timestamp too old');
   });
@@ -109,7 +109,7 @@ describe("Price feed", function() {
       timestamp: currentTime
     };
 
-    const signedPriceData = signPriceData(priceData, signer.privateKey);
+    const signedPriceData = priceSigner.signPriceData(priceData, signer.privateKey);
     await priceFeed.setPrices(signedPriceData.priceData, signedPriceData.signature);
 
     let contractPrice = await priceFeed.getPrice(priceData.symbols[0]);
@@ -131,7 +131,7 @@ describe("Price feed", function() {
       timestamp: currentTime
     };
 
-    const signedPriceData = signPriceData(priceData, signer.privateKey);
+    const signedPriceData = priceSigner.signPriceData(priceData, signer.privateKey);
     await expect(priceFeed.setPrices(signedPriceData.priceData, signedPriceData.signature))
       .to.be.revertedWith('The prices could be set only once in the transaction');
   });
@@ -178,7 +178,7 @@ describe("Price feed", function() {
           timestamp: currentTime
       };
 
-      const signedPriceData = signPriceData(priceData, signer.privateKey);
+      const signedPriceData = priceSigner.signPriceData(priceData, signer.privateKey);
       await expect(priceFeed.setPrices(signedPriceData.priceData, signedPriceData.signature))
           .to.be.revertedWith('Unauthorized price data signer');
   });
@@ -196,7 +196,7 @@ describe("Price feed", function() {
       timestamp: currentTime
     };
 
-    const signedPriceData = signPriceData(priceData, signer.privateKey);
+    const signedPriceData = priceSigner.signPriceData(priceData, signer.privateKey);
     await priceFeed.setPrices(signedPriceData.priceData, signedPriceData.signature);
 
     for(let i=0; i<3; i++) {

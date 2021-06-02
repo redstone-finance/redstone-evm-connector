@@ -1,6 +1,7 @@
 import {ethers} from "hardhat";
-import {signPriceData, verifySignature} from "../../utils/price-signer";
+import {PriceSigner} from "../../utils/price-signer";
 
+const priceSigner:PriceSigner = new PriceSigner();
 
 test('sign and verify single price', async () => {
     const PRIV = "0xae2b81c1fe9e3b01f060362f03abd0c80a6447cfe00ff7fc7fcf000000000000";
@@ -11,9 +12,9 @@ test('sign and verify single price', async () => {
         timestamp: 1
     };
     
-    const signedPriceData = signPriceData(priceData, PRIV);
+    const signedPriceData = priceSigner.signPriceData(priceData, PRIV);
     
-    expect(verifySignature(signedPriceData)).toBeTruthy();
+    expect(priceSigner.verifySignature(signedPriceData)).toBeTruthy();
 });
 
 test('sign and verify multiple prices', () => {

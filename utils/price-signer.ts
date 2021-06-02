@@ -16,79 +16,73 @@ export type SignedPriceDataType = {
 }
 
 const PriceData = [
-  {name: 'symbols', type: 'bytes32[]'},
-  {name: 'prices', type: 'uint256[]'},
-  {name: 'timestamp', type: 'uint256'}
+    {name: 'symbols', type: 'bytes32[]'},
+    {name: 'prices', type: 'uint256[]'},
+    {name: 'timestamp', type: 'uint256'}
 ];
 
 
 const EIP712Domain = [
-  {name: 'name', type: 'string'},
-  {name: 'version', type: 'string'},
-  {name: 'chainId', type: 'uint256'}
+    {name: 'name', type: 'string'},
+    {name: 'version', type: 'string'},
+    {name: 'chainId', type: 'uint256'}
 ];
 
+const serializeBN = (value:any) => value.toString();
 
-function toMessage(priceData: PriceDataType): any {
-  const serializeBN = (value:any) => value.toString();
+export class PriceSigner {
+    private _domainData: object;
 
-  return {
-    symbols: priceData.symbols,
-    prices: priceData.prices.map(serializeBN),
-    timestamp: serializeBN(priceData.timestamp)
-  }
-}
+    constructor(version: string = '0.4.0', chainId: number = 1) {
+        this._domainData =  {
+            name: 'Redstone',
+            version: version,
+            chainId : chainId,
+        };
+    }
 
-export function signPriceData(priceData: PriceDataType, primaryKey: string): SignedPriceDataType {
+    private serializeToMessage(priceData: PriceDataType): object {
+        return {
+            symbols: priceData.symbols,
+            prices: priceData.prices.map(serializeBN),
+            timestamp: serializeBN(priceData.timestamp)
+        }
+    }
 
-  const domainData =  {
-    name: 'Redstone',
-    version: '1.0.0',
-    chainId : 7,
-  };
+    signPriceData(priceData: PriceDataType, privateKey: string): SignedPriceDataType {
+        const data: any = {
+            types: {
+                EIP712Domain,
+                PriceData: PriceData,
+            },
+            domain: this._domainData,
+            primaryType: 'PriceData',
+            message: this.serializeToMessage(priceData),
+        };
 
-  const data: any = {
-    types: {
-      EIP712Domain,
-      PriceData: PriceData,
-    },
-    domain: domainData,
-    primaryType: 'PriceData',
-    message: toMessage(priceData),
-  };
+        return {
+            priceData: priceData,
+            signer: (new ethers.Wallet(privateKey)).address,
+            signature: signTypedMessage(toBuffer(privateKey), {data}, 'V4')
+        };
+    }
 
-  const signer = (new ethers.Wallet(primaryKey)).address;
-  const privateKey = toBuffer(primaryKey);
- 
-  return {
-    priceData: priceData,
-    signer: signer,  
-    signature: signTypedMessage(privateKey, {data}, 'V4')
-  };
-}
+    verifySignature(signedPriceData: SignedPriceDataType) {
+        const data: any = {
+            types: {
+                EIP712Domain,
+                PriceData: PriceData,
+            },
+            domain: this._domainData,
+            primaryType: 'PriceData',
+            message: this.serializeToMessage(signedPriceData.priceData),
+        };
 
-export function verifySignature(signedPriceData: SignedPriceDataType) {
-    //Move to constructor
-    const domainData =  {
-        name: 'Redstone',
-        version: '1.0.0',
-        chainId : 7,
-    };
+        const signer = recoverTypedMessage({data: data, sig: signedPriceData.signature});
+
+        return signer.toUpperCase() === signedPriceData.signer.toUpperCase();
+    }   
     
-    //Move to function
-    const data: any = {
-        types: {
-            EIP712Domain,
-            PriceData: PriceData,
-        },
-        domain: domainData,
-        primaryType: 'PriceData',
-        message: toMessage(signedPriceData.priceData),
-    };  
-    
-  const signer = recoverTypedMessage({data: data, sig: signedPriceData.signature});
-  
-  return signer.toUpperCase() === signedPriceData.signer.toUpperCase();
 }
 
 
