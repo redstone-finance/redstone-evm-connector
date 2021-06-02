@@ -1,5 +1,3 @@
-import redstone from 'redstone-api';
-
 import { Wallet, utils } from "ethers";
 import {signPriceData, PriceDataType, SignedPriceDataType} from './price-signer';
 
@@ -15,8 +13,7 @@ export function getSignedPrice(): SignedPriceDataType {
     const priceData : PriceDataType = {
         symbols: ["ETH", "AVAX"].map(utils.formatBytes32String),
         prices: [10, 5],
-        timestamp: currentTime,
-        signer: signer.address
+        timestamp: currentTime
     };
 
     return signPriceData(priceData, signer.privateKey);

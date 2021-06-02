@@ -28,9 +28,9 @@ contract PriceVerifier is PriceModel {
     }
 
 
-    function verifyPriceData(PriceData calldata priceData, bytes calldata signature) external view returns (bool) {
+    function recoverDataSigner(PriceData calldata priceData, bytes calldata signature) external view returns (address) {
         bytes32 hash = hashPriceData(priceData);
-        return priceData.signer == hash.recover(signature);
+        return hash.recover(signature);
     }
 
 
@@ -42,8 +42,7 @@ contract PriceVerifier is PriceModel {
                 PRICE_DATA__TYPEHASH,
                 keccak256(abi.encodePacked(priceData.symbols)),
                 keccak256(abi.encodePacked(priceData.prices)),
-                priceData.timestamp,
-                priceData.signer
+                priceData.timestamp
             ))
         ));
     }

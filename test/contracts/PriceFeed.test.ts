@@ -93,8 +93,7 @@ describe("Price feed", function() {
     let priceData = {
       symbols: ["ETH"].map(ethers.utils.formatBytes32String),
       prices: [1800],
-      timestamp: currentTime - 301,
-      signer: signer.address
+      timestamp: currentTime - 301
     };
 
     const signedPriceData = signPriceData(priceData, signer.privateKey);
@@ -107,8 +106,7 @@ describe("Price feed", function() {
     let priceData = {
       symbols: ["ETH"].map(ethers.utils.formatBytes32String),
       prices: [1800],
-      timestamp: currentTime,
-      signer: signer.address
+      timestamp: currentTime
     };
 
     const signedPriceData = signPriceData(priceData, signer.privateKey);
@@ -130,8 +128,7 @@ describe("Price feed", function() {
     let priceData = {
       symbols: ["ETH"].map(ethers.utils.formatBytes32String),
       prices: [1900],
-      timestamp: currentTime,
-      signer: signer.address
+      timestamp: currentTime
     };
 
     const signedPriceData = signPriceData(priceData, signer.privateKey);
@@ -144,8 +141,7 @@ describe("Price feed", function() {
       let priceData = {
           symbols: ["ETH"].map(ethers.utils.formatBytes32String),
           prices: [1900],
-          timestamp: currentTime,
-          signer: signer.address
+          timestamp: currentTime
       };
 
       await expect(priceFeed.connect(other).clearPrices(priceData))
@@ -157,8 +153,7 @@ describe("Price feed", function() {
     let priceData = {
       symbols: ["ETH"].map(ethers.utils.formatBytes32String),
       prices: [1900],
-      timestamp: currentTime,
-      signer: signer.address
+      timestamp: currentTime
     };
 
     await priceFeed.clearPrices(priceData);
@@ -180,8 +175,7 @@ describe("Price feed", function() {
       let priceData = {
           symbols: ["ETH"].map(ethers.utils.formatBytes32String),
           prices: [1800],
-          timestamp: currentTime,
-          signer: signer.address
+          timestamp: currentTime
       };
 
       const signedPriceData = signPriceData(priceData, signer.privateKey);
@@ -199,8 +193,7 @@ describe("Price feed", function() {
     let priceData = {
       symbols: ["ETH", "BTX", "AVAX"].map(ethers.utils.formatBytes32String),
       prices: [1800, 50000, 30],
-      timestamp: currentTime,
-      signer: signer.address
+      timestamp: currentTime
     };
 
     const signedPriceData = signPriceData(priceData, signer.privateKey);
@@ -217,8 +210,7 @@ describe("Price feed", function() {
     let priceData = {
       symbols: ["ETH", "BTX", "AVAX"].map(ethers.utils.formatBytes32String),
       prices: [1800, 50000, 30],
-      timestamp: currentTime,
-      signer: signer.address
+      timestamp: currentTime
     };
 
     await priceFeed.clearPrices(priceData);

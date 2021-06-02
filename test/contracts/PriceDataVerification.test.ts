@@ -35,12 +35,11 @@ describe("Price data verification", function() {
     let priceData = {
       symbols: [].map(ethers.utils.formatBytes32String),
       prices: [],
-      timestamp: 1111,
-      signer: signer.address
+      timestamp: 1111
     };
 
     const signedData = signPriceData(priceData, signer.privateKey);
-    expect(await verifier.verifyPriceData(priceData, signedData.signature)).to.be.true;
+    expect(await verifier.recoverDataSigner(priceData, signedData.signature)).equals(signer.address);
   });
 
 
@@ -48,19 +47,17 @@ describe("Price data verification", function() {
     let priceData = {
       symbols: ["ETH"].map(ethers.utils.formatBytes32String),
       prices: [1800],
-      timestamp: 1111,
-      signer: signer.address
+      timestamp: 1111
     };
 
     let differentPriceData = {
       symbols: ["ETH"].map(ethers.utils.formatBytes32String),
       prices: [1799],
-      timestamp: 1111,
-      signer: signer.address
+      timestamp: 1111
     };
 
     const signedData = signPriceData(differentPriceData, signer.privateKey);
-    expect(await verifier.verifyPriceData(priceData, signedData.signature)).to.be.false;
+    expect(await verifier.recoverDataSigner(priceData, signedData.signature)).not.equals(signer.address);
   });
 
 
@@ -68,19 +65,17 @@ describe("Price data verification", function() {
     let priceData = {
       symbols: ["ETH"].map(ethers.utils.formatBytes32String),
       prices: [1800],
-      timestamp: 1111,
-      signer: signer.address
+      timestamp: 1111
     };
 
     let differentPriceData = {
       symbols: ["ETH2"].map(ethers.utils.formatBytes32String),
       prices: [1800],
-      timestamp: 1111,
-      signer: signer.address
+      timestamp: 1111
     };
 
     const signedData = signPriceData(differentPriceData, signer.privateKey);
-    expect(await verifier.verifyPriceData(priceData, signedData.signature)).to.be.false;
+    expect(await verifier.recoverDataSigner(priceData, signedData.signature)).not.equals(signer.address);
   });
 
 
@@ -88,39 +83,17 @@ describe("Price data verification", function() {
     let priceData = {
       symbols: ["ETH"].map(ethers.utils.formatBytes32String),
       prices: [1800],
-      timestamp: 1111,
-      signer: signer.address
+      timestamp: 1111
     };
 
     let differentPriceData = {
       symbols: ["ETH"].map(ethers.utils.formatBytes32String),
       prices: [1800],
-      timestamp: 1112,
-      signer: signer.address
+      timestamp: 1112
     };
 
     const signedData = signPriceData(differentPriceData, signer.privateKey);
-    expect(await verifier.verifyPriceData(priceData, signedData.signature)).to.be.false;
-  });
-
-
-  it("Should not verify price data with a signature for a different signer", async function() {
-    let priceData = {
-      symbols: ["ETH"].map(ethers.utils.formatBytes32String),
-      prices: [1800],
-      timestamp: 1111,
-      signer: signer.address
-    };
-
-    let differentPriceData = {
-      symbols: ["ETH"].map(ethers.utils.formatBytes32String),
-      prices: [1800],
-      timestamp: 1111,
-      signer: owner.address
-    };
-
-    const signedData = signPriceData(differentPriceData, signer.privateKey);
-    expect(await verifier.verifyPriceData(priceData, signedData.signature)).to.be.false;
+    expect(await verifier.recoverDataSigner(priceData, signedData.signature)).not.equals(signer.address);
   });
 
 
@@ -128,12 +101,11 @@ describe("Price data verification", function() {
       let priceData = {
         symbols: ["ETH"].map(ethers.utils.formatBytes32String),
         prices: [1800],
-        timestamp: 1111,
-        signer: signer.address
+        timestamp: 1111
       };
 
       const signedData = signPriceData(priceData, signer.privateKey);
-      expect(await verifier.verifyPriceData(priceData, signedData.signature)).to.be.true;
+      expect(await verifier.recoverDataSigner(priceData, signedData.signature)).equals(signer.address);
   });
 
 
@@ -141,12 +113,11 @@ describe("Price data verification", function() {
     let priceData = {
       symbols: ["ETH", "AR"].map(ethers.utils.formatBytes32String),
       prices: [1800, 15],
-      timestamp: 1111,
-      signer: signer.address
+      timestamp: 1111
     };
 
     const signedData = signPriceData(priceData, signer.privateKey);
-    expect(await verifier.verifyPriceData(priceData, signedData.signature)).to.be.true;
+      expect(await verifier.recoverDataSigner(priceData, signedData.signature)).equals(signer.address);
   });
 
 
@@ -154,12 +125,11 @@ describe("Price data verification", function() {
     let priceData = {
       symbols: ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10"].map(ethers.utils.formatBytes32String),
       prices: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-      timestamp: 1111,
-      signer: signer.address
+      timestamp: 1111
     };
 
     const signedData = signPriceData(priceData, signer.privateKey);
-    expect(await verifier.verifyPriceData(priceData, signedData.signature)).to.be.true;
+    expect(await verifier.recoverDataSigner(priceData, signedData.signature)).equals(signer.address);
   });
 
 
