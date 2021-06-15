@@ -8,6 +8,9 @@ export default {
     hardhat: {
       chainId: 7
     }
+  },
+  paths: {
+    tests: "./test/contracts"
   }
 };
 
