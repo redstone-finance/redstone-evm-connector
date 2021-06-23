@@ -16,7 +16,7 @@ contract MockPriceFeed is IPriceFeed {
 
 
 
-    function getPrice(bytes32 symbol) external override returns(uint256) {
+    function getPrice(bytes32 symbol) public view override returns(uint256) {
         require(prices[symbol] > 0, "No pricing data for given symbol");
         return prices[symbol];
     }

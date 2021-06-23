@@ -56,7 +56,7 @@ contract PriceFeed is IPriceFeed, PriceModel, Ownable {
     }
 
 
-    function getPrice(bytes32 symbol) external override view returns(uint256) {
+    function getPrice(bytes32 symbol) override public view returns(uint256) {
         require(prices[symbol] > 0, "No pricing data for given symbol");
         return prices[symbol];
     }
