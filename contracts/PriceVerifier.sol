@@ -13,16 +13,16 @@ contract PriceVerifier is PriceModel {
     bytes32 DOMAIN_SEPARATOR;
 
     constructor() {
-        //Get chainId from assembly
-        uint256 chainId;
-        assembly {
-            chainId := chainid()
-        }
+        //For multi-chain testing
+        uint256 chainId = 1;
+//        assembly {
+//            chainId := chainid()
+//        }
 
         DOMAIN_SEPARATOR = keccak256(abi.encode(
                 EIP712_DOMAIN_TYPEHASH,
                 keccak256("Redstone"),
-                keccak256("1.0.0"),
+                keccak256("0.4"),
                 chainId
             ));
     }
@@ -41,7 +41,7 @@ contract PriceVerifier is PriceModel {
             keccak256(abi.encode(
                 PRICE_DATA__TYPEHASH,
                 keccak256(abi.encodePacked(priceData.symbols)),
-                keccak256(abi.encodePacked(priceData.prices)),
+                keccak256(abi.encodePacked(priceData.values)),
                 priceData.timestamp
             ))
         ));

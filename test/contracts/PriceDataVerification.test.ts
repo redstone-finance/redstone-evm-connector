@@ -18,7 +18,7 @@ describe("Price data verification", function() {
   let admin: SignerWithAddress;
   let signer: Wallet;
   let verifier: PriceVerifier;
-  const priceSigner = new PriceSigner("1.0.0", 7);
+  const priceSigner = new PriceSigner();
 
   it("Should deploy functions", async function() {
     [owner, admin] = await ethers.getSigners();
@@ -35,7 +35,7 @@ describe("Price data verification", function() {
   it("Should sign and verify empty price data", async function() {
     let priceData = {
       symbols: [].map(ethers.utils.formatBytes32String),
-      prices: [],
+      values: [],
       timestamp: 1111
     };
 
@@ -47,13 +47,13 @@ describe("Price data verification", function() {
   it("Should not verify price data with a signature for a different price", async function() {
     let priceData = {
       symbols: ["ETH"].map(ethers.utils.formatBytes32String),
-      prices: [1800],
+      values: [1800],
       timestamp: 1111
     };
 
     let differentPriceData = {
       symbols: ["ETH"].map(ethers.utils.formatBytes32String),
-      prices: [1799],
+      values: [1799],
       timestamp: 1111
     };
 
@@ -65,13 +65,13 @@ describe("Price data verification", function() {
   it("Should not verify price data with a signature for a different symbol", async function() {
     let priceData = {
       symbols: ["ETH"].map(ethers.utils.formatBytes32String),
-      prices: [1800],
+      values: [1800],
       timestamp: 1111
     };
 
     let differentPriceData = {
       symbols: ["ETH2"].map(ethers.utils.formatBytes32String),
-      prices: [1800],
+      values: [1800],
       timestamp: 1111
     };
 
@@ -83,13 +83,13 @@ describe("Price data verification", function() {
   it("Should not verify price data with a signature for a different timestamp", async function() {
     let priceData = {
       symbols: ["ETH"].map(ethers.utils.formatBytes32String),
-      prices: [1800],
+      values: [1800],
       timestamp: 1111
     };
 
     let differentPriceData = {
       symbols: ["ETH"].map(ethers.utils.formatBytes32String),
-      prices: [1800],
+      values: [1800],
       timestamp: 1112
     };
 
@@ -101,7 +101,7 @@ describe("Price data verification", function() {
   it("Should sign and verify single price data", async function() {
       let priceData = {
         symbols: ["ETH"].map(ethers.utils.formatBytes32String),
-        prices: [1800],
+        values: [1800],
         timestamp: 1111
       };
 
@@ -113,7 +113,7 @@ describe("Price data verification", function() {
   it("Should sign and verify double price data", async function() {
     let priceData = {
       symbols: ["ETH", "AR"].map(ethers.utils.formatBytes32String),
-      prices: [1800, 15],
+      values: [1800, 15],
       timestamp: 1111
     };
 
@@ -125,7 +125,7 @@ describe("Price data verification", function() {
   it("Should sign and verify 10 price data", async function() {
     let priceData = {
       symbols: ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10"].map(ethers.utils.formatBytes32String),
-      prices: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       timestamp: 1111
     };
 

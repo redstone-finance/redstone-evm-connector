@@ -5,7 +5,7 @@ import {ethers} from "hardhat";
 
 export type PriceDataType = {
     symbols: string[],
-    prices: number[],
+    values: number[],
     timestamp: number
 }
 
@@ -17,7 +17,7 @@ export type SignedPriceDataType = {
 
 const PriceData = [
     {name: 'symbols', type: 'bytes32[]'},
-    {name: 'prices', type: 'uint256[]'},
+    {name: 'values', type: 'uint256[]'},
     {name: 'timestamp', type: 'uint256'}
 ];
 
@@ -33,7 +33,7 @@ const serializeBN = (value:any) => value.toString();
 export class PriceSigner {
     private _domainData: object;
 
-    constructor(version: string = '0.4.0', chainId: number = 1) {
+    constructor(version: string = '0.4', chainId: number = 1) {
         this._domainData =  {
             name: 'Redstone',
             version: version,
@@ -44,7 +44,7 @@ export class PriceSigner {
     private serializeToMessage(priceData: PriceDataType): object {
         return {
             symbols: priceData.symbols,
-            prices: priceData.prices.map(serializeBN),
+            values: priceData.values.map(serializeBN),
             timestamp: serializeBN(priceData.timestamp)
         }
     }

@@ -8,12 +8,12 @@ const signer: Wallet = new Wallet(PRIV);
 
 export function getSignedPrice(): SignedPriceDataType {
 
-    const currentTime = Math.round(new Date().getTime()/1000);
-    const priceSigner = new PriceSigner("1.0.0", 7);
+    const currentTime = Math.round(new Date().getTime());
+    const priceSigner = new PriceSigner("0.4", 1);
 
     const priceData : PriceDataType = {
         symbols: ["ETH", "AVAX"].map(utils.formatBytes32String),
-        prices: [10, 5],
+        values: [10, 5],
         timestamp: currentTime
     };
 

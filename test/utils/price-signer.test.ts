@@ -8,7 +8,7 @@ test('sign and verify single price', async () => {
         
     const priceData = {
         symbols: ["ETH", "BTX", "AVAX"].map(ethers.utils.formatBytes32String),
-        prices: [1800, 50000, 30],
+        values: [1800, 50000, 30],
         timestamp: 1
     };
     

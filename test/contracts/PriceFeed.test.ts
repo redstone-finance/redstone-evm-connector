@@ -20,7 +20,7 @@ describe("Price feed", function() {
   let verifier: PriceVerifier;
   let priceFeed: PriceFeed;
   let currentTime: number;
-  const priceSigner = new PriceSigner("1.0.0", 7);
+  const priceSigner = new PriceSigner();
 
   it("Should deploy the Verifier", async function() {
     [owner, other] = await ethers.getSigners();
@@ -59,11 +59,11 @@ describe("Price feed", function() {
   it("Should not allow setting the price without authorization", async function() {
     const Mock = await ethers.getContractFactory("MockDefi");
     let mock = await Mock.deploy();
-    currentTime = await mock.getCurrentTime();
+    currentTime = await mock.getCurrentTime() * 1000;
 
     let priceData = {
       symbols: ["ETH"].map(ethers.utils.formatBytes32String),
-      prices: [1800],
+      values: [1800],
       timestamp: currentTime
     };
 
@@ -85,15 +85,11 @@ describe("Price feed", function() {
 
 
   it("Should not allow setting a price after delay", async function() {
-    const Mock = await ethers.getContractFactory("MockDefi");
-    let mock = await Mock.deploy();
-    currentTime = await mock.getCurrentTime();
-
 
     let priceData = {
       symbols: ["ETH"].map(ethers.utils.formatBytes32String),
-      prices: [1800],
-      timestamp: currentTime - 301
+      values: [1800],
+      timestamp: currentTime - 301000
     };
 
     const signedPriceData = priceSigner.signPriceData(priceData, signer.privateKey);
@@ -105,7 +101,7 @@ describe("Price feed", function() {
   it("Should set a single price", async function() {
     let priceData = {
       symbols: ["ETH"].map(ethers.utils.formatBytes32String),
-      prices: [1800],
+      values: [1800],
       timestamp: currentTime
     };
 
@@ -114,7 +110,7 @@ describe("Price feed", function() {
 
     let contractPrice = await priceFeed.getPrice(priceData.symbols[0]);
 
-    expect(contractPrice).to.be.equal(priceData.prices[0]);
+    expect(contractPrice).to.be.equal(priceData.values[0]);
   });
 
 
@@ -127,7 +123,7 @@ describe("Price feed", function() {
   it("Should not allow changing the price", async function() {
     let priceData = {
       symbols: ["ETH"].map(ethers.utils.formatBytes32String),
-      prices: [1900],
+      values: [1900],
       timestamp: currentTime
     };
 
@@ -140,7 +136,7 @@ describe("Price feed", function() {
   it("Should not allow to clear the price by other users", async function() {
       let priceData = {
           symbols: ["ETH"].map(ethers.utils.formatBytes32String),
-          prices: [1900],
+          values: [1900],
           timestamp: currentTime
       };
 
@@ -152,7 +148,7 @@ describe("Price feed", function() {
   it("Should clear the single price", async function() {
     let priceData = {
       symbols: ["ETH"].map(ethers.utils.formatBytes32String),
-      prices: [1900],
+      values: [1900],
       timestamp: currentTime
     };
 
@@ -174,7 +170,7 @@ describe("Price feed", function() {
 
       let priceData = {
           symbols: ["ETH"].map(ethers.utils.formatBytes32String),
-          prices: [1800],
+          values: [1800],
           timestamp: currentTime
       };
 
@@ -192,7 +188,7 @@ describe("Price feed", function() {
   it("Should set multiple prices", async function() {
     let priceData = {
       symbols: ["ETH", "BTX", "AVAX"].map(ethers.utils.formatBytes32String),
-      prices: [1800, 50000, 30],
+      values: [1800, 50000, 30],
       timestamp: currentTime
     };
 
@@ -200,16 +196,16 @@ describe("Price feed", function() {
     await priceFeed.setPrices(signedPriceData.priceData, signedPriceData.signature);
 
     for(let i=0; i<3; i++) {
-        expect(await priceFeed.getPrice(priceData.symbols[i])).to.be.equal(priceData.prices[i]);
+        expect(await priceFeed.getPrice(priceData.symbols[i])).to.be.equal(priceData.values[i]);
     }
-    
+
   });
 
 
   it("Should clear multiple prices", async function() {
     let priceData = {
       symbols: ["ETH", "BTX", "AVAX"].map(ethers.utils.formatBytes32String),
-      prices: [1800, 50000, 30],
+      values: [1800, 50000, 30],
       timestamp: currentTime
     };
 
@@ -219,16 +215,7 @@ describe("Price feed", function() {
       await expect(priceFeed.getPrice(priceData.symbols[0]))
         .to.be.revertedWith('No pricing data for given symbol');
     }
-    
+
   });
 
 });
-
-
-
-
-
-
-
-
-

@@ -33,12 +33,12 @@ contract PriceFeed is IPriceFeed, PriceModel, Ownable {
     function setPrices(PriceData calldata priceData, bytes calldata signature) external {
         address signer = priceVerifier.recoverDataSigner(priceData, signature);
         require(isSigner(signer), "Unauthorized price data signer");
-        require(block.timestamp > priceData.timestamp, "Price data timestamp cannot be from the future");
-        require(block.timestamp - priceData.timestamp < maxPriceDelay, "Price data timestamp too old");
+        require(block.timestamp * 1000 > priceData.timestamp, "Price data timestamp cannot be from the future");
+        require(block.timestamp * 1000 - priceData.timestamp < maxPriceDelay * 1000, "Price data timestamp too old");
         require(currentSetter == address(0), "The prices could be set only once in the transaction");
 
         for(uint256 i=0; i < priceData.symbols.length; i++) {
-            prices[priceData.symbols[i]] = priceData.prices[i];
+            prices[priceData.symbols[i]] = priceData.values[i];
         }
 
         currentSetter = msg.sender;
