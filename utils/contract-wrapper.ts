@@ -17,7 +17,7 @@ export type SignedPriceDataType = {
 
 
 async function getPriceData(priceFeed: PriceFeed, dataProvider:string) {
-    let {priceData, signature} = getSignedPrice();
+    let {priceData, signature} = await getSignedPrice(dataProvider);
 
     let setPriceTx = await priceFeed.populateTransaction.setPrices(priceData, signature);
     let setPriceData = setPriceTx.data ? setPriceTx.data.substr(2) : "";
