@@ -5,7 +5,9 @@ import { solidity } from "ethereum-waffle";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 
 import { PriceVerifier } from "../../typechain/PriceVerifier";
-import { PriceSigner } from "../../utils/price-signer";
+import EvmPriceSigner from "redstone-node/dist/src/utils/EvmPriceSigner";
+import {PricePackage} from "redstone-node/dist/src/types";
+import {PriceDataType} from "../../utils/contract-wrapper";
 
 chai.use(solidity);
 const { expect } = chai;
@@ -18,7 +20,7 @@ describe("Price data verification", function() {
   let admin: SignerWithAddress;
   let signer: Wallet;
   let verifier: PriceVerifier;
-  const priceSigner = new PriceSigner();
+  const priceSigner = new EvmPriceSigner();
 
   it("Should deploy functions", async function() {
     [owner, admin] = await ethers.getSigners();
@@ -33,104 +35,133 @@ describe("Price data verification", function() {
   //The verifier shouldn't validate the content - just the signature logic
 
   it("Should sign and verify empty price data", async function() {
-    let priceData = {
-      symbols: [].map(ethers.utils.formatBytes32String),
-      values: [],
+    const pricePackage:PricePackage = {
+      prices: [],
       timestamp: 1111
     };
 
-    const signedData = priceSigner.signPriceData(priceData, signer.privateKey);
-    expect(await verifier.recoverDataSigner(priceData, signedData.signature)).equals(signer.address);
+    const signedData = priceSigner.signPricePackage(pricePackage, signer.privateKey);
+    const serializedMessage = priceSigner.serializeToMessage(pricePackage) as PriceDataType;
+    expect(await verifier.recoverDataSigner(serializedMessage, signedData.signature)).equals(signer.address);
   });
 
 
   it("Should not verify price data with a signature for a different price", async function() {
-    let priceData = {
-      symbols: ["ETH"].map(ethers.utils.formatBytes32String),
-      values: [1800],
+    const pricePackage:PricePackage = {
+      prices: [
+        {symbol: "ETH", value: 1800}
+      ],
       timestamp: 1111
     };
 
-    let differentPriceData = {
-      symbols: ["ETH"].map(ethers.utils.formatBytes32String),
-      values: [1799],
-      timestamp: 1111
+    const differentPricePackage:PricePackage = {
+        prices: [
+            {symbol: "ETH", value: 1799}
+        ],
+        timestamp: 1111
     };
 
-    const signedData = priceSigner.signPriceData(differentPriceData, signer.privateKey);
-    expect(await verifier.recoverDataSigner(priceData, signedData.signature)).not.equals(signer.address);
+
+    const signedData = priceSigner.signPricePackage(differentPricePackage, signer.privateKey);
+    const serializedMessage = priceSigner.serializeToMessage(pricePackage) as PriceDataType;
+    expect(await verifier.recoverDataSigner(serializedMessage, signedData.signature)).not.equals(signer.address);
   });
+  
 
 
   it("Should not verify price data with a signature for a different symbol", async function() {
-    let priceData = {
-      symbols: ["ETH"].map(ethers.utils.formatBytes32String),
-      values: [1800],
-      timestamp: 1111
-    };
+      const pricePackage:PricePackage = {
+          prices: [
+              {symbol: "ETH", value: 1800}
+          ],
+          timestamp: 1111
+      };
 
-    let differentPriceData = {
-      symbols: ["ETH2"].map(ethers.utils.formatBytes32String),
-      values: [1800],
-      timestamp: 1111
-    };
+      const differentPricePackage:PricePackage = {
+          prices: [
+              {symbol: "ETH2", value: 1799}
+          ],
+          timestamp: 1111
+      };
 
-    const signedData = priceSigner.signPriceData(differentPriceData, signer.privateKey);
-    expect(await verifier.recoverDataSigner(priceData, signedData.signature)).not.equals(signer.address);
+
+      const signedData = priceSigner.signPricePackage(differentPricePackage, signer.privateKey);
+      const serializedMessage = priceSigner.serializeToMessage(pricePackage) as PriceDataType;
+      expect(await verifier.recoverDataSigner(serializedMessage, signedData.signature)).not.equals(signer.address);
   });
 
 
   it("Should not verify price data with a signature for a different timestamp", async function() {
-    let priceData = {
-      symbols: ["ETH"].map(ethers.utils.formatBytes32String),
-      values: [1800],
-      timestamp: 1111
-    };
+      const pricePackage:PricePackage = {
+          prices: [
+              {symbol: "ETH", value: 1800}
+          ],
+          timestamp: 1111
+      };
 
-    let differentPriceData = {
-      symbols: ["ETH"].map(ethers.utils.formatBytes32String),
-      values: [1800],
-      timestamp: 1112
-    };
+      const differentPricePackage:PricePackage = {
+          prices: [
+              {symbol: "ETH2", value: 1799}
+          ],
+          timestamp: 1112
+      };
 
-    const signedData = priceSigner.signPriceData(differentPriceData, signer.privateKey);
-    expect(await verifier.recoverDataSigner(priceData, signedData.signature)).not.equals(signer.address);
+
+      const signedData = priceSigner.signPricePackage(differentPricePackage, signer.privateKey);
+      const serializedMessage = priceSigner.serializeToMessage(pricePackage) as PriceDataType;
+      expect(await verifier.recoverDataSigner(serializedMessage, signedData.signature)).not.equals(signer.address);
   });
 
 
   it("Should sign and verify single price data", async function() {
-      let priceData = {
-        symbols: ["ETH"].map(ethers.utils.formatBytes32String),
-        values: [1800],
-        timestamp: 1111
+      const pricePackage:PricePackage = {
+          prices: [
+              {symbol: "ETH", value: 1800}
+          ],
+          timestamp: 1111
       };
 
-      const signedData = priceSigner.signPriceData(priceData, signer.privateKey);
-      expect(await verifier.recoverDataSigner(priceData, signedData.signature)).equals(signer.address);
+      const signedData = priceSigner.signPricePackage(pricePackage, signer.privateKey);
+      const serializedMessage = priceSigner.serializeToMessage(pricePackage) as PriceDataType;
+      expect(await verifier.recoverDataSigner(serializedMessage, signedData.signature)).equals(signer.address);
   });
 
 
   it("Should sign and verify double price data", async function() {
-    let priceData = {
-      symbols: ["ETH", "AR"].map(ethers.utils.formatBytes32String),
-      values: [1800, 15],
-      timestamp: 1111
-    };
+      const pricePackage:PricePackage = {
+          prices: [
+              {symbol: "ETH", value: 1800},
+              {symbol: "AR", value: 20}
+          ],
+          timestamp: 1111
+      };
 
-    const signedData = priceSigner.signPriceData(priceData, signer.privateKey);
-      expect(await verifier.recoverDataSigner(priceData, signedData.signature)).equals(signer.address);
+      const signedData = priceSigner.signPricePackage(pricePackage, signer.privateKey);
+      const serializedMessage = priceSigner.serializeToMessage(pricePackage) as PriceDataType;
+      expect(await verifier.recoverDataSigner(serializedMessage, signedData.signature)).equals(signer.address);
   });
 
 
   it("Should sign and verify 10 price data", async function() {
-    let priceData = {
-      symbols: ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10"].map(ethers.utils.formatBytes32String),
-      values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-      timestamp: 1111
-    };
+      const pricePackage:PricePackage = {
+          prices: [
+              {symbol: "T1", value: 1},
+              {symbol: "T2", value: 2},
+              {symbol: "T3", value: 3},
+              {symbol: "T4", value: 4},
+              {symbol: "T5", value: 5},
+              {symbol: "T6", value: 6},
+              {symbol: "T7", value: 7},
+              {symbol: "T8", value: 8},
+              {symbol: "T9", value: 9},
+              {symbol: "T10", value: 10},
+          ],
+          timestamp: 1111
+      };
 
-    const signedData = priceSigner.signPriceData(priceData, signer.privateKey);
-    expect(await verifier.recoverDataSigner(priceData, signedData.signature)).equals(signer.address);
+      const signedData = priceSigner.signPricePackage(pricePackage, signer.privateKey);
+      const serializedMessage = priceSigner.serializeToMessage(pricePackage) as PriceDataType;
+      expect(await verifier.recoverDataSigner(serializedMessage, signedData.signature)).equals(signer.address);
   });
 
 

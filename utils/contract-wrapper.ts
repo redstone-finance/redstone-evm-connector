@@ -1,10 +1,22 @@
 import {PriceFeed} from "../typechain/PriceFeed";
 import {ethers} from "ethers";
 
-const { getSignedPrice } = require("../utils/mock-api");
+const { getSignedPrice } = require("../utils/api-connector");
+
+export type PriceDataType = {
+    symbols: string[],
+    values: number[],
+    timestamp: number
+}
+
+export type SignedPriceDataType = {
+    priceData: PriceDataType,
+    signer: string,
+    signature: string
+}
 
 
-async function getPriceData(priceFeed: PriceFeed) {
+async function getPriceData(priceFeed: PriceFeed, dataProvider:string) {
     let {priceData, signature} = getSignedPrice();
 
     let setPriceTx = await priceFeed.populateTransaction.setPrices(priceData, signature);
@@ -27,7 +39,7 @@ function getMarkerData() {
 }
 
 
-export function wrapContract(contract: any, priceFeed: PriceFeed) {
+export function wrapContract(contract: any, priceFeed: PriceFeed, dataProvider: string = "MOCK") {
 
   let functionNames:string[] = Object.keys(contract.functions);
     functionNames.forEach(functionName => {
@@ -37,7 +49,7 @@ export function wrapContract(contract: any, priceFeed: PriceFeed) {
 
         let tx = await contract.populateTransaction[functionName](...args);
 
-        tx.data = tx.data + (await getPriceData(priceFeed)) + getMarkerData();
+        tx.data = tx.data + (await getPriceData(priceFeed, dataProvider)) + getMarkerData();
 
         if (isCall) {
             let result = await contract.signer.call(tx);

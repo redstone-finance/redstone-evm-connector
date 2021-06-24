@@ -13,6 +13,9 @@ chai.use(solidity);
 const { expect } = chai;
 
 const toBytes32 = ethers.utils.formatBytes32String;
+const serialized = function (x: number): number {
+    return x * 10**8;
+};
 
 describe("MockDefi with Proxy contract and pricing Data", function() {
 
@@ -78,8 +81,8 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
 
   it("Should check value - read with pricing info", async function() {
 
-    expect(await defi.currentValueOfWithPrices(signer.address, toBytes32("ETH"))).to.be.equal(1000);
-    expect(await defi.currentValueOfWithPrices(signer.address, toBytes32("AVAX"))).to.be.equal(250);
+    expect(await defi.currentValueOfWithPrices(signer.address, toBytes32("ETH"))).to.be.equal(serialized(1000));
+    expect(await defi.currentValueOfWithPrices(signer.address, toBytes32("AVAX"))).to.be.equal(serialized(250));
 
   });
 
