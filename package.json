@@ -5,10 +5,12 @@
   "main": "lib/utils/contract-wrapper.js",
   "types": "lib/utils/contract-wrapper.d.ts",
   "scripts": {
-    "build": "yarn test && tsc",
+    "build": "tsc",
+    "postbuild": "cp -r contracts ./lib",
     "test": "npx hardhat test",
     "prepare": "yarn build",
     "version": "git add -A src",
+    "postinstall": "yarn test",
     "postversion": "git push && git push --tags"
   },
   "keywords": [],

@@ -7,8 +7,5 @@
     "esModuleInterop": true,
     "outDir": "lib"
   },
-  "include": ["./scripts", "./utils"],
-  "files": [
-    "./hardhat.config.ts"
-  ]
+  "include": ["./scripts", "./utils", "./contracts", "./hardhat.config.ts"],
 }
