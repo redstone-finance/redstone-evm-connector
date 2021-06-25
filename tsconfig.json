@@ -3,10 +3,11 @@
     "target": "es5",
     "module": "commonjs",
     "strict": true,
+    "declaration": true,
     "esModuleInterop": true,
-    "outDir": "dist"
+    "outDir": "lib"
   },
-  "include": ["./scripts", "./test"],
+  "include": ["./scripts", "./utils"],
   "files": [
     "./hardhat.config.ts"
   ]
