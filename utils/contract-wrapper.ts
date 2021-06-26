@@ -59,7 +59,7 @@ export function wrapContract(contract: any, dataProvider: string = "MOCK") {
             let decoded =  contract.interface.decodeFunctionResult(functionName, result);
             return decoded.length == 1 ? decoded[0] : decoded;
         } else {
-            await contract.signer.sendTransaction(tx);
+            return await contract.signer.sendTransaction(tx);
         }
       };
     }
