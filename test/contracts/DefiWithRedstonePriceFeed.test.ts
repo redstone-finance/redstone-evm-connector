@@ -57,7 +57,7 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
 
     it("Should deposit - write no pricing info", async function() {
 
-        defi = wrapContract(defi, priceFeed, REDSTONE_STOCKS_PROVIDER);
+        defi = wrapContract(defi, REDSTONE_STOCKS_PROVIDER);
 
         await defi.deposit(toBytes32("GOOG"), 1);
         await defi.deposit(toBytes32("IBM"), 1);

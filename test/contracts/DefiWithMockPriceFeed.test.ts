@@ -61,7 +61,7 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
 
   it("Should deposit - write no pricing info", async function() {
 
-    defi = wrapContract(defi, priceFeed);
+    defi = wrapContract(defi);
 
     await defi.deposit(toBytes32("ETH"), 100);
     await defi.deposit(toBytes32("AVAX"), 50);
