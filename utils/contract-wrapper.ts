@@ -1,5 +1,6 @@
 import {PriceFeed} from "../typechain/PriceFeed";
-import {ethers} from "ethers";
+import {ContractInterface, ethers, Signer} from "ethers";
+import {PriceFeed__factory} from "../typechain/factories/PriceFeed__factory";
 
 const { getSignedPrice } = require("../utils/api-connector");
 
@@ -16,10 +17,12 @@ export type SignedPriceDataType = {
 }
 
 
-async function getPriceData(priceFeed: PriceFeed, dataProvider:string) {
+async function getPriceData(signer:Signer, dataProvider:string) {
     let {priceData, signature} = await getSignedPrice(dataProvider);
 
+    let priceFeed = PriceFeed__factory.connect(ethers.constants.AddressZero, signer);
     let setPriceTx = await priceFeed.populateTransaction.setPrices(priceData, signature);
+    
     let setPriceData = setPriceTx.data ? setPriceTx.data.substr(2) : "";
 
     let clearPriceTx = await priceFeed.populateTransaction.clearPrices(priceData);
@@ -39,7 +42,7 @@ function getMarkerData() {
 }
 
 
-export function wrapContract(contract: any, priceFeed: PriceFeed, dataProvider: string = "MOCK") {
+export function wrapContract(contract: any, dataProvider: string = "MOCK") {
 
   let functionNames:string[] = Object.keys(contract.functions);
     functionNames.forEach(functionName => {
@@ -49,14 +52,14 @@ export function wrapContract(contract: any, priceFeed: PriceFeed, dataProvider: 
 
         let tx = await contract.populateTransaction[functionName](...args);
 
-        tx.data = tx.data + (await getPriceData(priceFeed, dataProvider)) + getMarkerData();
+        tx.data = tx.data + (await getPriceData(contract.signer, dataProvider)) + getMarkerData();
 
         if (isCall) {
             let result = await contract.signer.call(tx);
             let decoded =  contract.interface.decodeFunctionResult(functionName, result);
             return decoded.length == 1 ? decoded[0] : decoded;
         } else {
-            await contract.signer.sendTransaction(tx);
+            return await contract.signer.sendTransaction(tx);
         }
       };
     }

@@ -34,10 +34,10 @@ contract PriceFeed is IPriceFeed, PriceModel, Ownable {
         address signer = priceVerifier.recoverDataSigner(priceData, signature);
         require(isSigner(signer), "Unauthorized price data signer");
         console.log("Signer OK");
-        require(block.timestamp * 1000 > priceData.timestamp, "Price data timestamp cannot be from the future");
         console.log("BT: ", block.timestamp * 1000);
-        console.log("PT: ", priceData.timestamp);
-        require(block.timestamp * 1000 - priceData.timestamp < maxPriceDelay * 1000, "Price data timestamp too old");
+        console.log("PT: ", priceData.timestamp);        
+        require(block.timestamp * 1000 > priceData.timestamp - 15000, "Price data timestamp cannot be from the future");
+        require(block.timestamp * 1000 < priceData.timestamp || block.timestamp * 1000 - priceData.timestamp < maxPriceDelay * 1000, "Price data timestamp too old");
         console.log("Timestamp OK");
         require(currentSetter == address(0), "The prices could be set only once in the transaction");
 
