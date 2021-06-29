@@ -17,8 +17,8 @@ export type SignedPriceDataType = {
 }
 
 
-async function getPriceData(signer:Signer, dataProvider:string) {
-    let {priceData, signature} = await getSignedPrice(dataProvider);
+async function getPriceData(signer:Signer, dataProvider:string, asset?: string) {
+    let {priceData, signature} = await getSignedPrice(dataProvider, asset);
 
     let priceFeed = PriceFeed__factory.connect(ethers.constants.AddressZero, signer);
     let setPriceTx = await priceFeed.populateTransaction.setPrices(priceData, signature);
@@ -42,7 +42,7 @@ function getMarkerData() {
 }
 
 
-export function wrapContract(contract: any, dataProvider: string = "MOCK") {
+export function wrapContract(contract: any, dataProvider: string = "MOCK", asset?: string) {
 
   let functionNames:string[] = Object.keys(contract.functions);
     functionNames.forEach(functionName => {
@@ -52,7 +52,7 @@ export function wrapContract(contract: any, dataProvider: string = "MOCK") {
 
         let tx = await contract.populateTransaction[functionName](...args);
 
-        tx.data = tx.data + (await getPriceData(contract.signer, dataProvider)) + getMarkerData();
+        tx.data = tx.data + (await getPriceData(contract.signer, dataProvider, asset)) + getMarkerData();
 
         if (isCall) {
             let result = await contract.signer.call(tx);

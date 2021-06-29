@@ -55,7 +55,7 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
     });
 
 
-    it("Should deposit - write no pricing info", async function() {
+    it("Should deposit - write no pricing info multi", async function() {
 
         defi = wrapContract(defi, REDSTONE_STOCKS_PROVIDER);
 
@@ -65,7 +65,7 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
     });
 
 
-    it("Should inject correct prices from API", async function() {
+    it("Should inject correct prices from API multi", async function() {
 
         const apiPrices = await redstone.getAllPrices({provider:"redstone-stocks"});
 
@@ -73,6 +73,25 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
             .to.be.equal(serialized(apiPrices['GOOG'].value).toFixed(0));
         expect(await defi.currentValueOfWithPrices(owner.address, toBytes32("IBM")))
             .to.be.equal(serialized(apiPrices['IBM'].value).toFixed(0));
+
+    });
+
+
+    it("Should deposit - write no pricing info single", async function() {
+
+        defi = wrapContract(defi, REDSTONE_STOCKS_PROVIDER, "FB");
+
+        await defi.deposit(toBytes32("FB"), 1);
+
+    });
+
+
+    it("Should inject correct prices from API single", async function() {
+
+        const apiPrices = await redstone.getAllPrices({provider:"redstone-stocks"});
+
+        expect(await defi.currentValueOfWithPrices(owner.address, toBytes32("FB")))
+            .to.be.equal(serialized(apiPrices['FB'].value).toFixed(0));
 
     });
    

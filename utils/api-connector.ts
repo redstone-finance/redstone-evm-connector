@@ -5,17 +5,22 @@ import {PriceDataType, SignedPriceDataType} from "./contract-wrapper";
 import axios from "axios";
 
 
-export function getSignedPrice(dataProvider:string): Promise<SignedPriceDataType> {
+export function getSignedPrice(dataProvider:string, asset: string): Promise<SignedPriceDataType> {
     if (dataProvider == "MOCK") {
         return Promise.resolve(getMockData());
     } else {
-        return getRedstoneData(dataProvider)
+        return getRedstoneData(dataProvider, asset)
     }
        
 }
 
-async function getRedstoneData(dataProvider:string): Promise<SignedPriceDataType> {
-    const response = await axios.get("https://api-v2.redstone.finance/packages/latest?provider=" + dataProvider);
+async function getRedstoneData(dataProvider:string, asset: string): Promise<SignedPriceDataType> {
+    let query = "https://api-v2.redstone.finance/packages/latest?provider=" + dataProvider;
+    if (asset) {
+        query += "&symbol=" + asset;
+    }
+    const response = await axios.get(query);
+    
     const pricePackage = {
         prices: response.data.prices,
         timestamp: response.data.timestamp
