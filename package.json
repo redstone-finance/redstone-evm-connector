@@ -1,16 +1,16 @@
 {
   "name": "redstone-flash-storage",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "description": "",
   "main": "lib/utils/contract-wrapper.js",
   "types": "lib/utils/contract-wrapper.d.ts",
   "scripts": {
     "build": "tsc",
     "postbuild": "cp -r contracts ./lib",
-    "test": "npx hardhat test",
+    "test": "hardhat test",
     "prepare": "yarn build",
-    "version": "git add -A src",
-    "postinstall": "yarn test",
+    "version": "git add -A ./",
+    "prebuild": "hardhat compile",
     "postversion": "git push && git push --tags"
   },
   "keywords": [],
