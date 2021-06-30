@@ -41,18 +41,18 @@ contract PriceFeed is IPriceFeed, PriceModel, Ownable {
         console.log("Timestamp OK");
         require(currentSetter == address(0), "The prices could be set only once in the transaction");
 
-        for(uint256 i=0; i < priceData.symbols.length; i++) {
-            console.log("Setting price: ", priceData.values[i]);
-            prices[priceData.symbols[i]] = priceData.values[i];
-        }
+//        for(uint256 i=0; i < priceData.symbols.length; i++) {
+//            console.log("Setting price: ", priceData.values[i]);
+//            prices[priceData.symbols[i]] = priceData.values[i];
+//        }
 
-        currentSetter = msg.sender;
+        //currentSetter = msg.sender;
     }
 
 
 
     function clearPrices(PriceData calldata priceData) external {
-        require(currentSetter == msg.sender, "The prices could be cleared only by the address which set them");
+        //require(currentSetter == msg.sender, "The prices could be cleared only by the address which set them");
         for(uint256 i=0; i < priceData.symbols.length; i++) {
             delete prices[priceData.symbols[i]];
         }
