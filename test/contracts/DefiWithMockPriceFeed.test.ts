@@ -79,15 +79,15 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
 
   it("Should check value - read with pricing info", async function() {
 
-    expect(await defi.currentValueOfWithPrices(signer.address, toBytes32("ETH"))).to.be.equal(serialized(1000));
-    expect(await defi.currentValueOfWithPrices(signer.address, toBytes32("AVAX"))).to.be.equal(serialized(250));
+    expect(await defi.currentValueOf(signer.address, toBytes32("ETH"))).to.be.equal(serialized(1000));
+    expect(await defi.currentValueOf(signer.address, toBytes32("AVAX"))).to.be.equal(serialized(250));
 
   });
 
 
   it("Should swap - write with pricing info", async function() {
 
-    let tx = await defi.swapWithPrices(toBytes32("ETH"), toBytes32("AVAX"), 10);
+    let tx = await defi.swap(toBytes32("ETH"), toBytes32("AVAX"), 10);
     expect(tx).is.not.undefined;
     
     expect(await defi.balanceOf(signer.address, toBytes32("ETH"))).to.be.equal(90);
