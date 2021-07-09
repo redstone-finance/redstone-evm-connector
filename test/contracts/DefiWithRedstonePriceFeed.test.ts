@@ -69,9 +69,9 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
 
         const apiPrices = await redstone.getAllPrices({provider:"redstone-stocks"});
 
-        expect(await defi.currentValueOfWithPrices(owner.address, toBytes32("GOOG")))
+        expect(await defi.currentValueOf(owner.address, toBytes32("GOOG")))
             .to.be.equal(serialized(apiPrices['GOOG'].value).toFixed(0));
-        expect(await defi.currentValueOfWithPrices(owner.address, toBytes32("IBM")))
+        expect(await defi.currentValueOf(owner.address, toBytes32("IBM")))
             .to.be.equal(serialized(apiPrices['IBM'].value).toFixed(0));
 
     });
@@ -90,7 +90,7 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
 
         const apiPrices = await redstone.getAllPrices({provider:"redstone-stocks"});
 
-        expect(await defi.currentValueOfWithPrices(owner.address, toBytes32("FB")))
+        expect(await defi.currentValueOf(owner.address, toBytes32("FB")))
             .to.be.equal(serialized(apiPrices['FB'].value).toFixed(0));
 
     });

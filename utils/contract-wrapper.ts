@@ -44,19 +44,21 @@ function getMarkerData() {
 
 export function wrapContract(contract: any, dataProvider: string = "MOCK", asset?: string) {
 
-  let functionNames:string[] = Object.keys(contract.functions);
+  const wrappedContract = {...contract};
+
+  const functionNames:string[] = Object.keys(contract.functions);
     functionNames.forEach(functionName => {
     if (functionName.indexOf("(") == -1) {
-      let isCall = contract.interface.getFunction(functionName).constant;
-      contract[functionName + "WithPrices"] = async function(...args: any[]) {
+      const isCall = contract.interface.getFunction(functionName).constant;
+      wrappedContract[functionName] = async function(...args: any[]) {
 
-        let tx = await contract.populateTransaction[functionName](...args);
+        const tx = await contract.populateTransaction[functionName](...args);
 
         tx.data = tx.data + (await getPriceData(contract.signer, dataProvider, asset)) + getMarkerData();
 
         if (isCall) {
-            let result = await contract.signer.call(tx);
-            let decoded =  contract.interface.decodeFunctionResult(functionName, result);
+            const result = await contract.signer.call(tx);
+            const decoded =  contract.interface.decodeFunctionResult(functionName, result);
             return decoded.length == 1 ? decoded[0] : decoded;
         } else {
             return await contract.signer.sendTransaction(tx);
@@ -65,5 +67,5 @@ export function wrapContract(contract: any, dataProvider: string = "MOCK", asset
     }
   });
 
-  return contract;
+  return wrappedContract;
 }
