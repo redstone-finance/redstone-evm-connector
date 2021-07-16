@@ -32,24 +32,23 @@ contract PriceFeed is IPriceFeed, PriceModel, Ownable {
 
     function setPrices(PriceData calldata priceData, bytes calldata signature) external {
         address signer = priceVerifier.recoverDataSigner(priceData, signature);
+        uint256 blockTimestampMillseconds = block.timestamp * 1000;
+
         require(isSigner(signer), "Unauthorized price data signer");
-        console.log("Signer OK");
-        console.log("BT: ", block.timestamp * 1000);
-        console.log("PT: ", priceData.timestamp);        
-        require(block.timestamp * 1000 > priceData.timestamp - 15000, "Price data timestamp cannot be from the future");
-        require(block.timestamp * 1000 < priceData.timestamp || block.timestamp * 1000 - priceData.timestamp < maxPriceDelay * 1000, "Price data timestamp too old");
-        console.log("Timestamp OK");
+        // TODO: check the problem with prices on Kovan
+        require(blockTimestampMillseconds > priceData.timestamp - 15000, "Price data timestamp cannot be from the future");
+        require(blockTimestampMillseconds - priceData.timestamp < maxPriceDelay * 1000, "Price data timestamp too old");
         require(currentSetter == address(0), "The prices could be set only once in the transaction");
 
-        for(uint256 i=0; i < priceData.symbols.length; i++) {
-            console.log("Setting price: ", priceData.values[i]);
+        // TODO: later we can implement rules for update skipping
+        // e.g. if price has chhanged insignifficantly
+        // or if current time is too close to the last updated time
+        for (uint256 i = 0; i < priceData.symbols.length; i++) {
             prices[priceData.symbols[i]] = priceData.values[i];
         }
 
         currentSetter = msg.sender;
     }
-
-
 
     function clearPrices(PriceData calldata priceData) external {
         require(currentSetter == msg.sender, "The prices could be cleared only by the address which set them");
@@ -73,7 +72,7 @@ contract PriceFeed is IPriceFeed, PriceModel, Ownable {
 
 
     function revokeSigner(address signer) external onlyOwner {
-        trustedSigners[signer] = false;
+        delete trustedSigners[signer];
     }
 
 

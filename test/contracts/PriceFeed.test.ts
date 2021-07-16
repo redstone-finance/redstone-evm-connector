@@ -63,7 +63,7 @@ describe("Price feed", function() {
     let mock = await Mock.deploy();
     currentTime = await mock.getCurrentTime() * 1000;
 
-    const pricePackage:PricePackage = {
+    const pricePackage: PricePackage = {
       prices: [
         {symbol: "ETH", value: 1800}
       ],
@@ -91,7 +91,7 @@ describe("Price feed", function() {
 
   it("Should not allow setting a price after delay", async function() {
 
-    const pricePackage:PricePackage = {
+    const pricePackage: PricePackage = {
       prices: [
         {symbol: "ETH", value: 1800}
       ],
@@ -130,7 +130,7 @@ describe("Price feed", function() {
 
 
   it("Should not allow changing the price", async function() {
-    const pricePackage:PricePackage = {
+    const pricePackage: PricePackage = {
       prices: [
         {symbol: "ETH", value: 1800}
       ],
@@ -145,7 +145,7 @@ describe("Price feed", function() {
 
 
   it("Should not allow to clear the price by other users", async function() {
-    const pricePackage:PricePackage = {
+    const pricePackage: PricePackage = {
       prices: [
         {symbol: "ETH", value: 1800}
       ],
@@ -159,7 +159,7 @@ describe("Price feed", function() {
 
 
   it("Should clear the single price", async function() {
-    const pricePackage:PricePackage = {
+    const pricePackage: PricePackage = {
       prices: [
         {symbol: "ETH", value: 1800}
       ],
@@ -183,7 +183,7 @@ describe("Price feed", function() {
   it("Should revoke authorization", async function() {
     await priceFeed.revokeSigner(signer.address);
     
-    const pricePackage:PricePackage = {
+    const pricePackage: PricePackage = {
       prices: [
         {symbol: "ETH", value: 1800}
       ],
@@ -203,7 +203,7 @@ describe("Price feed", function() {
 
 
   it("Should set multiple prices", async function() {
-    const pricePackage:PricePackage = {
+    const pricePackage: PricePackage = {
       prices: [
         {symbol: "ETH", value: 1800},
         {symbol: "AVAX", value: 30},
@@ -216,7 +216,7 @@ describe("Price feed", function() {
     const serializedMessage = priceSigner.serializeToMessage(pricePackage) as PriceDataType;
     await priceFeed.setPrices(serializedMessage, signedData.signature);
 
-    for(let i=0; i<3; i++) {
+    for(let i = 0; i < 3; i++) {
       expect(await priceFeed.getPrice(serializedMessage.symbols[i])).to.be.equal(serializedMessage.values[i]);
     }
 
@@ -224,7 +224,7 @@ describe("Price feed", function() {
 
 
   it("Should clear multiple prices", async function() {
-    const pricePackage:PricePackage = {
+    const pricePackage: PricePackage = {
       prices: [
         {symbol: "ETH", value: 1800},
         {symbol: "AVAX", value: 30},
@@ -237,7 +237,7 @@ describe("Price feed", function() {
 
     await priceFeed.clearPrices(serializedMessage);
 
-    for(let i=0; i<3; i++) {
+    for(let i = 0; i < 3; i++) {
       await expect(priceFeed.getPrice(serializedMessage.symbols[0]))
         .to.be.revertedWith('No pricing data for given symbol');
     }

@@ -29,6 +29,7 @@ import "./RedstoneProxy.sol";
  * Our recommendation is for the dedicated account to be an instance of the {ProxyAdmin} contract. If set up this way,
  * you should think of the `ProxyAdmin` instance as the real administrative interface of your proxy.
  */
+
 contract RedstoneUpgradeableProxy is RedstoneProxy {
     /**
      * @dev Initializes an upgradeable proxy managed by `_admin`, backed by the implementation at `_logic`, and

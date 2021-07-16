@@ -22,10 +22,10 @@ contract MockDefi {
         initialized = true;
     }
 
-    mapping(address =>mapping(bytes32 => uint256)) balances;
+    mapping(address => mapping(bytes32 => uint256)) balances;
 
     function deposit(bytes32 symbol, uint256 amount) external {
-        //To check proxy in case of reverted tx
+        // To check proxy in case of reverted tx
         require(amount > 0, "Amount must be greater than zero");
 
         balances[msg.sender][symbol] += amount;
@@ -42,7 +42,6 @@ contract MockDefi {
 
     function currentValueOf(address account, bytes32 symbol) external view returns (uint256) {
         uint256 price = priceFeed.getPrice(symbol);
-        console.log("Price: ", price);
 
         return balances[account][symbol] * price;
     }

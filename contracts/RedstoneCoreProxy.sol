@@ -22,50 +22,44 @@ abstract contract RedstoneCoreProxy is Proxy {
      */
     function _delegate(address implementation) internal override {
 
-        //Check if transaction contains Limestone marker
+        // Check if transaction contains RedStone marker
         bool isTxWithPricing = false;
         if (msg.data.length > 32) {
             isTxWithPricing = msg.data.toBytes32(msg.data.length - 32) == MARKER;
         }
 
 
-        //Register price data
+        // Register price data
         bytes memory priceData;
         uint16 priceDataLen;
         if (isTxWithPricing) {
             priceDataLen = msg.data.toUint16(msg.data.length - 34);
-            //console.log("-----PDL: ", priceDataLen);
-            //console.log("-----Total: ", msg.data.length);
-
             priceData = msg.data.slice(msg.data.length - priceDataLen - 34, priceDataLen);
             (bool success,) = _priceFeed().call(priceData);
             require(success, "Error setting price data");
         }
 
 
-        //Assembly version - compare gas costs
-//        uint8 delegationResult;
-//        //bytes memory delegationReturn;
-//        assembly {
-//            // Copy msg.data. We take full control of memory in this inline assembly
-//            // block because it will not return to Solidity code. We overwrite the
-//            // Solidity scratch pad at memory position 0.
-//            calldatacopy(0, 0, 36)
-//
-//            // Call the implementation.
-//            // out and outsize are 0 because we don't know the size yet.
-//            delegationResult := delegatecall(gas(), implementation, 0, 36, 0, 0)
-//
-//            // Copy the returned data.
-//            returndatacopy(0, 0, returndatasize())
-//        }
+        // Assembly version - TODO: fix it and compare gas costs
+        // uint8 delegationResult;
+        // // bytes memory delegationReturn;
+        // assembly {
+        //     // Copy msg.data. We take full control of memory in this inline assembly
+        //     // block because it will not return to Solidity code. We overwrite the
+        //     // Solidity scratch pad at memory position 0.
+        //     calldatacopy(0, 0, 36)
 
-        //Delegate the original transaction
-        (bool delegationSuccess, bytes memory delegationResult) = implementation.delegatecall(msg.data);
-        
-        console.log("Delegation result");
-        console.logBytes(delegationResult);
+        //     // Call the implementation.
+        //     // out and outsize are 0 because we don't know the size yet.
+        //     delegationResult := delegatecall(gas(), implementation, 0, 36, 0, 0)
 
+        //     // Copy the returned data.
+        //     returndatacopy(0, 0, returndatasize())
+        // }
+
+        // Delegate the original transaction
+        (bool delegationSuccess, bytes memory delegationResult) =
+            implementation.delegatecall(msg.data);
 
         // Clear price data
         if (isTxWithPricing) {
@@ -76,7 +70,9 @@ abstract contract RedstoneCoreProxy is Proxy {
         }
 
 
-        //Return results from base method
+        // Return results from base method
+        // TODO: review the code below
+        // Check if mload is needed
         assembly {
             switch delegationSuccess
             // delegatecall returns 0 on error.

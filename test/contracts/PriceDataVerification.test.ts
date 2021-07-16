@@ -35,7 +35,7 @@ describe("Price data verification", function() {
   //The verifier shouldn't validate the content - just the signature logic
 
   it("Should sign and verify empty price data", async function() {
-    const pricePackage:PricePackage = {
+    const pricePackage: PricePackage = {
       prices: [],
       timestamp: 1111
     };
@@ -47,7 +47,7 @@ describe("Price data verification", function() {
 
 
   it("Should not verify price data with a signature for a different price", async function() {
-    const pricePackage:PricePackage = {
+    const pricePackage: PricePackage = {
       prices: [
         {symbol: "ETH", value: 1800}
       ],
@@ -70,7 +70,7 @@ describe("Price data verification", function() {
 
 
   it("Should not verify price data with a signature for a different symbol", async function() {
-      const pricePackage:PricePackage = {
+      const pricePackage: PricePackage = {
           prices: [
               {symbol: "ETH", value: 1800}
           ],
@@ -92,7 +92,7 @@ describe("Price data verification", function() {
 
 
   it("Should not verify price data with a signature for a different timestamp", async function() {
-      const pricePackage:PricePackage = {
+      const pricePackage: PricePackage = {
           prices: [
               {symbol: "ETH", value: 1800}
           ],
@@ -114,7 +114,7 @@ describe("Price data verification", function() {
 
 
   it("Should sign and verify single price data", async function() {
-      const pricePackage:PricePackage = {
+      const pricePackage: PricePackage = {
           prices: [
               {symbol: "ETH", value: 1800}
           ],
@@ -128,7 +128,7 @@ describe("Price data verification", function() {
 
 
   it("Should sign and verify double price data", async function() {
-      const pricePackage:PricePackage = {
+      const pricePackage: PricePackage = {
           prices: [
               {symbol: "ETH", value: 1800},
               {symbol: "AR", value: 20}
@@ -143,7 +143,7 @@ describe("Price data verification", function() {
 
 
   it("Should sign and verify 10 price data", async function() {
-      const pricePackage:PricePackage = {
+      const pricePackage: PricePackage = {
           prices: [
               {symbol: "T1", value: 1},
               {symbol: "T2", value: 2},

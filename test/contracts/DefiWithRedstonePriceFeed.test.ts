@@ -28,6 +28,13 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
     let defi: MockDefi;
     let priceFeed: PriceFeed;
     let verifier: PriceVerifier;
+    let apiPrices: any;
+
+    async function loadApiPrices() {
+        apiPrices = await redstone.getAllPrices({
+            provider: "redstone-stocks",
+        });
+    }
 
     it("Deployment should have zero balance", async function() {
         [owner, admin] = await ethers.getSigners();
@@ -40,11 +47,11 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
         verifier = (await Verifier.deploy()) as PriceVerifier;
         priceFeed = (await PriceFeed.deploy(verifier.address, 5 * 60)) as PriceFeed;
         await priceFeed.authorizeSigner(REDSTONE_STOCKS_PROVIDER_ADDRESS);
-        console.log("Authorized: ", REDSTONE_STOCKS_PROVIDER_ADDRESS);
+        // console.log("Authorized: ", REDSTONE_STOCKS_PROVIDER_ADDRESS);
 
         defi = (await Defi.deploy()) as MockDefi;
 
-        console.log("Defi address: " + defi.address);
+        // console.log("Defi address: " + defi.address);
         const proxy = await Proxy.deploy(defi.address, priceFeed.address, admin.address, []);
 
         defi = (await Defi.attach(proxy.address)) as MockDefi;
@@ -67,7 +74,7 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
 
     it("Should inject correct prices from API multi", async function() {
 
-        const apiPrices = await redstone.getAllPrices({provider:"redstone-stocks"});
+        await loadApiPrices();
 
         expect(await defi.currentValueOf(owner.address, toBytes32("GOOG")))
             .to.be.equal(serialized(apiPrices['GOOG'].value).toFixed(0));
@@ -81,14 +88,17 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
 
         defi = wrapContract(defi, REDSTONE_STOCKS_PROVIDER, "FB");
 
-        await defi.deposit(toBytes32("FB"), 1);
+        await Promise.all([
+            defi.deposit(toBytes32("FB"), 1),
+            loadApiPrices(),
+        ]);
 
     });
 
 
     it("Should inject correct prices from API single", async function() {
 
-        const apiPrices = await redstone.getAllPrices({provider:"redstone-stocks"});
+        // const apiPrices = await redstone.getAllPrices({provider:"redstone-stocks"});
 
         expect(await defi.currentValueOf(owner.address, toBytes32("FB")))
             .to.be.equal(serialized(apiPrices['FB'].value).toFixed(0));
