@@ -22,7 +22,7 @@ abstract contract RedstoneCoreProxy is Proxy {
      */
     function _delegate(address implementation) internal override {
 
-        // Check if transaction contains RedStone marker
+        // Check if transaction contains Redstone marker
         bool isTxWithPricing = false;
         if (msg.data.length > 32) {
             isTxWithPricing = msg.data.toBytes32(msg.data.length - 32) == MARKER;

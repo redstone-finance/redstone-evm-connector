@@ -13,10 +13,10 @@ contract PriceFeed is IPriceFeed, PriceModel, Ownable {
     PriceVerifier public priceVerifier;
     uint256 public maxPriceDelay;
 
-    //A map indicating if a signer could be trusted by a client protocol
+    // A map indicating if a signer could be trusted by a client protocol
     mapping(address => bool) trustedSigners;
     
-    //An user that sets the prices in the context of the current transaction
+    // A user that sets the prices in the context of the current transaction
     address private currentSetter;
 
     mapping(bytes32 => uint256) private prices;

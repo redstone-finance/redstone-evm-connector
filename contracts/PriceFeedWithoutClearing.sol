@@ -13,11 +13,8 @@ contract PriceFeedWithoutClearing is IPriceFeed, PriceModel, Ownable {
     PriceVerifier public priceVerifier;
     uint256 public maxPriceDelay;
 
-    //A map indicating if a signer could be trusted by a client protocol
+    // A map indicating if a signer could be trusted by a client protocol
     mapping(address => bool) trustedSigners;
-    
-    //An user that sets the prices in the context of the current transaction
-    address private currentSetter;
 
     mapping(bytes32 => uint256) private prices;
 
@@ -45,8 +42,6 @@ contract PriceFeedWithoutClearing is IPriceFeed, PriceModel, Ownable {
         for (uint256 i = 0; i < priceData.symbols.length; i++) {
             prices[priceData.symbols[i]] = priceData.values[i];
         }
-
-        currentSetter = msg.sender;
     }
 
 

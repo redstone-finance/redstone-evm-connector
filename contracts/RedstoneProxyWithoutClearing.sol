@@ -29,7 +29,7 @@ contract RedstoneProxyWithoutClearing is RedstoneCoreProxyWithoutClearing, ERC19
      * function call, and allows initializating the storage of the proxy like a Solidity constructor.
      */
     constructor(address _logic, address _priceFeedAddress, bytes memory _data) payable {
-        setPriceFeed(_priceFeedAddress);
+        _setPriceFeed(_priceFeedAddress);
         _upgradeToAndCall(_logic, _data, false);
     }
     
@@ -49,13 +49,17 @@ contract RedstoneProxyWithoutClearing is RedstoneCoreProxyWithoutClearing, ERC19
         return StorageSlot.getAddressSlot(_PRICE_FEED_SLOT).value;
     }
 
-    /**
-     * @dev Sets the price feed address
-     */
-    function setPriceFeed(address _priceFeedAddress) public {
+    function _setPriceFeed(address _priceFeedAddress) private {
         require(_priceFeedAddress != address(0), "Price feed address cannot be empty");
         
         assert(_IMPLEMENTATION_SLOT == bytes32(uint256(keccak256("eip1967.proxy.implementation")) - 1));
         StorageSlot.getAddressSlot(_PRICE_FEED_SLOT).value = _priceFeedAddress;
+    }
+
+    /**
+     * @dev Sets the price feed address (internal function)
+     */
+    function setPriceFeed(address _priceFeedAddress) external {
+        _setPriceFeed(_priceFeedAddress);
     }
 }

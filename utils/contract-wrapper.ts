@@ -1,7 +1,7 @@
 import { ethers, Signer } from "ethers";
 import { PriceFeed__factory } from "../typechain/factories/PriceFeed__factory";
 
-// TODO: Alex, refactor this file and add many comments to make it understandable
+// TODO: Refactor this file and add many comments to make it more clear
 
 const { getSignedPrice } = require("../utils/api-connector");
 
@@ -27,14 +27,14 @@ async function getPriceData(signer: Signer, dataProvider: string, asset?: string
       allowFalsyValues: true,
     });
 
-    let clearPriceTx = await priceFeed.populateTransaction.clearPrices(priceData); // TODO: Alex, priceData may have any value, we don't use it
-    let clearPricePrefix = clearPriceTx.data ? clearPriceTx.data.substr(2,8) : ""; // TODO: Alex, we get 4 bytes from 1 to 4 (skipping 0 (0x)) - this is the function signature clearPrices
+    let clearPriceTx = await priceFeed.populateTransaction.clearPrices(priceData); // priceData may have any value, we don't use it
+    let clearPricePrefix = clearPriceTx.data ? clearPriceTx.data.substr(2,8) : ""; // we get 4 bytes from 2nd to 5th (skipping 1st (0x)) - this is the function signature clearPrices
 
     // Add priceDataLen info
     const priceDataLen = countBytesInHexString(setPriceData);
 
-    // TODO: Alex, here is the template of data, that are added to the end of tx:
-    // [CLEAR_PRICE_FUNCTION_SIGNATURE (4 bytes)] + [SET_PRICE_FUNCTION_WITH_ARGUMENTS (Variable bytes size, 4 bytes for signature + var bytes for arguments. It is callable)] + [SET_PRICE_FUNCTION_WITH_ARGS_BYTE_LENGTH (2 bytes)]
+    // Template of data that we add to the end of tx is below
+    // [CLEAR_PRICE_FUNCTION_SIGNATURE (4 bytes)] + [SET_PRICE_FUNCTION_WITH_ARGUMENTS (Variable bytes size, 4 bytes for signature + variable length bytes for arguments. It is callable)] + [SET_PRICE_FUNCTION_WITH_ARGS_BYTE_LENGTH (2 bytes)]
     return clearPricePrefix + setPriceData + priceDataLen.toString(16).padStart(4, "0"); // padStart helpes to always have 2 bytes length for any number
 }
 
@@ -50,7 +50,7 @@ export function wrapContract(contract: any, dataProvider: string = "MOCK", asset
 
         const tx = await contract.populateTransaction[functionName](...args);
 
-        // TODO: Alex, here is the price data appending (with marker)
+        // Here we append price data (currently with function signatures) to trasnation data
         tx.data = tx.data + (await getPriceData(contract.signer, dataProvider, asset)) + getMarkerData();
 
         if (isCall) {
