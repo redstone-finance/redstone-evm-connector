@@ -57,8 +57,6 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
         defi = (await Defi.attach(proxy.address)) as MockDefi;
         await defi.initialize(priceFeed.address);
 
-        //defi = defi.connect(signer);
-
     });
 
 
