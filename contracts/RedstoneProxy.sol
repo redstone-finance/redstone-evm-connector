@@ -4,7 +4,6 @@ pragma solidity ^0.8.2;
 
 import "./RedstoneCoreProxy.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Upgrade.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @dev This contract implements an upgradeable proxy. It is upgradeable because calls are delegated to an
@@ -13,7 +12,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  * implementation behind the proxy.
  */
 
-contract RedstoneProxy is RedstoneCoreProxy, ERC1967Upgrade, Ownable {
+contract RedstoneProxy is RedstoneCoreProxy, ERC1967Upgrade {
     // Note! We cannot add non-constant fields to this contract
     // Because they would override the fields from the proxied contract
     // It happens because EVM identifies them based on types and order (not their names)
@@ -61,7 +60,8 @@ contract RedstoneProxy is RedstoneCoreProxy, ERC1967Upgrade, Ownable {
     /**
      * @dev Sets the price feed address (internal function)
      */
-    function setPriceFeed(address _priceFeedAddress) external onlyOwner {
+    function setPriceFeed(address _priceFeedAddress) external {
+        require(msg.sender == _getAdmin(), "Only admin can set price feed");
         _setPriceFeed(_priceFeedAddress);
     }
 }
