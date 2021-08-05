@@ -45,7 +45,7 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
         const Verifier = await ethers.getContractFactory("PriceVerifier");
 
         verifier = (await Verifier.deploy()) as PriceVerifier;
-        priceFeed = (await PriceFeed.deploy(verifier.address, 5 * 60)) as PriceFeed;
+        priceFeed = (await PriceFeed.deploy(verifier.address, 5 * 60 * 1000)) as PriceFeed;
         await priceFeed.authorizeSigner(REDSTONE_STOCKS_PROVIDER_ADDRESS);
         // console.log("Authorized: ", REDSTONE_STOCKS_PROVIDER_ADDRESS);
 

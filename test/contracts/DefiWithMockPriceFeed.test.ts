@@ -40,7 +40,7 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
     signer = new ethers.Wallet(PRIV, owner.provider);
 
     verifier = (await Verifier.deploy()) as PriceVerifier;
-    priceFeed = (await PriceFeed.deploy(verifier.address, 5 * 60)) as PriceFeed;
+    priceFeed = (await PriceFeed.deploy(verifier.address, 5 * 60 * 1000)) as PriceFeed;
     await priceFeed.authorizeSigner(signer.address);
     // console.log("Authorized: ", signer.address);
 

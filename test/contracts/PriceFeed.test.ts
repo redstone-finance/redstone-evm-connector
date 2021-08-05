@@ -37,7 +37,7 @@ describe("Price feed", function() {
   it("Should not allow creating price feed with an empty verifier", async function() {
     const PriceFeed = await ethers.getContractFactory("PriceFeed");
 
-    await expect(PriceFeed.deploy(ethers.constants.AddressZero, 5 * 60))
+    await expect(PriceFeed.deploy(ethers.constants.AddressZero, 5 * 60 * 1000))
       .to.be.revertedWith('Cannot set an empty verifier');
   });
 
@@ -53,7 +53,7 @@ describe("Price feed", function() {
   it("Should deploy a price feed", async function() {
     const PriceFeed = await ethers.getContractFactory("PriceFeed");
 
-    priceFeed = await PriceFeed.deploy(verifier.address, 5 * 60) as PriceFeed;
+    priceFeed = await PriceFeed.deploy(verifier.address, 5 * 60 * 1000) as PriceFeed;
     expect(priceFeed.address).not.to.equal(ethers.constants.AddressZero);
   });
 

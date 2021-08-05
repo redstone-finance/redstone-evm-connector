@@ -10,8 +10,10 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract PriceFeed is IPriceFeed, PriceModel, Ownable {
 
+    uint256 private constant MAX_FUTURE_PRICE_DIFF_MS = 15000;
+
     PriceVerifier public priceVerifier;
-    uint256 public maxPriceDelay;
+    uint256 public maxPriceDelayMilliseconds;
 
     // A map indicating if a signer could be trusted by a client protocol
     mapping(address => bool) trustedSigners;
@@ -22,11 +24,11 @@ contract PriceFeed is IPriceFeed, PriceModel, Ownable {
     mapping(bytes32 => uint256) private prices;
 
 
-    constructor(PriceVerifier _priceVerifier, uint256 _maxPriceDelay) {
+    constructor(PriceVerifier _priceVerifier, uint256 _maxPriceDelayMilliseconds) {
         require(address(_priceVerifier) != address(0), "Cannot set an empty verifier");
-        require(_maxPriceDelay > 0, "Maximum price delay must be greater than 0");
+        require(_maxPriceDelayMilliseconds > 0, "Maximum price delay must be greater than 0");
         priceVerifier = _priceVerifier;
-        maxPriceDelay = _maxPriceDelay;
+        maxPriceDelayMilliseconds = _maxPriceDelayMilliseconds;
     }
 
 
@@ -36,8 +38,8 @@ contract PriceFeed is IPriceFeed, PriceModel, Ownable {
 
         require(isSigner(signer), "Unauthorized price data signer");
         // TODO: check the problem with prices on Kovan
-        require(blockTimestampMillseconds > priceData.timestamp - 15000, "Price data timestamp cannot be from the future");
-        require(blockTimestampMillseconds - priceData.timestamp < maxPriceDelay * 1000, "Price data timestamp too old");
+        require(blockTimestampMillseconds > priceData.timestamp - MAX_FUTURE_PRICE_DIFF_MS, "Price data timestamp cannot be from the future");
+        require(blockTimestampMillseconds - priceData.timestamp < maxPriceDelayMilliseconds, "Price data timestamp too old");
         require(currentSetter == address(0), "The prices could be set only once in the transaction");
 
         // TODO: later we can implement rules for update skipping
