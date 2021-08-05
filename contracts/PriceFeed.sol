@@ -10,19 +10,13 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract PriceFeed is IPriceFeed, PriceModel, Ownable {
 
-    uint256 private constant MAX_FUTURE_PRICE_DIFF_MS = 15000;
-
     PriceVerifier public priceVerifier;
     uint256 public maxPriceDelayMilliseconds;
 
     // A map indicating if a signer could be trusted by a client protocol
     mapping(address => bool) trustedSigners;
-    
-    // A user that sets the prices in the context of the current transaction
-    address private currentSetter;
 
-    mapping(bytes32 => uint256) private prices;
-
+    mapping(bytes32 => uint256) internal prices;
 
     constructor(PriceVerifier _priceVerifier, uint256 _maxPriceDelayMilliseconds) {
         require(address(_priceVerifier) != address(0), "Cannot set an empty verifier");
@@ -33,14 +27,17 @@ contract PriceFeed is IPriceFeed, PriceModel, Ownable {
 
 
     function setPrices(PriceData calldata priceData, bytes calldata signature) external {
+        _setPrices(priceData, signature);
+    }
+
+    function _setPrices(PriceData calldata priceData, bytes calldata signature) internal virtual {
         address signer = priceVerifier.recoverDataSigner(priceData, signature);
         uint256 blockTimestampMillseconds = block.timestamp * 1000;
 
         require(isSigner(signer), "Unauthorized price data signer");
         // TODO: check the problem with prices on Kovan
-        require(blockTimestampMillseconds > priceData.timestamp - MAX_FUTURE_PRICE_DIFF_MS, "Price data timestamp cannot be from the future");
+        require(blockTimestampMillseconds > priceData.timestamp - 15000, "Price data timestamp cannot be from the future");
         require(blockTimestampMillseconds - priceData.timestamp < maxPriceDelayMilliseconds, "Price data timestamp too old");
-        require(currentSetter == address(0), "The prices could be set only once in the transaction");
 
         // TODO: later we can implement rules for update skipping
         // e.g. if price has chhanged insignifficantly
@@ -48,17 +45,6 @@ contract PriceFeed is IPriceFeed, PriceModel, Ownable {
         for (uint256 i = 0; i < priceData.symbols.length; i++) {
             prices[priceData.symbols[i]] = priceData.values[i];
         }
-
-        currentSetter = msg.sender;
-    }
-
-    function clearPrices(PriceData calldata priceData) external {
-        require(currentSetter == msg.sender, "The prices could be cleared only by the address which set them");
-        for(uint256 i=0; i < priceData.symbols.length; i++) {
-            delete prices[priceData.symbols[i]];
-        }
-
-        currentSetter = address(0);
     }
 
 

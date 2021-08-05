@@ -7,7 +7,7 @@ import {Wallet} from "ethers";
 import {PriceVerifier} from "../../typechain/PriceVerifier";
 const { wrapContract } = require("../../utils/contract-wrapper");
 
-import {PriceFeed} from "../../typechain/PriceFeed";
+import {PriceFeedWithClearing} from "../../typechain/PriceFeedWithClearing";
 chai.use(solidity);
 
 const { expect } = chai;
@@ -25,7 +25,7 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
   let owner: SignerWithAddress;
   let admin: SignerWithAddress;
   let defi: MockDefi;
-  let priceFeed: PriceFeed;
+  let priceFeed: PriceFeedWithClearing;
   let verifier: PriceVerifier;
   let signer: Wallet;
 
@@ -34,13 +34,13 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
 
     const Defi = await ethers.getContractFactory("MockDefi");
     const Proxy = await ethers.getContractFactory("RedstoneUpgradeableProxy");
-    const PriceFeed = await ethers.getContractFactory("PriceFeed");
+    const PriceFeedWithClearing = await ethers.getContractFactory("PriceFeedWithClearing");
     const Verifier = await ethers.getContractFactory("PriceVerifier");
 
     signer = new ethers.Wallet(PRIV, owner.provider);
 
     verifier = (await Verifier.deploy()) as PriceVerifier;
-    priceFeed = (await PriceFeed.deploy(verifier.address, 5 * 60 * 1000)) as PriceFeed;
+    priceFeed = (await PriceFeedWithClearing.deploy(verifier.address, 5 * 60 * 1000)) as PriceFeedWithClearing;
     await priceFeed.authorizeSigner(signer.address);
 
     defi = (await Defi.deploy()) as MockDefi;

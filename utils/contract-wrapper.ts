@@ -1,5 +1,5 @@
 import { ethers, Signer } from "ethers";
-import { PriceFeed__factory } from "../typechain/factories/PriceFeed__factory";
+import { PriceFeedWithClearing__factory } from "../typechain/factories/PriceFeedWithClearing__factory";
 
 // TODO: Refactor this file and add many comments to make it more clear
 
@@ -20,7 +20,7 @@ export type SignedPriceDataType = {
 async function getPriceData(signer: Signer, dataProvider: string, asset?: string) {
     let { priceData, signature } = await getSignedPrice(dataProvider, asset);
 
-    let priceFeed = PriceFeed__factory.connect(ethers.constants.AddressZero, signer);
+    let priceFeed = PriceFeedWithClearing__factory.connect(ethers.constants.AddressZero, signer);
     let setPriceTx = await priceFeed.populateTransaction.setPrices(priceData, signature);
     
     const setPriceData = remove0xFromHexString(setPriceTx.data, {

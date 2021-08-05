@@ -4,7 +4,7 @@ pragma solidity ^0.8.2;
 
 import "./BytesLib.sol";
 import 'hardhat/console.sol';
-import './PriceFeed.sol';
+import './PriceFeedWithClearing.sol';
 import "@openzeppelin/contracts/proxy/Proxy.sol";
 
 abstract contract RedstoneCoreProxy is Proxy {

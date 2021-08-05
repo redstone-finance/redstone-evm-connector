@@ -7,7 +7,7 @@ import {PriceVerifier} from "../../typechain/PriceVerifier";
 import redstone from 'redstone-api';
 const { wrapContract } = require("../../utils/contract-wrapper");
 
-import {PriceFeed} from "../../typechain/PriceFeed";
+import { PriceFeed } from "../../typechain/PriceFeed";
 chai.use(solidity);
 
 const { expect } = chai;
@@ -40,7 +40,7 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
         [owner, admin] = await ethers.getSigners();
 
         const Defi = await ethers.getContractFactory("MockDefi");
-        const Proxy = await ethers.getContractFactory("RedstoneUpgradeableProxy");
+        const Proxy = await ethers.getContractFactory("RedstoneUpgradeableProxyWithoutClearing");
         const PriceFeed = await ethers.getContractFactory("PriceFeed");
         const Verifier = await ethers.getContractFactory("PriceVerifier");
 
@@ -95,6 +95,7 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
     it("Should inject correct prices from API single", async function() {
         expect(await defi.currentValueOf(owner.address, toBytes32("FB")))
             .to.be.equal(serialized(apiPrices['FB'].value).toFixed(0));
+
     });
    
 
