@@ -47,11 +47,9 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
         verifier = (await Verifier.deploy()) as PriceVerifier;
         priceFeed = (await PriceFeedWithoutClearing.deploy(verifier.address, 5 * 60)) as PriceFeedWithoutClearing;
         await priceFeed.authorizeSigner(REDSTONE_STOCKS_PROVIDER_ADDRESS);
-        // console.log("Authorized: ", REDSTONE_STOCKS_PROVIDER_ADDRESS);
 
         defi = (await Defi.deploy()) as MockDefi;
 
-        // console.log("Defi address: " + defi.address);
         const proxy = await Proxy.deploy(defi.address, priceFeed.address, admin.address, []);
 
         defi = (await Defi.attach(proxy.address)) as MockDefi;
@@ -95,9 +93,6 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
 
 
     it("Should inject correct prices from API single", async function() {
-
-        // const apiPrices = await redstone.getAllPrices({provider:"redstone-stocks"});
-
         expect(await defi.currentValueOf(owner.address, toBytes32("FB")))
             .to.be.equal(serialized(apiPrices['FB'].value).toFixed(0));
 

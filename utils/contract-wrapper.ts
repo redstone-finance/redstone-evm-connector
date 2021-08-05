@@ -28,14 +28,19 @@ async function getPriceData(signer: Signer, dataProvider: string, asset?: string
     });
 
     let clearPriceTx = await priceFeed.populateTransaction.clearPrices(priceData); // priceData may have any value, we don't use it
-    let clearPricePrefix = clearPriceTx.data ? clearPriceTx.data.substr(2,8) : ""; // we get 4 bytes from 2nd to 5th (skipping 1st (0x)) - this is the function signature clearPrices
+    let clearPricePrefix = clearPriceTx.data ? clearPriceTx.data.substr(2,8) : ""; // We skip two first characters ("0x") and get 8 next (4 bytes of signature encoded as HEX)
 
     // Add priceDataLen info
     const priceDataLen = countBytesInHexString(setPriceData);
 
     // Template of data that we add to the end of tx is below
-    // [CLEAR_PRICE_FUNCTION_SIGNATURE (4 bytes)] + [SET_PRICE_FUNCTION_WITH_ARGUMENTS (Variable bytes size, 4 bytes for signature + variable length bytes for arguments. It is callable)] + [SET_PRICE_FUNCTION_WITH_ARGS_BYTE_LENGTH (2 bytes)]
-    return clearPricePrefix + setPriceData + priceDataLen.toString(16).padStart(4, "0"); // padStart helpes to always have 2 bytes length for any number
+    // [SIG_CLEAR|4][SIG_SET|4][DATA|...][DATA_LEN|2][MARKER|32]
+    // - SIG_CLEAR (4 bytes) - signature of clearPrices method of PriceFeed contract
+    // - SIG_SET (4 bytes) - signature of setPrices method of PriceFeed contract
+    // - DATA (variable bytes size) - pricing data
+    // - DATA_LEN (2 bytes) - pricing data size (in bytes)
+    // - MARKER (32 bytes) - redstone marker
+    return clearPricePrefix + setPriceData + priceDataLen.toString(16).padStart(4, "0"); // padStart helps to always have 2 bytes length for any number
 }
 
 export function wrapContract(contract: any, dataProvider: string = "MOCK", asset?: string) {
