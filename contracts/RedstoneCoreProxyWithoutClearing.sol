@@ -11,6 +11,8 @@ abstract contract RedstoneCoreProxyWithoutClearing is Proxy {
     using BytesLib for bytes;
 
     bytes32 constant MARKER = keccak256("Redstone.version.0.0.1");
+    uint8 constant MARKER_SLOT_SIZE = 32;
+    uint8 constant LEN_SLOT_SIZE = 2;
 
     /**
      * @dev Delegates the current call to `implementation`.
@@ -24,17 +26,18 @@ abstract contract RedstoneCoreProxyWithoutClearing is Proxy {
 
         // Check if transaction contains Redstone marker
         bool isTxWithPricing = false;
-        if (msg.data.length > 32) {
-            isTxWithPricing = msg.data.toBytes32(msg.data.length - 32) == MARKER;
+        if (msg.data.length > MARKER_SLOT_SIZE) {
+            isTxWithPricing = msg.data.toBytes32(msg.data.length - MARKER_SLOT_SIZE) == MARKER;
         }
 
 
         // Register price data
         bytes memory priceData;
         uint16 priceDataLen;
+        uint16 markerAndLenOffset = (MARKER_SLOT_SIZE + LEN_SLOT_SIZE);
         if (isTxWithPricing) {
-            priceDataLen = msg.data.toUint16(msg.data.length - 34);
-            priceData = msg.data.slice(msg.data.length - priceDataLen - 34, priceDataLen);
+            priceDataLen = msg.data.toUint16(msg.data.length - markerAndLenOffset);
+            priceData = msg.data.slice(msg.data.length - priceDataLen - markerAndLenOffset, priceDataLen);
             (bool success,) = _priceFeed().call(priceData);
             require(success, "Error setting price data");
         }
