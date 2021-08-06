@@ -4,10 +4,10 @@ pragma solidity ^0.8.2;
 
 import "./BytesLib.sol";
 import 'hardhat/console.sol';
-import './PriceFeedWithClearing.sol';
+import './PriceFeed.sol';
 import "@openzeppelin/contracts/proxy/Proxy.sol";
 
-abstract contract RedstoneCoreProxy is Proxy {
+abstract contract RedstoneCoreProxyWithoutClearing is Proxy {
     using BytesLib for bytes;
 
     bytes32 constant MARKER = keccak256("Redstone.version.0.0.1");
@@ -42,45 +42,29 @@ abstract contract RedstoneCoreProxy is Proxy {
             require(success, "Error setting price data");
         }
 
-
-        // Assembly version - TODO: fix it and compare gas costs
-        // uint8 delegationResult;
-        // // bytes memory delegationReturn;
-        // assembly {
-        //     // Copy msg.data. We take full control of memory in this inline assembly
-        //     // block because it will not return to Solidity code. We overwrite the
-        //     // Solidity scratch pad at memory position 0.
-        //     calldatacopy(0, 0, 36)
-
-        //     // Call the implementation.
-        //     // out and outsize are 0 because we don't know the size yet.
-        //     delegationResult := delegatecall(gas(), implementation, 0, 36, 0, 0)
-
-        //     // Copy the returned data.
-        //     returndatacopy(0, 0, returndatasize())
-        // }
-
-        // Delegate the original transaction
-        (bool delegationSuccess, bytes memory delegationResult) =
-            implementation.delegatecall(msg.data);
-
-        // Clear price data
-        if (isTxWithPricing) {
-            bytes memory clearDataPrefix = msg.data.slice(msg.data.length - priceDataLen - markerAndLenOffset - 4, 4);
-            bytes memory clearData = clearDataPrefix.concat(priceData.slice(4, priceData.length - 4));
-            (bool success,) = _priceFeed().call(clearData);
-            require(success, "Error clearing price data");
-        }
-
-
-        // Return results from base method
-        // TODO: review the code below
-        // Check if mload is needed
+        // Copied from openzeppelin github repo
+        // https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/proxy/Proxy.sol
         assembly {
-            switch delegationSuccess
+            // Copy msg.data. We take full control of memory in this inline assembly
+            // block because it will not return to Solidity code. We overwrite the
+            // Solidity scratch pad at memory position 0.
+            calldatacopy(0, 0, calldatasize())
+
+            // Call the implementation.
+            // out and outsize are 0 because we don't know the size yet.
+            let result := delegatecall(gas(), implementation, 0, calldatasize(), 0, 0)
+
+            // Copy the returned data.
+            returndatacopy(0, 0, returndatasize())
+
+            switch result
             // delegatecall returns 0 on error.
-            case 0 { revert(add(delegationResult, 32), delegationResult) }
-            default { return(add(delegationResult, 32), mload(delegationResult)) }
+            case 0 {
+                revert(0, returndatasize())
+            }
+            default {
+                return(0, returndatasize())
+            }
         }
     }
 

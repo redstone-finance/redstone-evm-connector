@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.2;
 
-import "./RedstoneCoreProxy.sol";
+import "./RedstoneCoreProxyWithoutClearing.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Upgrade.sol";
 
 /**
@@ -12,7 +12,7 @@ import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Upgrade.sol";
  * implementation behind the proxy.
  */
 
-contract RedstoneProxy is RedstoneCoreProxy, ERC1967Upgrade {
+contract RedstoneProxyWithoutClearing is RedstoneCoreProxyWithoutClearing, ERC1967Upgrade {
     // Note! We cannot add non-constant fields to this contract
     // Because they would override the fields from the proxied contract
     // It happens because EVM identifies them based on types and order (not their names)
@@ -49,7 +49,6 @@ contract RedstoneProxy is RedstoneCoreProxy, ERC1967Upgrade {
         return StorageSlot.getAddressSlot(_PRICE_FEED_SLOT).value;
     }
 
-    
     function _setPriceFeed(address _priceFeedAddress) private {
         require(_priceFeedAddress != address(0), "Price feed address cannot be empty");
         

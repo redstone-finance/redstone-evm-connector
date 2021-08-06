@@ -2,7 +2,7 @@ import { ethers } from "hardhat";
 import chai from "chai";
 import { solidity } from "ethereum-waffle";
 import { PriceVerifier } from "../../typechain/PriceVerifier";
-import { PriceFeed } from "../../typechain/PriceFeed";
+import { PriceFeedWithClearing } from "../../typechain/PriceFeedWithClearing";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 import {Wallet} from "ethers";
 import {PricePackage} from "redstone-node/dist/src/types";
@@ -20,7 +20,7 @@ describe("Price feed", function() {
   let other: SignerWithAddress;
   let signer: Wallet;
   let verifier: PriceVerifier;
-  let priceFeed: PriceFeed;
+  let priceFeed: PriceFeedWithClearing;
   let currentTime: number;
   const priceSigner = new EvmPriceSigner();
 
@@ -35,25 +35,25 @@ describe("Price feed", function() {
 
 
   it("Should not allow creating price feed with an empty verifier", async function() {
-    const PriceFeed = await ethers.getContractFactory("PriceFeed");
+    const PriceFeedWithClearing = await ethers.getContractFactory("PriceFeedWithClearing");
 
-    await expect(PriceFeed.deploy(ethers.constants.AddressZero, 5 * 60))
+    await expect(PriceFeedWithClearing.deploy(ethers.constants.AddressZero, 5 * 60 * 1000))
       .to.be.revertedWith('Cannot set an empty verifier');
   });
 
 
   it("Should not allow creating price feed with zero delay", async function() {
-    const PriceFeed = await ethers.getContractFactory("PriceFeed");
+    const PriceFeedWithClearing = await ethers.getContractFactory("PriceFeedWithClearing");
 
-    await expect(PriceFeed.deploy(verifier.address, 0))
+    await expect(PriceFeedWithClearing.deploy(verifier.address, 0))
       .to.be.revertedWith('Maximum price delay must be greater than 0');
   });
 
 
   it("Should deploy a price feed", async function() {
-    const PriceFeed = await ethers.getContractFactory("PriceFeed");
+    const PriceFeedWithClearing = await ethers.getContractFactory("PriceFeedWithClearing");
 
-    priceFeed = await PriceFeed.deploy(verifier.address, 5 * 60) as PriceFeed;
+    priceFeed = await PriceFeedWithClearing.deploy(verifier.address, 5 * 60 * 1000) as PriceFeedWithClearing;
     expect(priceFeed.address).not.to.equal(ethers.constants.AddressZero);
   });
 
@@ -63,7 +63,7 @@ describe("Price feed", function() {
     let mock = await Mock.deploy();
     currentTime = await mock.getCurrentTime() * 1000;
 
-    const pricePackage:PricePackage = {
+    const pricePackage: PricePackage = {
       prices: [
         {symbol: "ETH", value: 1800}
       ],
@@ -91,22 +91,23 @@ describe("Price feed", function() {
 
   it("Should not allow setting a price after delay", async function() {
 
-    const pricePackage:PricePackage = {
+    const pricePackage: PricePackage = {
       prices: [
         {symbol: "ETH", value: 1800}
       ],
-      timestamp: currentTime - 301000
+      timestamp: currentTime - (5 * 60 * 1000 + 10 * 1000)
     };
 
     const signedPriceData = priceSigner.signPricePackage(pricePackage, signer.privateKey);
     const serializedMessage = priceSigner.serializeToMessage(pricePackage) as PriceDataType;
+
     await expect(priceFeed.setPrices(serializedMessage, signedPriceData.signature))
       .to.be.revertedWith('Price data timestamp too old');
   });
 
 
   it("Should set a single price", async function() {
-    const pricePackage:PricePackage = {
+    const pricePackage: PricePackage = {
       prices: [
         {symbol: "ETH", value: 1800}
       ],
@@ -130,7 +131,7 @@ describe("Price feed", function() {
 
 
   it("Should not allow changing the price", async function() {
-    const pricePackage:PricePackage = {
+    const pricePackage: PricePackage = {
       prices: [
         {symbol: "ETH", value: 1800}
       ],
@@ -145,7 +146,7 @@ describe("Price feed", function() {
 
 
   it("Should not allow to clear the price by other users", async function() {
-    const pricePackage:PricePackage = {
+    const pricePackage: PricePackage = {
       prices: [
         {symbol: "ETH", value: 1800}
       ],
@@ -159,7 +160,7 @@ describe("Price feed", function() {
 
 
   it("Should clear the single price", async function() {
-    const pricePackage:PricePackage = {
+    const pricePackage: PricePackage = {
       prices: [
         {symbol: "ETH", value: 1800}
       ],
@@ -183,7 +184,7 @@ describe("Price feed", function() {
   it("Should revoke authorization", async function() {
     await priceFeed.revokeSigner(signer.address);
     
-    const pricePackage:PricePackage = {
+    const pricePackage: PricePackage = {
       prices: [
         {symbol: "ETH", value: 1800}
       ],
@@ -203,7 +204,7 @@ describe("Price feed", function() {
 
 
   it("Should set multiple prices", async function() {
-    const pricePackage:PricePackage = {
+    const pricePackage: PricePackage = {
       prices: [
         {symbol: "ETH", value: 1800},
         {symbol: "AVAX", value: 30},
@@ -216,7 +217,7 @@ describe("Price feed", function() {
     const serializedMessage = priceSigner.serializeToMessage(pricePackage) as PriceDataType;
     await priceFeed.setPrices(serializedMessage, signedData.signature);
 
-    for(let i=0; i<3; i++) {
+    for(let i = 0; i < 3; i++) {
       expect(await priceFeed.getPrice(serializedMessage.symbols[i])).to.be.equal(serializedMessage.values[i]);
     }
 
@@ -224,7 +225,7 @@ describe("Price feed", function() {
 
 
   it("Should clear multiple prices", async function() {
-    const pricePackage:PricePackage = {
+    const pricePackage: PricePackage = {
       prices: [
         {symbol: "ETH", value: 1800},
         {symbol: "AVAX", value: 30},
@@ -237,7 +238,7 @@ describe("Price feed", function() {
 
     await priceFeed.clearPrices(serializedMessage);
 
-    for(let i=0; i<3; i++) {
+    for(let i = 0; i < 3; i++) {
       await expect(priceFeed.getPrice(serializedMessage.symbols[0]))
         .to.be.revertedWith('No pricing data for given symbol');
     }

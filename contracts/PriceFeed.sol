@@ -11,53 +11,40 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract PriceFeed is IPriceFeed, PriceModel, Ownable {
 
     PriceVerifier public priceVerifier;
-    uint256 public maxPriceDelay;
+    uint256 public maxPriceDelayMilliseconds;
 
-    //A map indicating if a signer could be trusted by a client protocol
+    // A map indicating if a signer could be trusted by a client protocol
     mapping(address => bool) trustedSigners;
-    
-    //An user that sets the prices in the context of the current transaction
-    address private currentSetter;
 
-    mapping(bytes32 => uint256) private prices;
+    mapping(bytes32 => uint256) internal prices;
 
-
-    constructor(PriceVerifier _priceVerifier, uint256 _maxPriceDelay) {
+    constructor(PriceVerifier _priceVerifier, uint256 _maxPriceDelayMilliseconds) {
         require(address(_priceVerifier) != address(0), "Cannot set an empty verifier");
-        require(_maxPriceDelay > 0, "Maximum price delay must be greater than 0");
+        require(_maxPriceDelayMilliseconds > 0, "Maximum price delay must be greater than 0");
         priceVerifier = _priceVerifier;
-        maxPriceDelay = _maxPriceDelay;
+        maxPriceDelayMilliseconds = _maxPriceDelayMilliseconds;
     }
 
 
     function setPrices(PriceData calldata priceData, bytes calldata signature) external {
-        address signer = priceVerifier.recoverDataSigner(priceData, signature);
-        require(isSigner(signer), "Unauthorized price data signer");
-        console.log("Signer OK");
-        console.log("BT: ", block.timestamp * 1000);
-        console.log("PT: ", priceData.timestamp);        
-        require(block.timestamp * 1000 > priceData.timestamp - 15000, "Price data timestamp cannot be from the future");
-        require(block.timestamp * 1000 < priceData.timestamp || block.timestamp * 1000 - priceData.timestamp < maxPriceDelay * 1000, "Price data timestamp too old");
-        console.log("Timestamp OK");
-        require(currentSetter == address(0), "The prices could be set only once in the transaction");
-
-        for(uint256 i=0; i < priceData.symbols.length; i++) {
-            console.log("Setting price: ", priceData.values[i]);
-            prices[priceData.symbols[i]] = priceData.values[i];
-        }
-
-        currentSetter = msg.sender;
+        _setPrices(priceData, signature);
     }
 
+    function _setPrices(PriceData calldata priceData, bytes calldata signature) internal virtual {
+        address signer = priceVerifier.recoverDataSigner(priceData, signature);
+        uint256 blockTimestampMillseconds = block.timestamp * 1000;
 
+        require(isSigner(signer), "Unauthorized price data signer");
+        // TODO: check the problem with prices on Kovan
+        require(blockTimestampMillseconds > priceData.timestamp - 15000, "Price data timestamp cannot be from the future");
+        require(blockTimestampMillseconds - priceData.timestamp < maxPriceDelayMilliseconds, "Price data timestamp too old");
 
-    function clearPrices(PriceData calldata priceData) external {
-        require(currentSetter == msg.sender, "The prices could be cleared only by the address which set them");
-        for(uint256 i=0; i < priceData.symbols.length; i++) {
-            delete prices[priceData.symbols[i]];
+        // TODO: later we can implement rules for update skipping
+        // e.g. if price has chhanged insignifficantly
+        // or if current time is too close to the last updated time
+        for (uint256 i = 0; i < priceData.symbols.length; i++) {
+            prices[priceData.symbols[i]] = priceData.values[i];
         }
-
-        currentSetter = address(0);
     }
 
 
@@ -73,7 +60,7 @@ contract PriceFeed is IPriceFeed, PriceModel, Ownable {
 
 
     function revokeSigner(address signer) external onlyOwner {
-        trustedSigners[signer] = false;
+        delete trustedSigners[signer];
     }
 
 

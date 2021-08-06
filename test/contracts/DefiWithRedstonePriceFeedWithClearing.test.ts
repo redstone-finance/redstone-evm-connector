@@ -7,7 +7,7 @@ import {PriceVerifier} from "../../typechain/PriceVerifier";
 import redstone from 'redstone-api';
 const { wrapContract } = require("../../utils/contract-wrapper");
 
-import { PriceFeed } from "../../typechain/PriceFeed";
+import {PriceFeedWithClearing} from "../../typechain/PriceFeedWithClearing";
 chai.use(solidity);
 
 const { expect } = chai;
@@ -17,7 +17,7 @@ const serialized = function (x: number): number {
     return x * 10**8;
 };
 
-describe("MockDefi with Proxy contract and pricing Data", function() {
+describe("MockDefi with Proxy contract and pricing Data (with clearing)", function() {
 
     const REDSTONE_STOCKS_PROVIDER = "Yba8IVc_01bFxutKNJAZ7CmTD5AVi2GcWXf1NajPAsc";
     const REDSTONE_STOCKS_PROVIDER_ADDRESS = "0x926E370fD53c23f8B71ad2B3217b227E41A92b12";
@@ -26,7 +26,7 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
     let owner: SignerWithAddress;
     let admin: SignerWithAddress;
     let defi: MockDefi;
-    let priceFeed: PriceFeed;
+    let priceFeed: PriceFeedWithClearing;
     let verifier: PriceVerifier;
     let apiPrices: any;
 
@@ -40,12 +40,12 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
         [owner, admin] = await ethers.getSigners();
 
         const Defi = await ethers.getContractFactory("MockDefi");
-        const Proxy = await ethers.getContractFactory("RedstoneUpgradeableProxyWithoutClearing");
-        const PriceFeed = await ethers.getContractFactory("PriceFeed");
+        const Proxy = await ethers.getContractFactory("RedstoneUpgradeableProxy");
+        const PriceFeedWithClearing = await ethers.getContractFactory("PriceFeedWithClearing");
         const Verifier = await ethers.getContractFactory("PriceVerifier");
 
         verifier = (await Verifier.deploy()) as PriceVerifier;
-        priceFeed = (await PriceFeed.deploy(verifier.address, 5 * 60 * 1000)) as PriceFeed;
+        priceFeed = (await PriceFeedWithClearing.deploy(verifier.address, 5 * 60 * 1000)) as PriceFeedWithClearing;
         await priceFeed.authorizeSigner(REDSTONE_STOCKS_PROVIDER_ADDRESS);
 
         defi = (await Defi.deploy()) as MockDefi;
@@ -95,7 +95,6 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
     it("Should inject correct prices from API single", async function() {
         expect(await defi.currentValueOf(owner.address, toBytes32("FB")))
             .to.be.equal(serialized(apiPrices['FB'].value).toFixed(0));
-
     });
    
 
