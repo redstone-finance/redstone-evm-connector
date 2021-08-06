@@ -24,10 +24,10 @@ contract PriceFeedWithClearing is PriceFeed {
         currentSetter = address(0);
     }
 
-    function _setPrices(PriceData calldata priceData, bytes calldata signature) internal override {
+    function _setPrices(PriceData calldata priceData) internal override {
         require(currentSetter == address(0), "The prices could be set only once in the transaction");
 
-        super._setPrices(priceData, signature);
+        super._setPrices(priceData);
 
         currentSetter = msg.sender;
     }

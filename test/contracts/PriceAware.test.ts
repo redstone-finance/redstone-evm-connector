@@ -50,8 +50,8 @@ describe("Price Aware", function () {
         expect(await pa.checkStorage()).to.be.equal(3);
 
         pa = wrapContract(pa);
-        await pa.executePriceAwareWithPrices(1);
-        await pa.executePriceAwareWithPrices(1);
+        await pa.executePriceAware(1);
+        await pa.executePriceAware(1);
         expect(await pa.checkStorage()).to.be.equal(1000000001);
     });
 

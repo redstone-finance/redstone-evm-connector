@@ -29,10 +29,11 @@ contract PriceFeed is IPriceFeed, PriceModel, Ownable {
 
 
     function setPrices(PriceData calldata priceData, bytes calldata signature) external {
-        _setPrices(priceData, signature);
+        _checkPrices(priceData, signature);
+        _setPrices(priceData);
     }
-
-    function _setPrices(PriceData calldata priceData, bytes calldata signature) internal virtual {
+    
+    function _checkPrices(PriceData calldata priceData, bytes calldata signature) internal {
         address signer = priceVerifier.recoverDataSigner(priceData, signature);
         uint256 blockTimestampMillseconds = block.timestamp * 1000;
 
@@ -40,7 +41,9 @@ contract PriceFeed is IPriceFeed, PriceModel, Ownable {
         // TODO: check the problem with prices on Kovan
         require(blockTimestampMillseconds > priceData.timestamp - MAX_FUTURE_PRICE_DIFF_MS, "Price data timestamp cannot be from the future");
         require(blockTimestampMillseconds - priceData.timestamp < maxPriceDelayMilliseconds, "Price data timestamp too old");
+    }
 
+    function _setPrices(PriceData calldata priceData) internal virtual {        
         // TODO: later we can implement rules for update skipping
         // e.g. if price has chhanged insignifficantly
         // or if current time is too close to the last updated time
