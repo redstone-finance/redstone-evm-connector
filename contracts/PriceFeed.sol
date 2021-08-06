@@ -10,6 +10,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract PriceFeed is IPriceFeed, PriceModel, Ownable {
 
+    uint256 private constant MAX_FUTURE_PRICE_DIFF_MS = 15000;
+
     PriceVerifier public priceVerifier;
     uint256 public maxPriceDelayMilliseconds;
 
@@ -36,7 +38,7 @@ contract PriceFeed is IPriceFeed, PriceModel, Ownable {
 
         require(isSigner(signer), "Unauthorized price data signer");
         // TODO: check the problem with prices on Kovan
-        require(blockTimestampMillseconds > priceData.timestamp - 15000, "Price data timestamp cannot be from the future");
+        require(blockTimestampMillseconds > priceData.timestamp - MAX_FUTURE_PRICE_DIFF_MS, "Price data timestamp cannot be from the future");
         require(blockTimestampMillseconds - priceData.timestamp < maxPriceDelayMilliseconds, "Price data timestamp too old");
 
         // TODO: later we can implement rules for update skipping
