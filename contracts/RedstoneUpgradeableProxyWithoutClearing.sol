@@ -6,7 +6,7 @@
 
 pragma solidity ^0.8.2;
 
-import "./RedstoneProxy.sol";
+import "./RedstoneProxyWithoutClearing.sol";
 
 /**
  * @dev This contract implements a proxy that is upgradeable by an admin.
@@ -30,13 +30,13 @@ import "./RedstoneProxy.sol";
  * you should think of the `ProxyAdmin` instance as the real administrative interface of your proxy.
  */
 
-contract RedstoneUpgradeableProxy is RedstoneProxy {
+contract RedstoneUpgradeableProxyWithoutClearing is RedstoneProxyWithoutClearing {
     /**
      * @dev Initializes an upgradeable proxy managed by `_admin`, backed by the implementation at `_logic`, and
      * optionally initialized with `_data` as explained in {ERC1967Proxy-constructor}.
      */
     constructor(address _logic, address _priceFeedAddress, address admin_, bytes memory _data) payable
-        RedstoneProxy(_logic, _priceFeedAddress, _data) {
+        RedstoneProxyWithoutClearing(_logic, _priceFeedAddress, _data) {
         
         assert(_ADMIN_SLOT == bytes32(uint256(keccak256("eip1967.proxy.admin")) - 1));
         _changeAdmin(admin_);

@@ -13,11 +13,11 @@ contract PriceVerifier is PriceModel {
     bytes32 DOMAIN_SEPARATOR;
 
     constructor() {
-        //For multi-chain testing
+        // For multi-chain testing
         uint256 chainId = 1;
-//        assembly {
-//            chainId := chainid()
-//        }
+        // assembly {
+        //     chainId := chainid()
+        // }
 
         DOMAIN_SEPARATOR = keccak256(abi.encode(
                 EIP712_DOMAIN_TYPEHASH,
@@ -34,6 +34,8 @@ contract PriceVerifier is PriceModel {
     }
 
 
+    // We follow the EIP-712 standard for structured data hashing and signing
+    // Learn more: https://eips.ethereum.org/EIPS/eip-712
     function hashPriceData(PriceData calldata priceData) public view returns (bytes32) {
         return keccak256(abi.encodePacked(
             "\x19\x01",

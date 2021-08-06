@@ -3,7 +3,7 @@ import chai from "chai";
 import { solidity } from "ethereum-waffle";
 import { MockDefi } from "../../typechain/MockDefi";
 import { MockPriceFeed } from "../../typechain/MockPriceFeed";
-import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 chai.use(solidity);
 const { expect } = chai;
@@ -41,7 +41,7 @@ describe("MockDefi with Proxy contract but no pricing data", function() {
   it("Should send a simple write transaction via proxy contract", async function() {
 
     await priceFeed.setPrice(toBytes32("ETH"), 10);
-    await defi.deposit(toBytes32("ETH"),100);
+    await defi.deposit(toBytes32("ETH"), 100);
 
   });
 
@@ -55,12 +55,7 @@ describe("MockDefi with Proxy contract but no pricing data", function() {
 
 
   it("Should send a reverted transaction via proxy contract", async function() {
-
-    await expect(defi.deposit(toBytes32("ETH"), 0)).to.be.revertedWith('Amount must be greater than zero');
-
+    await expect(defi.deposit(toBytes32("ETH"), 0)).to.be.revertedWith("Amount must be greater than zero");
   });
-
-
-
 
 });
