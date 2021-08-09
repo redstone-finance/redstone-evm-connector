@@ -5,11 +5,11 @@ pragma experimental ABIEncoderV2;
 
 
 contract PriceModel {
-    string internal constant EIP712_DOMAIN = "EIP712Domain(string name,string version,uint256 chainId)";
-    bytes32 internal constant EIP712_DOMAIN_TYPEHASH = keccak256(abi.encodePacked(EIP712_DOMAIN));
+    string constant EIP712_DOMAIN = "EIP712Domain(string name,string version,uint256 chainId)";
+    bytes32 public constant EIP712_DOMAIN_TYPEHASH = keccak256(abi.encodePacked(EIP712_DOMAIN));
 
-    string internal constant PRICE_DATA__TYPE = "PriceData(bytes32[] symbols,uint256[] values,uint256 timestamp)";
-    bytes32 internal constant PRICE_DATA__TYPEHASH = keccak256(abi.encodePacked(PRICE_DATA__TYPE));
+    string constant PRICE_DATA__TYPE = "PriceData(bytes32[] symbols,uint256[] values,uint256 timestamp)";
+    bytes32 constant PRICE_DATA__TYPEHASH = keccak256(abi.encodePacked(PRICE_DATA__TYPE));
 
     struct PriceData {
         bytes32[] symbols;

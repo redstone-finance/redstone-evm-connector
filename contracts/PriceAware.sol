@@ -16,8 +16,8 @@ contract PriceAware is PriceFeed {
     bytes32 constant MARKER = keccak256("Redstone.version.0.0.1");
     bytes32 constant SYMBOL = bytes32("ETH");
 
-    constructor(PriceVerifier _priceVerifier, uint256 _maxPriceDelayMilliseconds)
-      PriceFeed(_priceVerifier, _maxPriceDelayMilliseconds) { }
+    constructor(uint256 _maxPriceDelayMilliseconds)
+      PriceFeed(_maxPriceDelayMilliseconds) { }
 
     function getPriceFromMsg(bytes32 symbol) internal view returns(uint256) {
       bool isTxWithPricing = false;

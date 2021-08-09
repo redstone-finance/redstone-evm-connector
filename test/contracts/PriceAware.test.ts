@@ -30,17 +30,12 @@ describe("Price Aware", function () {
         const PriceFeed = await ethers.getContractFactory("PriceFeed");
         const Verifier = await ethers.getContractFactory("PriceVerifier");
 
-        verifier = (await Verifier.deploy()) as PriceVerifier;
-        priceFeed = (await PriceFeed.deploy(verifier.address, 5 * 60)) as PriceFeed;
+        //verifier = (await Verifier.deploy()) as PriceVerifier;
+        //priceFeed = (await PriceFeed.deploy(5 * 60)) as PriceFeed;
         signer = new ethers.Wallet(PRIV, owner.provider);
         
-        await priceFeed.authorizeSigner(signer.address);
-        console.log("Authorized signer: ", signer.address);
-
         const MockPriceAware = await ethers.getContractFactory("MockPriceAware");
-
-
-        pa = (await MockPriceAware.deploy(verifier.address, 5 * 60)) as MockPriceAware;
+        pa = (await MockPriceAware.deploy(5 * 60)) as MockPriceAware;
         await pa.authorizeSigner(signer.address);
     });
 

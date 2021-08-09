@@ -7,8 +7,8 @@ import "../PriceAware.sol";
 contract MockPriceAware is PriceAware {
 
 
-  constructor(PriceVerifier _priceVerifier, uint256 _maxPriceDelayMilliseconds)
-    PriceAware(_priceVerifier, _maxPriceDelayMilliseconds) { }
+  constructor(uint256 _maxPriceDelayMilliseconds)
+    PriceAware(_maxPriceDelayMilliseconds) { }
 
   function execute(uint val) public returns(uint256) {
     getPrice();

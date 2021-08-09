@@ -14,8 +14,8 @@ contract PriceAwareAsm is PriceFeed {
   using BytesLib for bytes;
   bytes32 constant MARKER = keccak256("Redstone.version.0.0.1");
 
-  constructor(PriceVerifier _priceVerifier, uint256 _maxPriceDelayMilliseconds)
-    PriceFeed(_priceVerifier, _maxPriceDelayMilliseconds) { }
+  constructor(uint256 _maxPriceDelayMilliseconds)
+    PriceFeed(_maxPriceDelayMilliseconds) { }
 
   function toUint16(bytes memory _bytes, uint256 _start) internal pure returns (uint16) {
     uint16 tempUint;
@@ -93,10 +93,10 @@ contract PriceAwareAsm is PriceFeed {
     (pd, signature) = abi.decode(rawPriceDataAndSig, (PriceData, bytes)); //2k gas
     //console.log("Signature: ");
     //console.logBytes(signature);
-    address signer = priceVerifier.recoverDataSigner(pd, signature);
+    //address signer = priceVerifier.recoverDataSigner(pd, signature);
 
     _checkPrices(pd, signature);
-    console.log("Signer: ", signer);
+    //console.log("Signer: ", signer);
     //        for(uint256 i=0; i < pd.symbols.length; i++) { //400 gas
     //          //console.log("Extracting price: ", pd.values[i]);
     //          if (pd.symbols[i] == symbol) { 

@@ -3,16 +3,17 @@
 pragma solidity ^0.8.2;
 pragma experimental ABIEncoderV2;
 
-import './PriceVerifier.sol';
+
 import './IPriceFeed.sol';
 import 'hardhat/console.sol';
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./PriceVerifier.sol";
 
-contract PriceFeed is IPriceFeed, PriceModel, Ownable {
+
+contract PriceFeed is IPriceFeed, PriceVerifier, Ownable {
 
     uint256 private constant MAX_FUTURE_PRICE_DIFF_MS = 15000;
 
-    PriceVerifier public priceVerifier;
     uint256 public maxPriceDelayMilliseconds;
 
     // A map indicating if a signer could be trusted by a client protocol
@@ -20,21 +21,21 @@ contract PriceFeed is IPriceFeed, PriceModel, Ownable {
 
     mapping(bytes32 => uint256) internal prices;
 
-    constructor(PriceVerifier _priceVerifier, uint256 _maxPriceDelayMilliseconds) {
-        require(address(_priceVerifier) != address(0), "Cannot set an empty verifier");
+    constructor(uint256 _maxPriceDelayMilliseconds) {
         require(_maxPriceDelayMilliseconds > 0, "Maximum price delay must be greater than 0");
-        priceVerifier = _priceVerifier;
         maxPriceDelayMilliseconds = _maxPriceDelayMilliseconds;
     }
 
 
-    function setPrices(PriceData calldata priceData, bytes calldata signature) external {
+    function setPrices(PriceData calldata _priceData, bytes calldata _signature) external {
+        PriceData memory priceData = _priceData;
+        bytes memory signature = _signature;
         _checkPrices(priceData, signature);
-        _setPrices(priceData);
+        _setPrices(_priceData);
     }
     
     function _checkPrices(PriceData memory priceData, bytes memory signature) public view {
-        address signer = priceVerifier.recoverDataSigner(priceData, signature);
+        address signer = recoverDataSigner(priceData, signature);
         uint256 blockTimestampMillseconds = block.timestamp * 1000;
 
         require(isSigner(signer), "Unauthorized price data signer");

@@ -10,25 +10,15 @@ import 'hardhat/console.sol';
 contract PriceVerifier is PriceModel {
     using ECDSA for bytes32;
 
-    bytes32 DOMAIN_SEPARATOR;
-
-    constructor() {
-        // For multi-chain testing
-        uint256 chainId = 1;
-        // assembly {
-        //     chainId := chainid()
-        // }
-
-        DOMAIN_SEPARATOR = keccak256(abi.encode(
-                EIP712_DOMAIN_TYPEHASH,
-                keccak256("Redstone"),
-                keccak256("0.4"),
-                chainId
-            ));
-    }
+    bytes32 constant DOMAIN_SEPARATOR = keccak256(abi.encode(
+        EIP712_DOMAIN_TYPEHASH,
+        keccak256("Redstone"),
+        keccak256("0.4"),
+        1 //chainId - to be removed
+    ));    
 
 
-    function recoverDataSigner(PriceData calldata priceData, bytes calldata signature) external view returns (address) {
+    function recoverDataSigner(PriceData memory priceData, bytes memory signature) internal view returns (address) {
         bytes32 hash = hashPriceData(priceData);
         return hash.recover(signature);
     }
@@ -36,7 +26,7 @@ contract PriceVerifier is PriceModel {
 
     // We follow the EIP-712 standard for structured data hashing and signing
     // Learn more: https://eips.ethereum.org/EIPS/eip-712
-    function hashPriceData(PriceData calldata priceData) public view returns (bytes32) {
+    function hashPriceData(PriceData memory priceData) internal view returns (bytes32) {
         return keccak256(abi.encodePacked(
             "\x19\x01",
             DOMAIN_SEPARATOR,
