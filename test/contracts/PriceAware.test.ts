@@ -3,7 +3,7 @@ import { Wallet } from "ethers";
 import chai from "chai";
 import { solidity } from "ethereum-waffle";
 import { MockDefi } from "../../typechain/MockDefi";
-import { PriceAware } from "../../typechain/PriceAware";
+import { MockPriceAware } from "../../typechain/MockPriceAware";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 import {PriceVerifier} from "../../typechain/PriceVerifier";
 import {PriceFeed} from "../../typechain/PriceFeed";
@@ -18,7 +18,7 @@ describe("Price Aware", function () {
     let owner:SignerWithAddress;
     let signer:Wallet;
 
-    let pa: PriceAware;
+    let pa: MockPriceAware;
     let priceFeed: PriceFeed;
     let verifier: PriceVerifier;
 
@@ -37,22 +37,20 @@ describe("Price Aware", function () {
         await priceFeed.authorizeSigner(signer.address);
         console.log("Authorized signer: ", signer.address);
 
-        const PriceAware = await ethers.getContractFactory("PriceAware");
+        const MockPriceAware = await ethers.getContractFactory("MockPriceAware");
 
 
-        pa = (await PriceAware.deploy(priceFeed.address)) as PriceAware;
+        pa = (await MockPriceAware.deploy(verifier.address, 5 * 60)) as MockPriceAware;
+        await pa.authorizeSigner(signer.address);
     });
 
     it("should get price", async function () {
         await pa.execute(1);
 
-        await pa.execute(1);        
-        expect(await pa.checkStorage()).to.be.equal(3);
-
         pa = wrapContract(pa);
-        await pa.executePriceAware(1);
-        await pa.executePriceAware(1);
-        expect(await pa.checkStorage()).to.be.equal(1000000001);
+        await pa.executeWithPrice(7);
+        //await pa.executePriceAware(1);
+        //expect(price).to.be.equal(1000000001);
     });
 
 

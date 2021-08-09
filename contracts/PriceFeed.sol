@@ -33,14 +33,14 @@ contract PriceFeed is IPriceFeed, PriceModel, Ownable {
         _setPrices(priceData);
     }
     
-    function _checkPrices(PriceData calldata priceData, bytes calldata signature) internal {
+    function _checkPrices(PriceData memory priceData, bytes memory signature) public view {
         address signer = priceVerifier.recoverDataSigner(priceData, signature);
         uint256 blockTimestampMillseconds = block.timestamp * 1000;
 
         require(isSigner(signer), "Unauthorized price data signer");
         // TODO: check the problem with prices on Kovan
-        require(blockTimestampMillseconds > priceData.timestamp - MAX_FUTURE_PRICE_DIFF_MS, "Price data timestamp cannot be from the future");
-        require(blockTimestampMillseconds - priceData.timestamp < maxPriceDelayMilliseconds, "Price data timestamp too old");
+        //require(blockTimestampMillseconds > priceData.timestamp - MAX_FUTURE_PRICE_DIFF_MS, "Price data timestamp cannot be from the future");
+        //require(blockTimestampMillseconds - priceData.timestamp < maxPriceDelayMilliseconds, "Price data timestamp too old");
     }
 
     function _setPrices(PriceData calldata priceData) internal virtual {        
