@@ -9,8 +9,6 @@ contract MockPriceAware is PriceAware {
   
   MockStatePriceProvider mockStatePriceProvider = new MockStatePriceProvider();
 
-  constructor(uint256 _maxPriceDelayMilliseconds)
-    PriceAware(_maxPriceDelayMilliseconds) { }
 
   function execute(uint val) public returns(uint256) {
     getPrice();

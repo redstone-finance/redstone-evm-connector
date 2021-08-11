@@ -14,18 +14,12 @@ contract PriceFeed is IPriceFeed, PriceVerifier, Ownable {
 
     uint256 private constant MAX_FUTURE_PRICE_DIFF_MS = 15000;
 
-    uint256 public maxPriceDelayMilliseconds;
+    uint256 public maxPriceDelayMilliseconds = 5 * 60 * 1000;
 
     // A map indicating if a signer could be trusted by a client protocol
     mapping(address => bool) trustedSigners;
 
     mapping(bytes32 => uint256) internal prices;
-
-    constructor(uint256 _maxPriceDelayMilliseconds) {
-        require(_maxPriceDelayMilliseconds > 0, "Maximum price delay must be greater than 0");
-        maxPriceDelayMilliseconds = _maxPriceDelayMilliseconds;
-    }
-
 
     function setPrices(PriceData calldata _priceData, bytes calldata _signature) external {
         PriceData memory priceData = _priceData;
@@ -51,6 +45,12 @@ contract PriceFeed is IPriceFeed, PriceVerifier, Ownable {
         for (uint256 i = 0; i < priceData.symbols.length; i++) {
             prices[priceData.symbols[i]] = priceData.values[i];
         }
+    }
+
+
+    function setMaxPriceDelay(uint256 _maxPriceDelayMilliseconds) external onlyOwner {
+        require(_maxPriceDelayMilliseconds > 0, "Maximum price delay must be greater than 0");
+        maxPriceDelayMilliseconds = _maxPriceDelayMilliseconds;
     }
 
 

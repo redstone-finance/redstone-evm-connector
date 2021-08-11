@@ -25,7 +25,7 @@ describe("Price Aware - basic version", function () {
         signer = new ethers.Wallet(PRIV, owner.provider);
         
         const MockPriceAware = await ethers.getContractFactory("MockPriceAware");
-        mockPriceAware = (await MockPriceAware.deploy(5 * 60)) as MockPriceAware;
+        mockPriceAware = (await MockPriceAware.deploy()) as MockPriceAware;
         await mockPriceAware.authorizeSigner(signer.address);
     });
 
@@ -52,7 +52,7 @@ describe("Price Aware - assembly version", function () {
         signer = new ethers.Wallet(PRIV, owner.provider);
 
         const MockPriceAware = await ethers.getContractFactory("MockPriceAwareAsm");
-        mockPriceAwareAsm = (await MockPriceAware.deploy(5 * 60)) as MockPriceAware;
+        mockPriceAwareAsm = (await MockPriceAware.deploy()) as MockPriceAware;
         await mockPriceAwareAsm.authorizeSigner(signer.address);
     });
 

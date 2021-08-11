@@ -15,9 +15,7 @@ contract PriceAware is PriceFeed {
 
     bytes32 constant MARKER = keccak256("Redstone.version.0.0.1");
 
-    constructor(uint256 _maxPriceDelayMilliseconds)
-      PriceFeed(_maxPriceDelayMilliseconds) { }
-
+  
     function getPriceFromMsg(bytes32 symbol) internal view returns(uint256) {
       bool isTxWithPricing = false;
       if (msg.data.length > 32) { //1k gas

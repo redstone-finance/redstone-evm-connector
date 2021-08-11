@@ -12,8 +12,6 @@ contract PriceFeedWithClearing is PriceFeed {
     // A user that sets the prices in the context of the current transaction
     address internal currentSetter;
 
-    constructor(uint256 _maxPriceDelay)
-        PriceFeed(_maxPriceDelay) {}
 
     function clearPrices(PriceData calldata priceData) external {
         require(currentSetter == msg.sender, "The prices could be cleared only by the address which set them");

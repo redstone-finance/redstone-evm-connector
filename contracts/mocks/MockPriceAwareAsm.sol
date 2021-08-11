@@ -9,8 +9,6 @@ contract MockPriceAwareAsm is PriceAwareAsm {
 
   MockStatePriceProvider mockStatePriceProvider = new MockStatePriceProvider();
 
-  constructor(uint256 _maxPriceDelayMilliseconds)
-  PriceAwareAsm(_maxPriceDelayMilliseconds) { }
 
   function execute(uint val) public returns(uint256) {
     return getPrice();

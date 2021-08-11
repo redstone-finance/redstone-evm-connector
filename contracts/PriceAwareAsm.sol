@@ -14,8 +14,6 @@ contract PriceAwareAsm is PriceFeed {
   using BytesLib for bytes;
   bytes32 constant MARKER = keccak256("Redstone.version.0.0.1");
 
-  constructor(uint256 _maxPriceDelayMilliseconds)
-    PriceFeed(_maxPriceDelayMilliseconds) { }
 
   function toUint16(bytes memory _bytes, uint256 _start) internal pure returns (uint16) {
     uint16 tempUint;
