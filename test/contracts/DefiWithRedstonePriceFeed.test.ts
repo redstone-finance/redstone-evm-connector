@@ -3,7 +3,6 @@ import chai from "chai";
 import { solidity } from "ethereum-waffle";
 import { MockDefi } from "../../typechain/MockDefi";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import {PriceVerifier} from "../../typechain/PriceVerifier";
 import redstone from 'redstone-api';
 const { wrapContract } = require("../../utils/contract-wrapper");
 
@@ -27,7 +26,6 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
     let admin: SignerWithAddress;
     let defi: MockDefi;
     let priceFeed: PriceFeed;
-    let verifier: PriceVerifier;
     let apiPrices: any;
 
     async function loadApiPrices() {
@@ -42,10 +40,8 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
         const Defi = await ethers.getContractFactory("MockDefi");
         const Proxy = await ethers.getContractFactory("RedstoneUpgradeableProxyWithoutClearing");
         const PriceFeed = await ethers.getContractFactory("PriceFeed");
-        const Verifier = await ethers.getContractFactory("PriceVerifier");
 
-        verifier = (await Verifier.deploy()) as PriceVerifier;
-        priceFeed = (await PriceFeed.deploy(verifier.address, 5 * 60 * 1000)) as PriceFeed;
+        priceFeed = (await PriceFeed.deploy()) as PriceFeed;
         await priceFeed.authorizeSigner(REDSTONE_STOCKS_PROVIDER_ADDRESS);
 
         defi = (await Defi.deploy()) as MockDefi;

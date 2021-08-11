@@ -4,7 +4,7 @@ import chai from "chai";
 import { solidity } from "ethereum-waffle";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 
-import { PriceVerifier } from "../../typechain/PriceVerifier";
+import { MockPriceVerifierProxy } from "../../typechain/MockPriceVerifierProxy";
 import EvmPriceSigner from "redstone-node/dist/src/utils/EvmPriceSigner";
 import {PricePackage} from "redstone-node/dist/src/types";
 import {PriceDataType} from "../../utils/contract-wrapper";
@@ -19,16 +19,16 @@ describe("Price data verification", function() {
   let owner: SignerWithAddress;
   let admin: SignerWithAddress;
   let signer: Wallet;
-  let verifier: PriceVerifier;
+  let verifier: MockPriceVerifierProxy;
   const priceSigner = new EvmPriceSigner();
 
   it("Should deploy functions", async function() {
     [owner, admin] = await ethers.getSigners();
 
-    const Verifier = await ethers.getContractFactory("PriceVerifier");
+    const Verifier = await ethers.getContractFactory("MockPriceVerifierProxy");
 
     signer = new ethers.Wallet(PRIV, owner.provider);
-    verifier = (await Verifier.deploy()) as PriceVerifier;
+    verifier = (await Verifier.deploy()) as MockPriceVerifierProxy;
   });
 
 
@@ -42,7 +42,7 @@ describe("Price data verification", function() {
 
     const signedData = priceSigner.signPricePackage(pricePackage, signer.privateKey);
     const serializedMessage = priceSigner.serializeToMessage(pricePackage) as PriceDataType;
-    expect(await verifier.recoverDataSigner(serializedMessage, signedData.signature)).equals(signer.address);
+    expect(await verifier.recoverDataSignerPublic(serializedMessage, signedData.signature)).equals(signer.address);
   });
 
 
@@ -64,7 +64,7 @@ describe("Price data verification", function() {
 
     const signedData = priceSigner.signPricePackage(differentPricePackage, signer.privateKey);
     const serializedMessage = priceSigner.serializeToMessage(pricePackage) as PriceDataType;
-    expect(await verifier.recoverDataSigner(serializedMessage, signedData.signature)).not.equals(signer.address);
+    expect(await verifier.recoverDataSignerPublic(serializedMessage, signedData.signature)).not.equals(signer.address);
   });
   
 
@@ -87,7 +87,7 @@ describe("Price data verification", function() {
 
       const signedData = priceSigner.signPricePackage(differentPricePackage, signer.privateKey);
       const serializedMessage = priceSigner.serializeToMessage(pricePackage) as PriceDataType;
-      expect(await verifier.recoverDataSigner(serializedMessage, signedData.signature)).not.equals(signer.address);
+      expect(await verifier.recoverDataSignerPublic(serializedMessage, signedData.signature)).not.equals(signer.address);
   });
 
 
@@ -109,7 +109,7 @@ describe("Price data verification", function() {
 
       const signedData = priceSigner.signPricePackage(differentPricePackage, signer.privateKey);
       const serializedMessage = priceSigner.serializeToMessage(pricePackage) as PriceDataType;
-      expect(await verifier.recoverDataSigner(serializedMessage, signedData.signature)).not.equals(signer.address);
+      expect(await verifier.recoverDataSignerPublic(serializedMessage, signedData.signature)).not.equals(signer.address);
   });
 
 
@@ -123,7 +123,7 @@ describe("Price data verification", function() {
 
       const signedData = priceSigner.signPricePackage(pricePackage, signer.privateKey);
       const serializedMessage = priceSigner.serializeToMessage(pricePackage) as PriceDataType;
-      expect(await verifier.recoverDataSigner(serializedMessage, signedData.signature)).equals(signer.address);
+      expect(await verifier.recoverDataSignerPublic(serializedMessage, signedData.signature)).equals(signer.address);
   });
 
 
@@ -138,7 +138,7 @@ describe("Price data verification", function() {
 
       const signedData = priceSigner.signPricePackage(pricePackage, signer.privateKey);
       const serializedMessage = priceSigner.serializeToMessage(pricePackage) as PriceDataType;
-      expect(await verifier.recoverDataSigner(serializedMessage, signedData.signature)).equals(signer.address);
+      expect(await verifier.recoverDataSignerPublic(serializedMessage, signedData.signature)).equals(signer.address);
   });
 
 
@@ -161,7 +161,7 @@ describe("Price data verification", function() {
 
       const signedData = priceSigner.signPricePackage(pricePackage, signer.privateKey);
       const serializedMessage = priceSigner.serializeToMessage(pricePackage) as PriceDataType;
-      expect(await verifier.recoverDataSigner(serializedMessage, signedData.signature)).equals(signer.address);
+      expect(await verifier.recoverDataSignerPublic(serializedMessage, signedData.signature)).equals(signer.address);
   });
 
 

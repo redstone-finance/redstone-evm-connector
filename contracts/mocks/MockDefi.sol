@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.2;
 
-import "./PriceFeed.sol";
+import "../PriceFeed.sol";
 import 'hardhat/console.sol';
 
 /***

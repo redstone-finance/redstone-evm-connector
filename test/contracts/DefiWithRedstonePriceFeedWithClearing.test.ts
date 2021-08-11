@@ -42,10 +42,8 @@ describe("MockDefi with Proxy contract and pricing Data (with clearing)", functi
         const Defi = await ethers.getContractFactory("MockDefi");
         const Proxy = await ethers.getContractFactory("RedstoneUpgradeableProxy");
         const PriceFeedWithClearing = await ethers.getContractFactory("PriceFeedWithClearing");
-        const Verifier = await ethers.getContractFactory("PriceVerifier");
 
-        verifier = (await Verifier.deploy()) as PriceVerifier;
-        priceFeed = (await PriceFeedWithClearing.deploy(verifier.address, 5 * 60 * 1000)) as PriceFeedWithClearing;
+        priceFeed = (await PriceFeedWithClearing.deploy()) as PriceFeedWithClearing;
         await priceFeed.authorizeSigner(REDSTONE_STOCKS_PROVIDER_ADDRESS);
 
         defi = (await Defi.deploy()) as MockDefi;

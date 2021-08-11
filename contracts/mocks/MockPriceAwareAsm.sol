@@ -24,4 +24,9 @@ contract MockPriceAwareAsm is PriceAwareAsm {
     return mockStatePriceProvider.getPrice(bytes32("ETH"));
   }
 
+
+  function getTime() public view returns(uint256) {
+    return block.timestamp;
+  }
+
 }

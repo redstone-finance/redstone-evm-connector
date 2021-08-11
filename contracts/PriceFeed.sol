@@ -33,9 +33,13 @@ contract PriceFeed is IPriceFeed, PriceVerifier, Ownable {
         uint256 blockTimestampMillseconds = block.timestamp * 1000;
 
         require(isSigner(signer), "Unauthorized price data signer");
+        
         // TODO: check the problem with prices on Kovan
         //require(blockTimestampMillseconds > priceData.timestamp - MAX_FUTURE_PRICE_DIFF_MS, "Price data timestamp cannot be from the future");
-        //require(blockTimestampMillseconds - priceData.timestamp < maxPriceDelayMilliseconds, "Price data timestamp too old");
+        //console.log("Block: ", blockTimestampMillseconds);
+        //console.log("Price: ", priceData.timestamp);
+        
+        require(blockTimestampMillseconds - priceData.timestamp < maxPriceDelayMilliseconds, "Price data timestamp too old");
     }
 
     function _setPrices(PriceData calldata priceData) internal virtual {        

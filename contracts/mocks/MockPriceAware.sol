@@ -22,6 +22,11 @@ contract MockPriceAware is PriceAware {
 
   function getPrice() internal view returns(uint256) {
     return mockStatePriceProvider.getPrice(bytes32("ETH"));
-  }  
+  }
+
+
+  function getTime() public view returns(uint256) {
+    return block.timestamp;
+  }
 
 }

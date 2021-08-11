@@ -19,42 +19,29 @@ describe("Price feed", function() {
   let owner: SignerWithAddress;
   let other: SignerWithAddress;
   let signer: Wallet;
-  let verifier: PriceVerifier;
   let priceFeed: PriceFeedWithClearing;
   let currentTime: number;
   const priceSigner = new EvmPriceSigner();
 
-  it("Should deploy the Verifier", async function() {
+  it("Should prepare the signer", async function() {
     [owner, other] = await ethers.getSigners();
 
-    const Verifier = await ethers.getContractFactory("PriceVerifier");
-
     signer = new ethers.Wallet(PRIV, owner.provider);
-    verifier = (await Verifier.deploy()) as PriceVerifier;
-  });
-
-
-  it("Should not allow creating price feed with an empty verifier", async function() {
-    const PriceFeedWithClearing = await ethers.getContractFactory("PriceFeedWithClearing");
-
-    await expect(PriceFeedWithClearing.deploy(ethers.constants.AddressZero, 5 * 60 * 1000))
-      .to.be.revertedWith('Cannot set an empty verifier');
-  });
-
-
-  it("Should not allow creating price feed with zero delay", async function() {
-    const PriceFeedWithClearing = await ethers.getContractFactory("PriceFeedWithClearing");
-
-    await expect(PriceFeedWithClearing.deploy(verifier.address, 0))
-      .to.be.revertedWith('Maximum price delay must be greater than 0');
   });
 
 
   it("Should deploy a price feed", async function() {
     const PriceFeedWithClearing = await ethers.getContractFactory("PriceFeedWithClearing");
 
-    priceFeed = await PriceFeedWithClearing.deploy(verifier.address, 5 * 60 * 1000) as PriceFeedWithClearing;
+    priceFeed = await PriceFeedWithClearing.deploy() as PriceFeedWithClearing;
     expect(priceFeed.address).not.to.equal(ethers.constants.AddressZero);
+  });
+
+
+  it("Should not allow setting zero delay", async function() {
+
+      await expect(priceFeed.setMaxPriceDelay(0))
+          .to.be.revertedWith('Maximum price delay must be greater than 0');
   });
 
 

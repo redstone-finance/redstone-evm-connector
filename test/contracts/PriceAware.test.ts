@@ -5,7 +5,8 @@ import { solidity } from "ethereum-waffle";
 
 import { MockPriceAware } from "../../typechain/MockPriceAware";
 import { MockPriceAwareAsm } from "../../typechain/MockPriceAwareAsm";
-import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { syncTime } from "../_helpers";
 const { wrapContract } = require("../../utils/contract-wrapper");
 
 chai.use(solidity);
@@ -33,6 +34,7 @@ describe("Price Aware - basic version", function () {
         await mockPriceAware.execute(1);
 
         mockPriceAware = wrapContract(mockPriceAware);
+        await syncTime();
         await mockPriceAware.executeWithPrice(7);
     });
 });
@@ -60,6 +62,7 @@ describe("Price Aware - assembly version", function () {
         await mockPriceAwareAsm.execute(1);
 
         mockPriceAwareAsm = wrapContract(mockPriceAwareAsm);
+        await syncTime();
         await mockPriceAwareAsm.executeWithPrice(7);
     });
 });

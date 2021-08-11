@@ -1,10 +1,10 @@
 import { ethers } from "hardhat";
+import {Wallet} from "ethers";
 import chai from "chai";
 import { solidity } from "ethereum-waffle";
 import { MockDefi } from "../../typechain/MockDefi";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import {Wallet} from "ethers";
-import {PriceVerifier} from "../../typechain/PriceVerifier";
+import { syncTime } from "../_helpers";
 const { wrapContract } = require("../../utils/contract-wrapper");
 
 import {PriceFeedWithClearing} from "../../typechain/PriceFeedWithClearing";
@@ -26,7 +26,6 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
   let admin: SignerWithAddress;
   let defi: MockDefi;
   let priceFeed: PriceFeedWithClearing;
-  let verifier: PriceVerifier;
   let signer: Wallet;
 
   it("Deployment should have zero balance", async function() {
@@ -35,12 +34,10 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
     const Defi = await ethers.getContractFactory("MockDefi");
     const Proxy = await ethers.getContractFactory("RedstoneUpgradeableProxy");
     const PriceFeedWithClearing = await ethers.getContractFactory("PriceFeedWithClearing");
-    const Verifier = await ethers.getContractFactory("PriceVerifier");
 
     signer = new ethers.Wallet(PRIV, owner.provider);
-
-    verifier = (await Verifier.deploy()) as PriceVerifier;
-    priceFeed = (await PriceFeedWithClearing.deploy(verifier.address, 5 * 60 * 1000)) as PriceFeedWithClearing;
+    
+    priceFeed = (await PriceFeedWithClearing.deploy()) as PriceFeedWithClearing;
     await priceFeed.authorizeSigner(signer.address);
 
     defi = (await Defi.deploy()) as MockDefi;
@@ -61,6 +58,7 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
 
     defi = wrapContract(defi);
 
+    await syncTime();
     await defi.deposit(toBytes32("ETH"), 100);
     await defi.deposit(toBytes32("AVAX"), 50);
 
