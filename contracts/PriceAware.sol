@@ -14,7 +14,6 @@ contract PriceAware is PriceFeed {
     using BytesLib for bytes;
 
     bytes32 constant MARKER = keccak256("Redstone.version.0.0.1");
-    bytes32 constant SYMBOL = bytes32("ETH");
 
     constructor(uint256 _maxPriceDelayMilliseconds)
       PriceFeed(_maxPriceDelayMilliseconds) { }
