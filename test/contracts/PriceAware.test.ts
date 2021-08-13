@@ -7,7 +7,7 @@ import { MockPriceAware } from "../../typechain/MockPriceAware";
 import { MockPriceAwareAsm } from "../../typechain/MockPriceAwareAsm";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { syncTime } from "../_helpers";
-const { wrapContract } = require("../../utils/contract-wrapper");
+const { wrapContract, wrapContractLite } = require("../../utils/contract-wrapper");
 
 chai.use(solidity);
 const { expect } = chai;
@@ -55,14 +55,18 @@ describe("Price Aware - assembly version", function () {
 
         const MockPriceAware = await ethers.getContractFactory("MockPriceAwareAsm");
         mockPriceAwareAsm = (await MockPriceAware.deploy()) as MockPriceAware;
-        await mockPriceAwareAsm.authorizeSigner(signer.address);
+        
+        //The more efficient version has inlined signer
+        //await mockPriceAwareAsm.authorizeSigner(signer.address);
     });
 
     it("should get price", async function () {
         await mockPriceAwareAsm.execute(1);
 
-        mockPriceAwareAsm = wrapContract(mockPriceAwareAsm);
+        //mockPriceAwareAsm = wrapContract(mockPriceAwareAsm);
+        mockPriceAwareAsm = wrapContractLite(mockPriceAwareAsm);
         await syncTime();
-        await mockPriceAwareAsm.executeWithPrice(7);
+        const answer = await mockPriceAwareAsm.executeWithPrice(7);
+        console.log("Answer: " + answer);
     });
 });

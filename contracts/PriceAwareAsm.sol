@@ -8,101 +8,90 @@ import 'hardhat/console.sol';
 import './PriceFeed.sol';
 import "@openzeppelin/contracts/proxy/Proxy.sol";
 import 'hardhat/console.sol';
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 
-contract PriceAwareAsm is PriceFeed {
+
+contract PriceAwareAsm  {
+  using ECDSA for bytes32;
   using BytesLib for bytes;
   bytes32 constant MARKER = keccak256("Redstone.version.0.0.1");
-
-
-  function toUint16(bytes memory _bytes, uint256 _start) internal pure returns (uint16) {
-    uint16 tempUint;
-
-    assembly {
-      tempUint := mload(add(add(_bytes, 0x2), _start))
-    }
-
-    return tempUint;
-  }
+  
+  uint constant MAX_DELAY = 3 * 60;
+  address constant TRUSTED_SIGNER = 0xFE71e9691B9524BC932C23d0EeD5c9CE41161884;
 
   function getPriceFromMsg(bytes32 symbol) internal view returns(uint256) {
-    //We may validate marker but it costs additional 1k of gas
-
-    //      bool isTxWithPricing = false;
-    //      if (msg.data.length > 32) { //1k gas
-    //        isTxWithPricing = msg.data.toBytes32(msg.data.length - 32) == MARKER;
-    //      }
-    //
-    //      bytes memory priceData;
-    //      uint16 priceDataLen;
-    //
-    //      if (isTxWithPricing) {
 
 
-
-    //uint16 priceDataLen = msg.data.toUint16(msg.data.length - 34); //1030 gas      
-
-    //        uint16 priceDataLen; //Only 28 gas
-    //        assembly { 
-    //          //Calldataload loads slots of 32 bytes
-    //          //The last 32 bytes are for MARKER
-    //          //We load the previous 32 bytes and automatically take the 2 least significant ones (casting to uint16)
-    //          priceDataLen := calldataload(sub(calldatasize(), 64))
-    //        }
-
-
-    //bytes memory cpy;
-
-
-    //priceData = msg.data.slice(msg.data.length - priceDataLen - 34, priceDataLen);
-    bytes memory data = msg.data;
-    bytes memory rawPriceDataAndSig;
-    assembly {
-      let priceDataLen := calldataload(sub(calldatasize(), 64))
-      rawPriceDataAndSig := mload(0x40)
-      mstore(rawPriceDataAndSig, priceDataLen)
-      calldatacopy(add(rawPriceDataAndSig, 0x20), sub(calldatasize(), add(priceDataLen, 30)), sub(priceDataLen,4))
-      mstore(0x40, add(rawPriceDataAndSig, add(priceDataLen, 0x20)))
+    uint8 dataSize; //Number of data entries    
+    //Saving ~1k of gas
+    assembly { 
+      //Calldataload loads slots of 32 bytes
+      //The last 65 bytes are for signature
+      //We load the previous 32 bytes and automatically take the 2 least significant ones (casting to uint16)
+      dataSize := calldataload(sub(calldatasize(), 97))
     }
+    
+    //dataSizeLen(1) + (symbolLen(32) + valueLen(32)) * dataSize
+    uint16 messageLength = dataSize * 64 + 33; //Length of data message in bytes
+    
+    
+    //bytes memory rawData = msg.data.slice(msg.data.length - messageLength - 65, messageLength);
+    //Saving ~2k of gas
+    bytes memory rawData;
+    assembly {
+      rawData := mload(0x40)
+      mstore(rawData, messageLength)
+      calldatacopy(add(rawData, 0x20), sub(calldatasize(), add(messageLength, 65)), messageLength)
+      mstore(0x40, add(rawData, 0x20))
+    }    
+    
+    
+    bytes32 hash = keccak256(rawData);
+    bytes32 hashWithPrefix = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hash));
 
-
-    //bytes memory lenBytes = msg.data.slice(msg.data.length - 34, 2);
-    //console.log(callBytes.length);
-    //console.logBytes32(callBytes);
-
-    //console.logBytes(data);
-    //console.logBytes(callBytes);
-
-    //bytes32 callBytes;
-    //bytes memory lenBytes = msg.data.slice(msg.data.length - 34, 2);
-    //        console.logBytes(msg.data);
-    //        console.logBytes32(callBytes);
-    //        console.log(priceDataLen);
-
-
-
-
-    //
-    //        //priceData = msg.data.slice(msg.data.length - priceDataLen - 34, priceDataLen);
-    // bytes memory priceData = msg.data.slice(msg.data.length - priceDataLen - 30, priceDataLen-4); //3k gas
-    //priceData = msg.data.slice(msg.data.length - priceDataLen - 34, priceDataLen);
-    PriceData memory pd;
+    //bytes memory signature = msg.data.slice(msg.data.length - 65, 65);
     bytes memory signature;
-    (pd, signature) = abi.decode(rawPriceDataAndSig, (PriceData, bytes)); //2k gas
-    //console.log("Signature: ");
-    //console.logBytes(signature);
-    //address signer = priceVerifier.recoverDataSigner(pd, signature);
+    assembly {
+      signature := mload(0x40)
+      mstore(signature, 65)
+      calldatacopy(add(signature, 0x20), sub(calldatasize(), 65), 65)
+      mstore(0x40, add(signature, 0x20))
+    }
+    
+    address signer = hashWithPrefix.recover(signature);
+    require(signer == TRUSTED_SIGNER, "Signer not authorized");
 
-    _checkPrices(pd, signature);
-    //console.log("Signer: ", signer);
-    //        for(uint256 i=0; i < pd.symbols.length; i++) { //400 gas
-    //          //console.log("Extracting price: ", pd.values[i]);
-    //          if (pd.symbols[i] == symbol) { 
-    //            return pd.values[i];
-    //          }
-    //        }
-    //}
-    return 2;
+    uint256 dataTimestamp;
+    assembly {
+      //Calldataload loads slots of 32 bytes
+      //The last 65 bytes are for signature + 1 for data size
+      //We load the previous 32 bytes
+      dataTimestamp := calldataload(sub(calldatasize(), 98))
+    }    
+    require(block.timestamp - dataTimestamp < MAX_DELAY, "Data is too old");
+    
+//    console.log("Len: ", messageLength);
+//    console.logBytes(rawData);
+//    console.logBytes32(hash);
+//    console.logBytes(signature);
+//    console.log("Signer: ", signer);
+
+
+    uint256 val;
+    uint256 max = dataSize;
+    bytes32 current;
+    uint256 i;
+    assembly {
+      let start := sub(calldatasize(), add(messageLength, 65))
+      for { i := 0 } lt(i, max) { i := add(i, 1) } {
+        val := calldataload(add(start, add(32, mul(i, 64))))
+        current := calldataload(add(start, mul(i, 64)))
+        if eq(current, symbol) { i := max }
+      }
+    }
+    
+    return val;
   }
 
 }

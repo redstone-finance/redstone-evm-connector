@@ -37,6 +37,7 @@
     "@openzeppelin/test-helpers": "^0.5.10",
     "@typechain/ethers-v5": "^6.0.5",
     "eth-sig-util": "^3.0.1",
+    "ethereumjs-util": "^7.1.0",
     "hardhat-typechain": "^0.3.5",
     "lodash": "^4.17.21",
     "redstone-api": "^0.4.0",

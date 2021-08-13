@@ -1,5 +1,7 @@
 import { ethers, Signer } from "ethers";
 import { PriceFeedWithClearing__factory } from "../typechain/factories/PriceFeedWithClearing__factory";
+import { personalSign } from "eth-sig-util";
+import { toBuffer, keccakFromString, keccak256, bufferToHex } from "ethereumjs-util";
 
 // TODO: Refactor this file and add many comments to make it more clear
 
@@ -43,6 +45,33 @@ async function getPriceData(signer: Signer, dataProvider: string, asset?: string
     return clearPricePrefix + setPriceData + priceDataLen.toString(16).padStart(4, "0"); // padStart helps to always have 2 bytes length for any number
 }
 
+async function getPriceDataLite(signer: Signer, dataProvider: string, asset?: string) {
+    let { priceData } = await getSignedPrice(dataProvider, asset);
+
+    const PRIV = "0xae2b81c1fe9e3b01f060362f03abd0c80a6447cfe00ff7fc7fcf000000000000";
+    
+    let data = "";
+    for(var i=0; i<priceData.symbols.length; i++) {
+        data += priceData.symbols[i].substr(2) + priceData.values[i].toString(16).padStart(64, "0");
+    }
+
+    data += Math.ceil(priceData.timestamp / 1000).toString(16).padStart(64, "0")
+         + priceData.symbols.length.toString(8).padStart(2, "0");
+    
+    console.log("Raw data");
+    console.log(data);
+    const hash = bufferToHex(keccak256(toBuffer("0x" + data)));
+
+    console.log("Hash: " + hash);
+    let signature = personalSign(toBuffer(PRIV), {data: hash});
+    console.log("Signature: " + signature);
+    
+    
+    data += signature.substr(2);
+
+    return data; 
+}
+
 export function wrapContract(contract: any, dataProvider: string = "MOCK", asset?: string) {
 
   const wrappedContract = {...contract};
@@ -70,6 +99,35 @@ export function wrapContract(contract: any, dataProvider: string = "MOCK", asset
   });
 
   return wrappedContract;
+}
+
+export function wrapContractLite(contract: any, dataProvider: string = "MOCK", asset?: string) {
+
+    const wrappedContract = {...contract};
+
+    const functionNames:string[] = Object.keys(contract.functions);
+    functionNames.forEach(functionName => {
+        if (functionName.indexOf("(") == -1) {
+            const isCall = contract.interface.getFunction(functionName).constant;
+            wrappedContract[functionName] = async function(...args: any[]) {
+
+                const tx = await contract.populateTransaction[functionName](...args);
+
+                // Here we append price data (currently with function signatures) to trasnation data
+                tx.data = tx.data + (await getPriceDataLite(contract.signer, dataProvider, asset));
+
+                if (isCall) {
+                    const result = await contract.signer.call(tx);
+                    const decoded =  contract.interface.decodeFunctionResult(functionName, result);
+                    return decoded.length == 1 ? decoded[0] : decoded;
+                } else {
+                    return await contract.signer.sendTransaction(tx);
+                }
+            };
+        }
+    });
+
+    return wrappedContract;
 }
 
 function getMarkerData() {
