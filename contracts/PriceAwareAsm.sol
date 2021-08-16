@@ -21,10 +21,13 @@ contract PriceAwareAsm  {
   address constant TRUSTED_SIGNER = 0xFE71e9691B9524BC932C23d0EeD5c9CE41161884;
 
   function getPriceFromMsg(bytes32 symbol) internal view returns(uint256) {
-
-
+    //The structure of calldata witn n - data items:
+    //The data that is signed (symbols, values, timestamp) are inside the {} brackets
+    //[origina_call_data| ?]{[[symbol | 32][value | 32] | n times][timestamp | 32]}[size | 1][signature | 65]
+    
+  
+    //1. First we extract dataSize - the number of data items (symbol,value pairs) in the message
     uint8 dataSize; //Number of data entries    
-    //Saving ~1k of gas
     assembly { 
       //Calldataload loads slots of 32 bytes
       //The last 65 bytes are for signature
@@ -32,25 +35,35 @@ contract PriceAwareAsm  {
       dataSize := calldataload(sub(calldatasize(), 97))
     }
     
-    //dataSizeLen(1) + (symbolLen(32) + valueLen(32)) * dataSize
+    
+    // 2. We calculate the size of signable message expressed in bytes
+    // ((symbolLen(32) + valueLen(32)) * dataSize + timeStamp length
     uint16 messageLength = dataSize * 64 + 32; //Length of data message in bytes
     
     
+    // 3. We extract the signableMessage
+
+    //(That's the high level equivalent 2k gas more expensive)
     //bytes memory rawData = msg.data.slice(msg.data.length - messageLength - 65, messageLength);
-    //Saving ~2k of gas
-    bytes memory rawData;
+    
+    bytes memory signableMessage;
     assembly {
-      rawData := mload(0x40)
-      mstore(rawData, messageLength)
+      signableMessage := mload(0x40)
+      mstore(signableMessage, messageLength)
       //The starting point is callDataSize minus length of data(messageLength), signature(65) and size(1) = 66
-      calldatacopy(add(rawData, 0x20), sub(calldatasize(), add(messageLength, 66)), messageLength)
-      mstore(0x40, add(rawData, 0x20))
+      calldatacopy(add(signableMessage, 0x20), sub(calldatasize(), add(messageLength, 66)), messageLength)
+      mstore(0x40, add(signableMessage, 0x20))
     }    
     
     
-    bytes32 hash = keccak256(rawData);
+    // 4. We first hash the raw message and then hash it again with the prefix
+    // Following the https://github.com/ethereum/eips/issues/191 standard
+    bytes32 hash = keccak256(signableMessage);
     bytes32 hashWithPrefix = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hash));
 
+    // 5. We extract the off-chain signature from calldata
+    
+    //(That's the high level equivalent 2k gas more expensive)
     //bytes memory signature = msg.data.slice(msg.data.length - 65, 65);
     bytes memory signature;
     assembly {
@@ -60,9 +73,13 @@ contract PriceAwareAsm  {
       mstore(0x40, add(signature, 0x20))
     }
     
+    // 6. We verify the off-chain signature against on-chain hashed data
+    
     address signer = hashWithPrefix.recover(signature);
     require(signer == TRUSTED_SIGNER, "Signer not authorized");
 
+    //7. We extract timestamp from callData
+    
     uint256 dataTimestamp;
     assembly {
       //Calldataload loads slots of 32 bytes
@@ -72,25 +89,31 @@ contract PriceAwareAsm  {
     }    
     require(block.timestamp - dataTimestamp < MAX_DELAY, "Data is too old");
     
+    //Debugging logs (to be removed)
+    
 //    console.log("Len: ", messageLength);
 //    console.logBytes(rawData);
 //    console.logBytes32(hash);
 //    console.logBytes(signature);
 //    console.log("Signer: ", signer);
 
+    
+    //8. We iterate directly through call data to extract the value for a given symbol
 
     uint256 val;
     uint256 max = dataSize;
-    bytes32 current;
+    bytes32 currentSymbol;
     uint256 i;
     assembly {
-      let start := sub(calldatasize(), add(messageLength, 65))
+      let start := sub(calldatasize(), add(messageLength, 66))
       for { i := 0 } lt(i, max) { i := add(i, 1) } {
         val := calldataload(add(start, add(32, mul(i, 64))))
-        current := calldataload(add(start, mul(i, 64)))
-        if eq(current, symbol) { i := max }
+        currentSymbol := calldataload(add(start, mul(i, 64)))
+        if eq(currentSymbol, symbol) { i := max }
       }
     }
+    
+    console.log("VAL: ", val);
     
     return val;
   }

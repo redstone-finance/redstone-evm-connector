@@ -62,12 +62,10 @@ describe("Price Aware - assembly version", function () {
     });
 
     it("should get price", async function () {
-        //await mockPriceAwareAsm.execute(1);
 
-        //mockPriceAwareAsm = wrapContract(mockPriceAwareAsm);
         mockPriceAwareAsm = wrapContractLite(mockPriceAwareAsm);
-        //await syncTime();
+        //await syncTime(); // recommended for hardhat test
         let tx = await mockPriceAwareAsm.executeWithPrice(7);
-        console.log(tx);
+        console.log("Executed with RedStone price: " + tx.hash);
     });
 });
