@@ -55,8 +55,7 @@ async function getPriceDataLite(signer: Signer, dataProvider: string, asset?: st
         data += priceData.symbols[i].substr(2) + priceData.values[i].toString(16).padStart(64, "0");
     }
 
-    data += Math.ceil(priceData.timestamp / 1000).toString(16).padStart(64, "0")
-         + priceData.symbols.length.toString(8).padStart(2, "0");
+    data += Math.ceil(priceData.timestamp / 1000).toString(16).padStart(64, "0");         
     
     console.log("Raw data");
     console.log(data);
@@ -67,7 +66,8 @@ async function getPriceDataLite(signer: Signer, dataProvider: string, asset?: st
     console.log("Signature: " + signature);
     
     
-    data += signature.substr(2);
+    data += priceData.symbols.length.toString(8).padStart(2, "0")
+            + signature.substr(2);
 
     return data; 
 }

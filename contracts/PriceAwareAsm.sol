@@ -33,7 +33,7 @@ contract PriceAwareAsm  {
     }
     
     //dataSizeLen(1) + (symbolLen(32) + valueLen(32)) * dataSize
-    uint16 messageLength = dataSize * 64 + 33; //Length of data message in bytes
+    uint16 messageLength = dataSize * 64 + 32; //Length of data message in bytes
     
     
     //bytes memory rawData = msg.data.slice(msg.data.length - messageLength - 65, messageLength);
@@ -42,7 +42,8 @@ contract PriceAwareAsm  {
     assembly {
       rawData := mload(0x40)
       mstore(rawData, messageLength)
-      calldatacopy(add(rawData, 0x20), sub(calldatasize(), add(messageLength, 65)), messageLength)
+      //The starting point is callDataSize minus length of data(messageLength), signature(65) and size(1) = 66
+      calldatacopy(add(rawData, 0x20), sub(calldatasize(), add(messageLength, 66)), messageLength)
       mstore(0x40, add(rawData, 0x20))
     }    
     
