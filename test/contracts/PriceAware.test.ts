@@ -24,7 +24,7 @@ describe("Price Aware - basic version", function () {
         [owner] = await ethers.getSigners();
 
         signer = new ethers.Wallet(PRIV, owner.provider);
-        
+
         const MockPriceAware = await ethers.getContractFactory("MockPriceAware");
         mockPriceAware = (await MockPriceAware.deploy()) as MockPriceAware;
         await mockPriceAware.authorizeSigner(signer.address);
@@ -58,15 +58,16 @@ describe("Price Aware - assembly version", function () {
         
         //The more efficient version has inlined signer
         //await mockPriceAwareAsm.authorizeSigner(signer.address);
+        console.log("MockPriceAware deployed: " + mockPriceAwareAsm.address);
     });
 
     it("should get price", async function () {
-        await mockPriceAwareAsm.execute(1);
+        //await mockPriceAwareAsm.execute(1);
 
         //mockPriceAwareAsm = wrapContract(mockPriceAwareAsm);
         mockPriceAwareAsm = wrapContractLite(mockPriceAwareAsm);
-        await syncTime();
-        const answer = await mockPriceAwareAsm.executeWithPrice(7);
-        console.log("Answer: " + answer);
+        //await syncTime();
+        let tx = await mockPriceAwareAsm.executeWithPrice(7);
+        console.log(tx);
     });
 });
