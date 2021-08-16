@@ -17,7 +17,7 @@ const serialized = function (x: number): number {
     return x * 10**8;
 };
 
-describe("MockDefi with Proxy contract and pricing Data", function() {
+describe("MockDefi with Proxy contract and mock pricing Data", function() {
 
   const PRIV = "0xae2b81c1fe9e3b01f060362f03abd0c80a6447cfe00ff7fc7fcf000000000000";
 
@@ -67,6 +67,7 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
 
   it("Should check balance - read no pricing info", async function() {
 
+    await syncTime();
     expect(await defi.balanceOf(signer.address, toBytes32("ETH"))).to.be.equal(100);
     expect(await defi.balanceOf(signer.address, toBytes32("AVAX"))).to.be.equal(50);
 
@@ -75,6 +76,7 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
 
   it("Should check value - read with pricing info", async function() {
 
+    await syncTime();
     expect(await defi.currentValueOf(signer.address, toBytes32("ETH"))).to.be.equal(serialized(1000));
     expect(await defi.currentValueOf(signer.address, toBytes32("AVAX"))).to.be.equal(serialized(250));
 
@@ -83,6 +85,7 @@ describe("MockDefi with Proxy contract and pricing Data", function() {
 
   it("Should swap - write with pricing info", async function() {
 
+    await syncTime();
     let tx = await defi.swap(toBytes32("ETH"), toBytes32("AVAX"), 10);
     expect(tx).is.not.undefined;
     
