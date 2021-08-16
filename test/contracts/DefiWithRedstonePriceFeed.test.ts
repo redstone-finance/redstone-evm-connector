@@ -16,7 +16,7 @@ const serialized = function (x: number): number {
     return x * 10**8;
 };
 
-describe("MockDefi with Proxy contract and pricing Data", function() {
+describe("MockDefi with Proxy contract and real pricing Data", function() {
 
     const REDSTONE_STOCKS_PROVIDER = "Yba8IVc_01bFxutKNJAZ7CmTD5AVi2GcWXf1NajPAsc";
     const REDSTONE_STOCKS_PROVIDER_ADDRESS = "0x926E370fD53c23f8B71ad2B3217b227E41A92b12";
