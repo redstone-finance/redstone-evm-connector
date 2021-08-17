@@ -3,11 +3,11 @@ import { Wallet } from "ethers";
 import chai from "chai";
 import { solidity } from "ethereum-waffle";
 
-import { MockPriceAware } from "../../typechain/MockPriceAware";
-import { MockPriceAwareAsm } from "../../typechain/MockPriceAwareAsm";
+import { MockPriceAware } from "../typechain/MockPriceAware";
+import { MockPriceAwareAsm } from "../typechain/MockPriceAwareAsm";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { syncTime } from "../_helpers";
-const { wrapContract, wrapContractLite } = require("../../utils/contract-wrapper");
+import { syncTime } from "../test/_helpers";
+const { wrapContract, wrapContractLite } = require("../utils/contract-wrapper");
 
 chai.use(solidity);
 const { expect } = chai;

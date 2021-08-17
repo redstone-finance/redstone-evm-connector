@@ -4,10 +4,10 @@ import chai from "chai";
 import { solidity } from "ethereum-waffle";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 
-import { MockPriceVerifierProxy } from "../../typechain/MockPriceVerifierProxy";
+import { MockPriceVerifierProxy } from "../typechain/MockPriceVerifierProxy";
 import EvmPriceSigner from "redstone-node/dist/src/utils/EvmPriceSigner";
 import {PricePackage} from "redstone-node/dist/src/types";
-import {PriceDataType} from "../../utils/contract-wrapper";
+import {PriceDataType} from "../utils/contract-wrapper";
 
 chai.use(solidity);
 const { expect } = chai;

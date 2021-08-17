@@ -1,4 +1,4 @@
-import {ethers, Signer} from "ethers";
+import {Contract, ethers, Signer} from "ethers";
 import {PriceFeedWithClearing__factory} from "../typechain/factories/PriceFeedWithClearing__factory";
 import {personalSign} from "eth-sig-util";
 import {bufferToHex, keccak256, toBuffer} from "ethereumjs-util";
@@ -72,7 +72,8 @@ async function getPriceDataLite(signer: Signer, dataProvider: string, asset?: st
   return data;
 }
 
-export function wrapContract(contract: any, dataProvider: string = "MOCK", asset?: string) {
+export function wrapContract<T extends Contract>
+  (contract: T, dataProvider: string = "MOCK", asset?: string): T {
 
   const wrappedContract = {...contract};
 
@@ -80,11 +81,12 @@ export function wrapContract(contract: any, dataProvider: string = "MOCK", asset
   functionNames.forEach(functionName => {
     if (functionName.indexOf("(") == -1) {
       const isCall = contract.interface.getFunction(functionName).constant;
-      wrappedContract[functionName] = async function (...args: any[]) {
+
+      (wrappedContract[functionName] as any) = async function (...args: any[]) {
 
         const tx = await contract.populateTransaction[functionName](...args);
 
-        // Here we append price data (currently with function signatures) to trasnation data
+        // Here we append price data (currently with function signatures) to transaction data
         tx.data = tx.data + (await getPriceData(contract.signer, dataProvider, asset)) + getMarkerData();
 
         if (isCall) {
