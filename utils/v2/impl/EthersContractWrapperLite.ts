@@ -1,28 +1,22 @@
 import {Contract, Signer} from "ethers";
-import {MockConnector} from "../connector/impl/MockConnector";
-import {RedStoneApiConnector, RedStoneProvider} from "../connector/impl/RedStoneApiConnector";
+import {MockPriceFeed} from "../connector/impl/MockPriceFeed";
 import {EthersContractWrapper} from "./EthersContractWrapper";
 import {bufferToHex, keccak256, toBuffer} from "ethereumjs-util";
 import {personalSign} from "eth-sig-util";
+import {EthersContractWrapperLiteBuilder} from "./EthersContractWrapperLiteBuilder";
 
 export class EthersContractWrapperLite<T extends Contract> extends EthersContractWrapper<T> {
 
-
-  static usingMockPriceFeed<T extends Contract>(baseContract: T) {
-    return new EthersContractWrapperLite(baseContract, new MockConnector());
+  static wrapLite<T extends Contract>(contract: T): EthersContractWrapperLiteBuilder<T> {
+    return new EthersContractWrapperLiteBuilder(contract);
   }
-
-  static usingRedstoneApi<T extends Contract>(baseContract: T, providerId: RedStoneProvider) {
-    return new EthersContractWrapperLite(baseContract, new RedStoneApiConnector(providerId))
-  }
-
 
   protected getMarkerData() {
     return "";
   }
 
   protected async getPriceData(signer: Signer, asset?: string) {
-    const {priceData} = await this.apiConnector.getSignedPrice(asset)
+    const {priceData} = await this.apiConnector.getSignedPrice()
 
     let data = "";
     for (let i = 0; i < priceData.symbols.length; i++) {
@@ -31,7 +25,7 @@ export class EthersContractWrapperLite<T extends Contract> extends EthersContrac
 
     data += Math.ceil(priceData.timestamp / 1000).toString(16).padStart(64, "0");
     const hash = bufferToHex(keccak256(toBuffer("0x" + data)));
-    const signature = personalSign(toBuffer(MockConnector.P_KEY), {data: hash});
+    const signature = personalSign(toBuffer(MockPriceFeed.P_KEY), {data: hash});
     data += priceData.symbols.length.toString(8).padStart(2, "0")
       + signature.substr(2);
 

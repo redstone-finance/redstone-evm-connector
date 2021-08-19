@@ -9,7 +9,7 @@ import {mockModule, syncTime} from "../_helpers";
 import {PriceFeedWithClearing} from "../../typechain/PriceFeedWithClearing";
 import * as MockProvider from "../../utils/mock-price-package";
 import * as sinon from 'sinon';
-import {MockConnector} from "../../utils/v2/connector/impl/MockConnector";
+import {MockPriceFeed} from "../../utils/v2/connector/impl/MockPriceFeed";
 import {EthersContractWrapper} from "../../utils/v2/impl/EthersContractWrapper";
 
 chai.use(solidity);
@@ -27,7 +27,7 @@ describe("MockDefi with Proxy contract and mock pricing Data", function () {
 
   let sandbox: sinon.SinonSandbox;
 
-  const mockApiConnector = new MockConnector();
+  const mockApiConnector = new MockPriceFeed();
 
   const mockProvider = mockModule<typeof MockProvider>(MockProvider, {
     mockPricePackage: (forTime: number) => {
@@ -84,8 +84,8 @@ describe("MockDefi with Proxy contract and mock pricing Data", function () {
   it("Should deposit - write no pricing info", async function () {
 
     defi = EthersContractWrapper
-      .usingMockPriceFeed(defi)
-      .wrap();
+      .wrap(defi)
+      .usingMockPriceFeed();
 
     await syncTime();
     await defi.deposit(toBytes32("ETH"), 100);

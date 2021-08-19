@@ -2,8 +2,7 @@ import {ContractWrapper} from "../ContractWrapper";
 import {Contract, ethers, Signer} from "ethers";
 import {PriceFeedConnector} from "../connector/PriceFeedConnector";
 import {PriceFeedWithClearing__factory} from "../../../typechain";
-import {MockConnector} from "../connector/impl/MockConnector";
-import {RedStoneApiConnector, RedStoneProvider} from "../connector/impl/RedStoneApiConnector";
+import {EthersContractWrapperBuilder} from "./EthersContractWrapperBuilder";
 
 export class EthersContractWrapper<T extends Contract> implements ContractWrapper<T> {
 
@@ -12,12 +11,8 @@ export class EthersContractWrapper<T extends Contract> implements ContractWrappe
     protected readonly apiConnector: PriceFeedConnector) {
   }
 
-  static usingMockPriceFeed<T extends Contract>(baseContract: T) {
-    return new EthersContractWrapper(baseContract, new MockConnector());
-  }
-
-  static usingRedstoneApi<T extends Contract>(baseContract: T, providerId: RedStoneProvider) {
-    return new EthersContractWrapper(baseContract, new RedStoneApiConnector(providerId));
+  static wrap<T extends Contract>(contract: T): EthersContractWrapperBuilder<T> {
+    return new EthersContractWrapperBuilder(contract);
   }
 
   wrap(asset?: string): T {
@@ -58,7 +53,7 @@ export class EthersContractWrapper<T extends Contract> implements ContractWrappe
   }
 
   protected async getPriceData(signer: Signer, asset?: string) {
-    const {priceData, signature} = await this.apiConnector.getSignedPrice(asset);
+    const {priceData, signature} = await this.apiConnector.getSignedPrice();
 
     const priceFeed = PriceFeedWithClearing__factory.connect(ethers.constants.AddressZero, signer);
     const setPriceTx = await priceFeed.populateTransaction.setPrices(priceData, signature);

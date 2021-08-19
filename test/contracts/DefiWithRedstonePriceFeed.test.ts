@@ -56,8 +56,8 @@ describe("MockDefi with Proxy contract and real pricing Data", function () {
   it("Should deposit - write no pricing info multi", async function () {
 
     defi = EthersContractWrapper
-      .usingRedstoneApi(defi, "redstone-stocks")
-      .wrap();
+      .wrap(defi)
+      .usingRedStonePriceFeed("redstone-stocks");
 
     await defi.deposit(toBytes32("GOOG"), 1);
     await defi.deposit(toBytes32("IBM"), 1);
@@ -80,8 +80,8 @@ describe("MockDefi with Proxy contract and real pricing Data", function () {
   it("Should deposit - write no pricing info single", async function () {
 
     defi = EthersContractWrapper
-      .usingRedstoneApi(defi, "redstone-stocks")
-      .wrap("FB");
+      .wrap(defi)
+      .usingRedStonePriceFeed("redstone-stocks", "FB");
 
     await Promise.all([
       defi.deposit(toBytes32("FB"), 1),
@@ -94,7 +94,6 @@ describe("MockDefi with Proxy contract and real pricing Data", function () {
   it("Should inject correct prices from API single", async function () {
     expect(await defi.currentValueOf(owner.address, toBytes32("FB")))
       .to.be.equal(serialized(apiPrices['FB'].value).toFixed(0));
-
   });
 
 

@@ -1,20 +1,22 @@
-import {PriceFeedConnector, SignedPriceDataType} from "../PriceFeedConnector";
+import {PriceDataType, PriceFeedConnector, SignedPriceDataType} from "../PriceFeedConnector";
 import EvmPriceSigner from "redstone-node/dist/src/utils/EvmPriceSigner";
-import {PriceDataType} from "../../../contract-wrapper";
 import {mockPricePackage} from "../../../mock-price-package";
 import {Wallet} from "ethers";
 import {SignedPricePackage} from "redstone-node/dist/src/types";
 
 
-export class MockConnector implements PriceFeedConnector {
+export class MockPriceFeed implements PriceFeedConnector {
 
   static readonly P_KEY = "0xae2b81c1fe9e3b01f060362f03abd0c80a6447cfe00ff7fc7fcf000000000000";
 
   private readonly priceSigner = new EvmPriceSigner();
-  private readonly signer = new Wallet(MockConnector.P_KEY);
+  private readonly signer = new Wallet(MockPriceFeed.P_KEY);
+
+  constructor() {
+  }
 
 
-  async getSignedPrice(asset?: string): Promise<SignedPriceDataType> {
+  async getSignedPrice(): Promise<SignedPriceDataType> {
     const currentTime = Math.round(new Date().getTime());
     const pricePackage = mockPricePackage(currentTime);
 
@@ -28,6 +30,5 @@ export class MockConnector implements PriceFeedConnector {
       signature: signedPackage.signature
     };
   }
-
 
 }

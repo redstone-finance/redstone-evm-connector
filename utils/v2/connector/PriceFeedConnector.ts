@@ -12,5 +12,5 @@ export type SignedPriceDataType = {
 };
 
 export interface PriceFeedConnector {
-  getSignedPrice(asset?: string): Promise<SignedPriceDataType>;
+  getSignedPrice(): Promise<SignedPriceDataType>;
 }
