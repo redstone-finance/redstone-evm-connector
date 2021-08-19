@@ -1,16 +1,17 @@
-import { ethers } from "hardhat";
-import { Wallet } from "ethers";
+import {ethers} from "hardhat";
+import {Wallet} from "ethers";
 import chai from "chai";
-import { solidity } from "ethereum-waffle";
+import {solidity} from "ethereum-waffle";
 
-import { MockPriceAware } from "../typechain/MockPriceAware";
-import { MockPriceAwareAsm } from "../typechain/MockPriceAwareAsm";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { syncTime } from "../test/_helpers";
-const { wrapContract, wrapContractLite } = require("../utils/contract-wrapper");
+import {MockPriceAware} from "../../typechain/MockPriceAware";
+import {MockPriceAwareAsm} from "../../typechain/MockPriceAwareAsm";
+import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
+import {syncTime} from "../_helpers";
+import {EthersContractWrapper} from "../../utils/v2/impl/EthersContractWrapper";
+import {EthersContractWrapperLite} from "../../utils/v2/impl/EthersContractWrapperLite";
+import {MockConnector} from "../../utils/v2/connector/impl/MockConnector";
 
 chai.use(solidity);
-const { expect } = chai;
 
 describe("Price Aware - basic version", function () {
     let owner:SignerWithAddress;
@@ -18,12 +19,10 @@ describe("Price Aware - basic version", function () {
 
     let mockPriceAware: MockPriceAware;
 
-    const PRIV = "0xae2b81c1fe9e3b01f060362f03abd0c80a6447cfe00ff7fc7fcf000000000000";
-
     it("should deploy contracts", async function () {
         [owner] = await ethers.getSigners();
 
-        signer = new ethers.Wallet(PRIV, owner.provider);
+        signer = new ethers.Wallet(MockConnector.P_KEY, owner.provider);
 
         const MockPriceAware = await ethers.getContractFactory("MockPriceAware");
         mockPriceAware = (await MockPriceAware.deploy()) as MockPriceAware;
@@ -33,7 +32,9 @@ describe("Price Aware - basic version", function () {
     it("should get price", async function () {
         await mockPriceAware.execute(1);
 
-        mockPriceAware = wrapContract(mockPriceAware);
+        mockPriceAware = EthersContractWrapper
+          .usingMockPriceFeed(mockPriceAware)
+          .wrap();
         await syncTime();
         await mockPriceAware.executeWithPrice(7);
     });
@@ -46,12 +47,10 @@ describe("Price Aware - assembly version", function () {
 
     let mockPriceAwareAsm: MockPriceAwareAsm;
 
-    const PRIV = "0xae2b81c1fe9e3b01f060362f03abd0c80a6447cfe00ff7fc7fcf000000000000";
-
     it("should deploy contracts", async function () {
         [owner] = await ethers.getSigners();
 
-        signer = new ethers.Wallet(PRIV, owner.provider);
+        signer = new ethers.Wallet(MockConnector.P_KEY, owner.provider);
 
         const MockPriceAware = await ethers.getContractFactory("MockPriceAwareAsm");
         mockPriceAwareAsm = (await MockPriceAware.deploy()) as MockPriceAware;
@@ -63,7 +62,7 @@ describe("Price Aware - assembly version", function () {
 
     it("should get price", async function () {
 
-        mockPriceAwareAsm = wrapContractLite(mockPriceAwareAsm);
+        mockPriceAwareAsm = EthersContractWrapperLite.usingMockPriceFeed(mockPriceAwareAsm).wrap();
         //await syncTime(); // recommended for hardhat test
         let tx = await mockPriceAwareAsm.executeWithPrice(7);
         console.log("Executed with RedStone price: " + tx.hash);
