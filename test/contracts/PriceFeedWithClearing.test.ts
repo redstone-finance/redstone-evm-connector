@@ -1,13 +1,12 @@
-import { ethers } from "hardhat";
+import {ethers} from "hardhat";
 import chai from "chai";
-import { solidity } from "ethereum-waffle";
-import { PriceVerifier } from "../../typechain/PriceVerifier";
-import { PriceFeedWithClearing } from "../../typechain/PriceFeedWithClearing";
+import {solidity} from "ethereum-waffle";
+import {PriceFeedWithClearing} from "../../typechain/PriceFeedWithClearing";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 import {Wallet} from "ethers";
 import {PricePackage} from "redstone-node/dist/src/types";
-import {PriceDataType} from "../../utils/contract-wrapper";
-import EvmPriceSigner from "redstone-node/dist/src/utils/EvmPriceSigner";
+import {PriceDataType} from "../../utils/v2/connector/PriceFeedConnector";
+import EvmPriceSigner from "redstone-node/dist/src/signers/EvmPriceSigner";
 
 chai.use(solidity);
 const { expect } = chai;

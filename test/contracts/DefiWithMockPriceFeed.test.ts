@@ -7,9 +7,10 @@ import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 import {mockModule, syncTime} from "../_helpers";
 
 import {PriceFeedWithClearing} from "../../typechain/PriceFeedWithClearing";
-import {wrapContract} from "../../utils/contract-wrapper";
 import * as MockProvider from "../../utils/mock-price-package";
 import * as sinon from 'sinon';
+import {MockPriceFeed} from "../../utils/v2/connector/impl/MockPriceFeed";
+import {EthersContractWrapper} from "../../utils/v2/impl/EthersContractWrapper";
 
 chai.use(solidity);
 
@@ -25,6 +26,8 @@ describe("MockDefi with Proxy contract and mock pricing Data", function () {
   const PRIV = "0xae2b81c1fe9e3b01f060362f03abd0c80a6447cfe00ff7fc7fcf000000000000";
 
   let sandbox: sinon.SinonSandbox;
+
+  const mockApiConnector = new MockPriceFeed();
 
   const mockProvider = mockModule<typeof MockProvider>(MockProvider, {
     mockPricePackage: (forTime: number) => {
@@ -80,7 +83,9 @@ describe("MockDefi with Proxy contract and mock pricing Data", function () {
 
   it("Should deposit - write no pricing info", async function () {
 
-    defi = wrapContract(defi);
+    defi = EthersContractWrapper
+      .wrap(defi)
+      .usingMockPriceFeed();
 
     await syncTime();
     await defi.deposit(toBytes32("ETH"), 100);
