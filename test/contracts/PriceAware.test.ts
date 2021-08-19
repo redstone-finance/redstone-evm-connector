@@ -10,7 +10,6 @@ import {syncTime} from "../_helpers";
 import {EthersContractWrapper} from "../../utils/v2/impl/EthersContractWrapper";
 import {EthersContractWrapperLite} from "../../utils/v2/impl/EthersContractWrapperLite";
 import {MockPriceFeed} from "../../utils/v2/connector/impl/MockPriceFeed";
-import {mock} from "sinon";
 
 chai.use(solidity);
 

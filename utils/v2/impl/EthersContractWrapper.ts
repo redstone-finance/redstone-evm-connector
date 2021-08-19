@@ -47,12 +47,12 @@ export class EthersContractWrapper<T extends Contract> implements ContractWrappe
     return wrappedContract;
   }
 
-  protected getMarkerData() {
+  protected getMarkerData(): string {
     const marker = ethers.utils.id("Redstone.version.0.0.1");
     return EthersContractWrapper.remove0xFromHexString(marker);
   }
 
-  protected async getPriceData(signer: Signer, asset?: string) {
+  protected async getPriceData(signer: Signer, asset?: string): Promise<string> {
     const {priceData, signature} = await this.apiConnector.getSignedPrice();
 
     const priceFeed = PriceFeedWithClearing__factory.connect(ethers.constants.AddressZero, signer);

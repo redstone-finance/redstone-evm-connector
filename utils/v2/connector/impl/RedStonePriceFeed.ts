@@ -1,7 +1,7 @@
 import {PriceDataType, PriceFeedConnector, SignedPriceDataType} from "../PriceFeedConnector";
 import axios from "axios";
-import EvmPriceSigner from "redstone-node/dist/src/utils/EvmPriceSigner";
 import _ from "lodash";
+import EvmPriceSigner from "redstone-node/dist/src/signers/EvmPriceSigner";
 
 export type RedStoneProvider = "redstone" | "redstone-stocks" | "redstone-rapid";
 

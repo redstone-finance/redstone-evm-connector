@@ -1,8 +1,8 @@
 import {PriceDataType, PriceFeedConnector, SignedPriceDataType} from "../PriceFeedConnector";
-import EvmPriceSigner from "redstone-node/dist/src/utils/EvmPriceSigner";
 import {mockPricePackage} from "../../../mock-price-package";
 import {Wallet} from "ethers";
 import {SignedPricePackage} from "redstone-node/dist/src/types";
+import EvmPriceSigner from "redstone-node/dist/src/signers/EvmPriceSigner";
 
 
 export class MockPriceFeed implements PriceFeedConnector {
@@ -11,10 +11,6 @@ export class MockPriceFeed implements PriceFeedConnector {
 
   private readonly priceSigner = new EvmPriceSigner();
   private readonly signer = new Wallet(MockPriceFeed.P_KEY);
-
-  constructor() {
-  }
-
 
   async getSignedPrice(): Promise<SignedPriceDataType> {
     const currentTime = Math.round(new Date().getTime());
