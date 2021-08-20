@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: Unlicense
 /*
+ * The library was upgraded by Redstone to Solidity 0.8. The original author below:
+ *
  * @title Solidity Bytes Arrays Utils
  * @author Gonçalo Sá <goncalo.sa@consensys.net>
  *
