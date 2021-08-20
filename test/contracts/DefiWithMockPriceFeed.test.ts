@@ -2,7 +2,7 @@ import {ethers} from "hardhat";
 import {Wallet} from "ethers";
 import chai from "chai";
 import {solidity} from "ethereum-waffle";
-import {SampleStorageBased} from "../../typechain/MockDefi";
+import {SampleStorageBased} from "../../typechain/SampleStorageBased";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 import {mockModule, syncTime} from "../_helpers";
 

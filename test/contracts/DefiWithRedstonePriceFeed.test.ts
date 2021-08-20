@@ -36,7 +36,7 @@ describe("MockDefi with Proxy contract and real pricing Data", function () {
   it("Deployment should have zero balance", async function () {
     [owner, admin] = await ethers.getSigners();
 
-    const Defi = await ethers.getContractFactory("MockDefi");
+    const Defi = await ethers.getContractFactory("SampleStorageBased");
     const Proxy = await ethers.getContractFactory("RedstoneUpgradeableProxyWithoutClearing");
     const PriceFeed = await ethers.getContractFactory("PriceFeed");
 
