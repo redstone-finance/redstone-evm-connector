@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 import chai from "chai";
 import { solidity } from "ethereum-waffle";
-import { MockDefi } from "../../typechain/MockDefi";
+import { SampleStorageBased } from "../../typechain/SampleStorageBased";
 import { MockPriceFeed } from "../../typechain/MockPriceFeed";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 
@@ -12,18 +12,18 @@ const toBytes32 = ethers.utils.formatBytes32String;
 
 describe("Mock Defi", function () {
     let owner:SignerWithAddress;
-    let defi: MockDefi;
+    let defi: SampleStorageBased;
     let priceFeed: MockPriceFeed;
 
 
     it("should deploy contracts", async function () {
         [owner] = await ethers.getSigners();
 
-        const MockDefi = await ethers.getContractFactory("MockDefi");
+        const MockDefi = await ethers.getContractFactory("SampleStorageBased");
         const MockPriceFeed = await ethers.getContractFactory("MockPriceFeed");
 
         priceFeed = (await MockPriceFeed.deploy()) as MockPriceFeed;
-        defi = (await MockDefi.deploy()) as MockDefi;
+        defi = (await MockDefi.deploy()) as SampleStorageBased;
         await defi.initialize(priceFeed.address);
     });
 

@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.2;
 
-import '../PriceVerifier.sol';
+import '../commons/PriceVerifier.sol';
 
 contract MockPriceVerifierProxy is PriceVerifier {
 

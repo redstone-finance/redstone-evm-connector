@@ -2,21 +2,21 @@
 
 pragma solidity ^0.8.2;
 
-import "../PriceAware.sol";
-import "./MockStatePriceProvider.sol";
+import "../mocks/MockStatePriceProvider.sol";
+import "../message-based/PriceAwareAsm.sol";
 
-contract MockPriceAware is PriceAware {
-  
+contract MockPriceAwareAsm is PriceAwareAsm {
+
   MockStatePriceProvider mockStatePriceProvider = new MockStatePriceProvider();
 
 
   function execute(uint val) public returns(uint256) {
-    getPrice();
+    return getPrice();
   }
 
 
   function executeWithPrice(uint val) public returns(uint256) {
-    getPriceFromMsg(bytes32("ETH"));
+    return getPriceFromMsg(bytes32("ETH"));
   }
 
 

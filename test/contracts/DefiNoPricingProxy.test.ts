@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 import chai from "chai";
 import { solidity } from "ethereum-waffle";
-import { MockDefi } from "../../typechain/MockDefi";
+import { SampleStorageBased } from "../../typechain/SampleStorageBased";
 import { MockPriceFeed } from "../../typechain/MockPriceFeed";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
@@ -14,7 +14,7 @@ describe("MockDefi with Proxy contract but no pricing data", function() {
 
   let owner: SignerWithAddress;
   let admin: SignerWithAddress;
-  let defi: MockDefi;
+  let defi: SampleStorageBased;
   let priceFeed: MockPriceFeed;
 
   const toBytes32 = ethers.utils.formatBytes32String;
@@ -22,17 +22,17 @@ describe("MockDefi with Proxy contract but no pricing data", function() {
   it("Deployment should have zero balance", async function() {
     [owner, admin] = await ethers.getSigners();
 
-    const Defi = await ethers.getContractFactory("MockDefi");
+    const Defi = await ethers.getContractFactory("SampleStorageBased");
     const Proxy = await ethers.getContractFactory("RedstoneUpgradeableProxy");
     const PriceFeed = await ethers.getContractFactory("MockPriceFeed");
 
 
     priceFeed = (await PriceFeed.deploy()) as MockPriceFeed;
-    defi = (await Defi.deploy()) as MockDefi;
+    defi = (await Defi.deploy()) as SampleStorageBased;
 
     const proxy = await Proxy.deploy(defi.address, priceFeed.address, admin.address, []);
 
-    defi = (await Defi.attach(proxy.address)) as MockDefi;
+    defi = (await Defi.attach(proxy.address)) as SampleStorageBased;
     await defi.initialize(priceFeed.address);
     
   });

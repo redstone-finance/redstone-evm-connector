@@ -2,20 +2,10 @@
 
 pragma solidity ^0.8.2;
 
-import "./PriceVerifier.sol";
-import "./BytesLib.sol";
-import 'hardhat/console.sol';
-import './PriceFeed.sol';
-import "@openzeppelin/contracts/proxy/Proxy.sol";
-import 'hardhat/console.sol';
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-
-
 
 contract PriceAwareAsm  {
   using ECDSA for bytes32;
-  using BytesLib for bytes;
-  bytes32 constant MARKER = keccak256("Redstone.version.0.0.1");
   
   uint constant MAX_DELAY = 3 * 60;
   address constant TRUSTED_SIGNER = 0xFE71e9691B9524BC932C23d0EeD5c9CE41161884;
@@ -112,8 +102,6 @@ contract PriceAwareAsm  {
         if eq(currentSymbol, symbol) { i := max }
       }
     }
-    
-    console.log("VAL: ", val);
     
     return val;
   }

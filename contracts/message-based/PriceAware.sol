@@ -2,12 +2,11 @@
 
 pragma solidity ^0.8.2;
 
-import "./PriceVerifier.sol";
-import "./BytesLib.sol";
+import "../commons/PriceVerifier.sol";
+import "../commons/BytesLib.sol";
+import '../commons/PriceFeed.sol';
 import 'hardhat/console.sol';
-import './PriceFeed.sol';
 import "@openzeppelin/contracts/proxy/Proxy.sol";
-import 'hardhat/console.sol';
 
 
 contract PriceAware is PriceFeed {
@@ -33,7 +32,6 @@ contract PriceAware is PriceFeed {
         _checkPrices(priceData, signature);
 
         for(uint256 i=0; i < priceData.symbols.length; i++) { //400 gas
-          //console.log("Extracting price: ", pd.values[i]);
           if (priceData.symbols[i] == symbol) { 
             return priceData.values[i];
           }

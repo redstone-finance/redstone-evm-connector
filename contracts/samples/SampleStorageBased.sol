@@ -2,14 +2,14 @@
 
 pragma solidity ^0.8.2;
 
-import "../PriceFeed.sol";
+import "../commons/PriceFeed.sol";
 import 'hardhat/console.sol';
 
 /***
- * It simulates a simple defi protocol that allows depositing tokens,
+ * It is an example of a simple defi contract that allows depositing tokens,
  * getting their current valuation and swapping between each other based on the current price
 */
-contract MockDefi {
+contract SampleStorageBased {
 
     PriceFeed priceFeed;
     bool private initialized;

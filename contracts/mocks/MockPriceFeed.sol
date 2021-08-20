@@ -2,8 +2,7 @@
 
 pragma solidity ^0.8.2;
 
-import '../IPriceFeed.sol';
-import 'hardhat/console.sol';
+import '../commons/IPriceFeed.sol';
 
 contract MockPriceFeed is IPriceFeed {
 

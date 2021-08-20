@@ -1,7 +1,6 @@
 import { ethers } from "hardhat";
 import chai from "chai";
 import { solidity } from "ethereum-waffle";
-import { PriceVerifier } from "../../typechain/PriceVerifier";
 import { PriceFeedWithClearing } from "../../typechain/PriceFeedWithClearing";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 import {Wallet} from "ethers";
@@ -46,9 +45,9 @@ describe("Price feed", function() {
 
 
   it("Should not allow setting the price without authorization", async function() {
-    const Mock = await ethers.getContractFactory("MockDefi");
-    let mock = await Mock.deploy();
-    currentTime = await mock.getCurrentTime() * 1000;
+    const Sample = await ethers.getContractFactory("SampleStorageBased");
+    let sample = await Sample.deploy();
+    currentTime = await sample.getCurrentTime() * 1000;
 
     const pricePackage: PricePackage = {
       prices: [
