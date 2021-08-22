@@ -7,7 +7,7 @@ import {PriceVerifier} from "../../typechain/PriceVerifier";
 import redstone from 'redstone-api';
 
 import {PriceFeedWithClearing} from "../../typechain/PriceFeedWithClearing";
-import {EthersContractWrapper} from "../../utils/v2/impl/EthersContractWrapper";
+import WrapperBuilder from "../../utils/v2/impl/builder/WrapperBuilder";
 
 chai.use(solidity);
 
@@ -58,9 +58,9 @@ describe("MockDefi with Proxy contract and pricing Data (with clearing)", functi
 
   it("Should deposit - write no pricing info multi", async function () {
 
-    defi = EthersContractWrapper
+    defi = WrapperBuilder
       .wrap(defi)
-      .usingRedStonePriceFeed("redstone-stocks");
+      .usingPriceFeed("redstone-stocks");
 
     await defi.deposit(toBytes32("GOOG"), 1);
     await defi.deposit(toBytes32("IBM"), 1);
@@ -82,8 +82,9 @@ describe("MockDefi with Proxy contract and pricing Data (with clearing)", functi
 
   it("Should deposit - write no pricing info single", async function () {
 
-    defi = EthersContractWrapper.wrap(defi)
-      .usingRedStonePriceFeed("redstone-stocks", "FB");
+    defi = WrapperBuilder
+      .wrap(defi)
+      .usingPriceFeed("redstone-stocks", "FB");
 
     await Promise.all([
       defi.deposit(toBytes32("FB"), 1),

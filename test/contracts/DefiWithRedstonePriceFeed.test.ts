@@ -4,9 +4,8 @@ import {solidity} from "ethereum-waffle";
 import {SampleStorageBased} from "../../typechain/SampleStorageBased";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 import redstone from 'redstone-api';
-
-import {PriceFeed} from "../../typechain/PriceFeed";
-import {EthersContractWrapper} from "../../utils/v2/impl/EthersContractWrapper";
+import {PriceFeed} from "../../typechain";
+import WrapperBuilder from "../../utils/v2/impl/builder/WrapperBuilder";
 
 chai.use(solidity);
 
@@ -55,9 +54,9 @@ describe("MockDefi with Proxy contract and real pricing Data", function () {
 
   it("Should deposit - write no pricing info multi", async function () {
 
-    defi = EthersContractWrapper
+    defi = WrapperBuilder
       .wrap(defi)
-      .usingRedStonePriceFeed("redstone-stocks");
+      .usingPriceFeed("redstone-stocks");
 
     await defi.deposit(toBytes32("GOOG"), 1);
     await defi.deposit(toBytes32("IBM"), 1);
@@ -79,9 +78,9 @@ describe("MockDefi with Proxy contract and real pricing Data", function () {
 
   it("Should deposit - write no pricing info single", async function () {
 
-    defi = EthersContractWrapper
+    defi = WrapperBuilder
       .wrap(defi)
-      .usingRedStonePriceFeed("redstone-stocks", "FB");
+      .usingPriceFeed("redstone-stocks", "FB");
 
     await Promise.all([
       defi.deposit(toBytes32("FB"), 1),

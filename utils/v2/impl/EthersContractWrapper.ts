@@ -2,7 +2,6 @@ import {ContractWrapper} from "../ContractWrapper";
 import {Contract, ethers, Signer} from "ethers";
 import {PriceFeedConnector} from "../connector/PriceFeedConnector";
 import {PriceFeedWithClearing__factory} from "../../../typechain";
-import {EthersContractWrapperBuilder} from "./EthersContractWrapperBuilder";
 
 export class EthersContractWrapper<T extends Contract> implements ContractWrapper<T> {
 
@@ -11,11 +10,7 @@ export class EthersContractWrapper<T extends Contract> implements ContractWrappe
     protected readonly apiConnector: PriceFeedConnector) {
   }
 
-  static wrap<T extends Contract>(contract: T): EthersContractWrapperBuilder<T> {
-    return new EthersContractWrapperBuilder(contract);
-  }
-
-  wrap(asset?: string): T {
+  finish(): T {
     const contract = this.baseContract;
     const wrappedContract = {...contract};
     const self = this;
@@ -30,7 +25,7 @@ export class EthersContractWrapper<T extends Contract> implements ContractWrappe
 
           // Here we append price data (currently with function signatures) to transaction data
           tx.data = tx.data
-            + (await self.getPriceData(contract.signer, asset))
+            + (await self.getPriceData(contract.signer))
             + self.getMarkerData();
 
           if (isCall) {
@@ -52,7 +47,7 @@ export class EthersContractWrapper<T extends Contract> implements ContractWrappe
     return EthersContractWrapper.remove0xFromHexString(marker);
   }
 
-  protected async getPriceData(signer: Signer, asset?: string): Promise<string> {
+  protected async getPriceData(signer: Signer): Promise<string> {
     const {priceData, signature} = await this.apiConnector.getSignedPrice();
 
     const priceFeed = PriceFeedWithClearing__factory.connect(ethers.constants.AddressZero, signer);
