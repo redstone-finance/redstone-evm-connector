@@ -1,4 +1,4 @@
-import { ethers } from "hardhat";
+import {ethers} from "hardhat";
 import chai from "chai";
 import { solidity } from "ethereum-waffle";
 import { SampleStorageBased } from "../../typechain/SampleStorageBased";
