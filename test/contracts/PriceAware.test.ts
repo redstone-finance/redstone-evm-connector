@@ -126,9 +126,9 @@ describe("Price Aware - redstone realtime feed", function () {
 
     it("should get price with single asset", async function () {
 
-        sample = EthersContractWrapperLite
+        sample = WrapperBuilder
             .wrapLite(sample)
-            .usingRedStonePriceFeed("redstone-stocks", "IBM");
+            .usingPriceFeed("redstone-stocks", "IBM");
 
         await sample.authorizeProvider();
 
@@ -139,9 +139,9 @@ describe("Price Aware - redstone realtime feed", function () {
 
     it("should get price with multiple assets", async function () {
 
-        sample = EthersContractWrapperLite
+        sample = WrapperBuilder
             .wrapLite(sample)
-            .usingRedStonePriceFeed("redstone-stocks");
+            .usingPriceFeed("redstone-stocks");
 
         await sample.authorizeProvider();
 
