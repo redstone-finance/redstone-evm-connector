@@ -1,10 +1,10 @@
-import { ethers } from "hardhat";
-import { Wallet } from "ethers";
+import {ethers} from "hardhat";
+import {Wallet} from "ethers";
 import chai from "chai";
-import { solidity } from "ethereum-waffle";
+import {solidity} from "ethereum-waffle";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 
-import { MockPriceVerifierProxy } from "../../typechain/MockPriceVerifierProxy";
+import {MockPriceVerifierProxy} from "../../typechain/MockPriceVerifierProxy";
 import {PricePackage} from "redstone-node/dist/src/types";
 import {PriceDataType} from "../../utils/v2/connector/PriceFeedConnector";
 import EvmPriceSigner from "redstone-node/dist/src/signers/EvmPriceSigner";

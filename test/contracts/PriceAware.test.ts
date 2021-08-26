@@ -11,6 +11,8 @@ import {syncTime} from "../_helpers";
 import {EthersContractWrapper} from "../../utils/v2/impl/EthersContractWrapper";
 import {EthersContractWrapperLite} from "../../utils/v2/impl/EthersContractWrapperLite";
 import {MockPriceFeed} from "../../utils/v2/connector/impl/MockPriceFeed";
+import WrapperBuilder from "../../utils/v2/impl/builder/WrapperBuilder";
+import {DEFAULT_PRICE, MockableContract} from "../../utils/v2/impl/builder/MockableEthersContractWrapperBuilder";
 
 chai.use(solidity);
 
@@ -18,7 +20,7 @@ describe("Price Aware - basic version", function () {
     let owner:SignerWithAddress;
     let signer:Wallet;
 
-    let mockPriceAware: MockPriceAware;
+    let mockPriceAware: MockableContract<MockPriceAware>;
 
     it("should deploy contracts", async function () {
         [owner] = await ethers.getSigners();
@@ -26,16 +28,16 @@ describe("Price Aware - basic version", function () {
         signer = new ethers.Wallet(MockPriceFeed.P_KEY, owner.provider);
 
         const MockPriceAware = await ethers.getContractFactory("MockPriceAware");
-        mockPriceAware = (await MockPriceAware.deploy()) as MockPriceAware;
+        mockPriceAware = (await MockPriceAware.deploy()) as MockableContract<MockPriceAware>;
         await mockPriceAware.authorizeSigner(signer.address);
     });
 
     it("should get price", async function () {
         await mockPriceAware.execute(1);
 
-        mockPriceAware = EthersContractWrapper
-          .wrap(mockPriceAware)
-          .usingMockPriceFeed();
+        mockPriceAware = WrapperBuilder
+          .mock(mockPriceAware)
+          .using(DEFAULT_PRICE);
         await syncTime();
         await mockPriceAware.executeWithPrice(7);
     });
@@ -63,9 +65,9 @@ describe("Price Aware - inlined assembly version", function () {
 
     it("should get price", async function () {
 
-        sample = EthersContractWrapperLite
-            .wrapLite(sample)
-            .usingMockPriceFeed();
+        sample = WrapperBuilder
+          .mockLite(sample)
+          .using(DEFAULT_PRICE);
 
         //await syncTime(); // recommended for hardhat test
         let tx = await sample.executeWithPrice(7);
@@ -93,9 +95,9 @@ describe("Price Aware - editable assembly version", function () {
 
     it("should get price", async function () {
 
-        sample = EthersContractWrapperLite
-          .wrapLite(sample)
-          .usingMockPriceFeed();
+        sample = WrapperBuilder
+          .mockLite(sample)
+          .using(DEFAULT_PRICE);
 
         await sample.authorizeProvider();
 
