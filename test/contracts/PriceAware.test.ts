@@ -88,8 +88,6 @@ describe("Price Aware - editable assembly version", function () {
         const SamplePriceAwareAsm = await ethers.getContractFactory("SamplePriceAwareAsm");
         sample = (await SamplePriceAwareAsm.deploy()) as SamplePriceAwareAsm;
 
-        //TODO: move authorization to wrapper (to avoid passing signer address)
-        await sample.authorizeSigner(signer.address);
         console.log("MockPriceAware deployed: " + sample.address);
     });
 
@@ -98,6 +96,39 @@ describe("Price Aware - editable assembly version", function () {
         sample = EthersContractWrapperLite
           .wrapLite(sample)
           .usingMockPriceFeed();
+        
+        await sample.authorizeProvider();
+
+        //await syncTime(); // recommended for hardhat test
+        let tx = await sample.executeWithPrice(7);
+        console.log("Executed with RedStone price: " + tx.hash);
+    });
+});
+
+describe("Price Aware - redstone realtime feed", function () {
+    let owner:SignerWithAddress;
+    let signer:Wallet;
+
+    let sample: SamplePriceAwareAsm;
+
+    it("should deploy contracts", async function () {
+        [owner] = await ethers.getSigners();
+
+        signer = new ethers.Wallet(MockPriceFeed.P_KEY, owner.provider);
+
+        const SamplePriceAwareAsm = await ethers.getContractFactory("SamplePriceAwareAsm");
+        sample = (await SamplePriceAwareAsm.deploy()) as SamplePriceAwareAsm;
+
+        console.log("MockPriceAware deployed: " + sample.address);
+    });
+
+    it("should get price", async function () {
+
+        sample = EthersContractWrapperLite
+            .wrapLite(sample)
+            .usingRedStonePriceFeed("redstone-stocks", "IBM");
+
+        await sample.authorizeProvider();
 
         //await syncTime(); // recommended for hardhat test
         let tx = await sample.executeWithPrice(7);

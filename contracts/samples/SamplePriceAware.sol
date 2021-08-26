@@ -22,7 +22,7 @@ contract SamplePriceAwareAsm is PriceAwareAsm {
 
 
   function executeWithPrice(uint val) public returns(uint256) {
-    return getPriceFromMsg(bytes32("ETH"));
+    return getPriceFromMsg(bytes32("IBM"));
   }
 
 

@@ -4,6 +4,7 @@ pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "hardhat/console.sol";
 
 contract PriceAwareAsm is Ownable  {
   using ECDSA for bytes32;
@@ -81,6 +82,7 @@ contract PriceAwareAsm is Ownable  {
     // 6. We verify the off-chain signature against on-chain hashed data
     
     address signer = hashWithPrefix.recover(signature);
+    console.log("Address: ", signer);
     require(signer == trustedSigner, "Signer not authorized");
 
     //7. We extract timestamp from callData

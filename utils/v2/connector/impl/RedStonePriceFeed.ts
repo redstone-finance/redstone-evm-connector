@@ -2,6 +2,8 @@ import {PriceDataType, PriceFeedConnector, SignedPriceDataType} from "../PriceFe
 import axios from "axios";
 import _ from "lodash";
 import EvmPriceSigner from "redstone-node/dist/src/signers/EvmPriceSigner";
+import {ethers} from "hardhat";
+import {MockPriceFeed} from "./MockPriceFeed";
 
 export type RedStoneProvider = "redstone" | "redstone-stocks" | "redstone-rapid";
 
@@ -9,6 +11,7 @@ export class RedStonePriceFeed implements PriceFeedConnector {
 
   private readonly priceSigner = new EvmPriceSigner();
   private readonly apiUrl: string;
+  private cachedSigner?: string;
 
   constructor(
     private providerId: RedStoneProvider,
@@ -21,6 +24,7 @@ export class RedStonePriceFeed implements PriceFeedConnector {
 
     this.apiUrl = `https://api.redstone.finance/packages/latest?provider=${providerId}`
       + (asset ? `&symbol=${asset}` : '');
+    
   }
 
   async getSignedPrice(): Promise<SignedPriceDataType> {
@@ -35,8 +39,16 @@ export class RedStonePriceFeed implements PriceFeedConnector {
 
     return {
       priceData,
-      ..._.pick(response.data, ["signer", "signature"]),
+      ..._.pick(response.data, ["signer", "signature", "liteSignature"]),
     };
+  }
+
+  async getSigner(): Promise<string> {
+      if (!this.cachedSigner) {
+          const response = await axios.get("https://api.redstone.finance/providers");
+          this.cachedSigner = response.data[this.providerId].evmAddress;
+      }
+      return this.cachedSigner as string;
   }
 
 }

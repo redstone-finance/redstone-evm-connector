@@ -3,6 +3,7 @@ import {mockPricePackage} from "../../../mock-price-package";
 import {Wallet} from "ethers";
 import {SignedPricePackage} from "redstone-node/dist/src/types";
 import EvmPriceSigner from "redstone-node/dist/src/signers/EvmPriceSigner";
+import {ethers} from "hardhat";
 
 
 export class MockPriceFeed implements PriceFeedConnector {
@@ -23,8 +24,14 @@ export class MockPriceFeed implements PriceFeedConnector {
     return {
       priceData: serializedPackage,
       signer: signedPackage.signer,
-      signature: signedPackage.signature
+      signature: signedPackage.signature,
+      liteSignature: signedPackage.liteSignature
     };
+  }
+  
+  getSigner(): Promise<string> {
+    const wallet = new ethers.Wallet(MockPriceFeed.P_KEY);
+    return Promise.resolve(wallet.address);
   }
 
 }

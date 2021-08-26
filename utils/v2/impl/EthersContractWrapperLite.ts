@@ -19,14 +19,12 @@ export class EthersContractWrapperLite<T extends Contract> extends EthersContrac
   }
 
   protected async getPriceData(signer: Signer, asset?: string): Promise<string> {
-    const {priceData} = await this.apiConnector.getSignedPrice();
+    const {priceData, liteSignature} = await this.apiConnector.getSignedPrice();
 
     let data = this.priceSigner.getLiteDataBytesString(priceData);
-
-    const hash = bufferToHex(keccak256(toBuffer("0x" + data)));
-    const signature = personalSign(toBuffer(MockPriceFeed.P_KEY), {data: hash});
+    
     data += priceData.symbols.length.toString(8).padStart(2, "0")
-      + signature.substr(2);
+      + liteSignature.substr(2);
     return data;
   }
 

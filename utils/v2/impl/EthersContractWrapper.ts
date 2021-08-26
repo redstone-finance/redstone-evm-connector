@@ -24,27 +24,40 @@ export class EthersContractWrapper<T extends Contract> implements ContractWrappe
     functionNames.forEach(functionName => {
       if (functionName.indexOf("(") == -1) {
         const isCall = contract.interface.getFunction(functionName).constant;
-
-        (wrappedContract[functionName] as any) = async function (...args: any[]) {
-          const tx = await contract.populateTransaction[functionName](...args);
-
-          // Here we append price data (currently with function signatures) to transaction data
-          tx.data = tx.data
-            + (await self.getPriceData(contract.signer, asset))
-            + self.getMarkerData();
-
-          if (isCall) {
-            const result = await contract.signer.call(tx);
-            const decoded = contract.interface.decodeFunctionResult(functionName, result);
-            return decoded.length == 1 ? decoded[0] : decoded;
-          } else {
-            return await contract.signer.sendTransaction(tx);
+        
+        if (functionName == "authorizeSigner") {
+            (wrappedContract["authorizeProvider"] as any) = async function () {
+            const signer = await self.getSigner();
+            console.log("Authorizing provider: " + signer);
+            return await wrappedContract.authorizeSigner(signer);
           }
-        };
+        } else {
+          (wrappedContract[functionName] as any) = async function (...args: any[]) {
+
+            const tx = await contract.populateTransaction[functionName](...args);
+
+            // Here we append price data (currently with function signatures) to transaction data
+            tx.data = tx.data
+              + (await self.getPriceData(contract.signer, asset))
+              + self.getMarkerData();
+
+            if (isCall) {
+              const result = await contract.signer.call(tx);
+              const decoded = contract.interface.decodeFunctionResult(functionName, result);
+              return decoded.length == 1 ? decoded[0] : decoded;
+            } else {
+              return await contract.signer.sendTransaction(tx);
+            }
+          };
+        }
       }
     });
 
     return wrappedContract;
+  }
+  
+  protected getSigner(): Promise<string> {
+    return this.apiConnector.getSigner();
   }
 
   protected getMarkerData(): string {

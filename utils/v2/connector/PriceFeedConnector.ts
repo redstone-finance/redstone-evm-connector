@@ -8,9 +8,11 @@ export type PriceDataType = {
 export type SignedPriceDataType = {
   priceData: PriceDataType,
   signer: string,
-  signature: string
+  signature: string,
+  liteSignature: string
 };
 
 export interface PriceFeedConnector {
   getSignedPrice(): Promise<SignedPriceDataType>;
+  getSigner(): Promise<string>
 }
