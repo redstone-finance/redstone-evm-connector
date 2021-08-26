@@ -66,7 +66,7 @@ describe("Price Aware - inlined assembly version", function () {
         sample = EthersContractWrapperLite
             .wrapLite(sample)
             .usingMockPriceFeed();
-        
+
         //await syncTime(); // recommended for hardhat test
         let tx = await sample.executeWithPrice(7);
         console.log("Executed with RedStone price: " + tx.hash);
@@ -96,7 +96,7 @@ describe("Price Aware - editable assembly version", function () {
         sample = EthersContractWrapperLite
           .wrapLite(sample)
           .usingMockPriceFeed();
-        
+
         await sample.authorizeProvider();
 
         //await syncTime(); // recommended for hardhat test
@@ -122,7 +122,7 @@ describe("Price Aware - redstone realtime feed", function () {
         console.log("MockPriceAware deployed: " + sample.address);
     });
 
-    it("should get price", async function () {
+    it("should get price with single asset", async function () {
 
         sample = EthersContractWrapperLite
             .wrapLite(sample)
@@ -131,6 +131,19 @@ describe("Price Aware - redstone realtime feed", function () {
         await sample.authorizeProvider();
 
         //await syncTime(); // recommended for hardhat test
+        let tx = await sample.executeWithPrice(7);
+        console.log("Executed with RedStone price: " + tx.hash);
+    });
+
+    it("should get price with multiple assets", async function () {
+
+        sample = EthersContractWrapperLite
+            .wrapLite(sample)
+            .usingRedStonePriceFeed("redstone-stocks");
+
+        await sample.authorizeProvider();
+
+        await syncTime(); // recommended for hardhat test
         let tx = await sample.executeWithPrice(7);
         console.log("Executed with RedStone price: " + tx.hash);
     });

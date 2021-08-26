@@ -39,13 +39,12 @@ contract PriceAwareAsm is Ownable  {
       //The last 65 bytes are for signature
       //We load the previous 32 bytes and automatically take the 2 least significant ones (casting to uint16)
       dataSize := calldataload(sub(calldatasize(), 97))
-    }
-    
+    }  
+  
     
     // 2. We calculate the size of signable message expressed in bytes
     // ((symbolLen(32) + valueLen(32)) * dataSize + timeStamp length
-    uint16 messageLength = dataSize * 64 + 32; //Length of data message in bytes
-    
+    uint16 messageLength = uint16(dataSize) * 64 + 32; //Length of data message in bytes    
     
     // 3. We extract the signableMessage
 
@@ -82,7 +81,6 @@ contract PriceAwareAsm is Ownable  {
     // 6. We verify the off-chain signature against on-chain hashed data
     
     address signer = hashWithPrefix.recover(signature);
-    console.log("Address: ", signer);
     require(signer == trustedSigner, "Signer not authorized");
 
     //7. We extract timestamp from callData

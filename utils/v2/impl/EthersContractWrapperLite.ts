@@ -23,8 +23,8 @@ export class EthersContractWrapperLite<T extends Contract> extends EthersContrac
 
     let data = this.priceSigner.getLiteDataBytesString(priceData);
     
-    data += priceData.symbols.length.toString(8).padStart(2, "0")
-      + liteSignature.substr(2);
+    data += priceData.symbols.length.toString(16).padStart(2, "0")
+          + liteSignature.substr(2);
     return data;
   }
 
