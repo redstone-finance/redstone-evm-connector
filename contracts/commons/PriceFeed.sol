@@ -9,7 +9,11 @@ import 'hardhat/console.sol';
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./PriceVerifier.sol";
 
-
+/**
+ * @title PriceFeed
+ * @dev A contract that provides prices for assets
+ * It's integrated with the PriceVerifier contract that checks data authenticity
+ */
 contract PriceFeed is IPriceFeed, PriceVerifier, Ownable {
 
     uint256 private constant MAX_FUTURE_PRICE_DIFF_MS = 15000;
