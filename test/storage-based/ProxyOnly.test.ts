@@ -9,12 +9,13 @@ chai.use(solidity);
 const { expect } = chai;
 
 
-describe("MockDefi with Proxy contract but no pricing data", function() {
+//We test proxy functionality without any pricing data attached
+describe("Sample Storage contract with Proxy contract but no pricing data", function() {
 
 
   let owner: SignerWithAddress;
   let admin: SignerWithAddress;
-  let defi: SampleStorageBased;
+  let sample: SampleStorageBased;
   let priceFeed: MockPriceFeed;
 
   const toBytes32 = ethers.utils.formatBytes32String;
@@ -28,12 +29,12 @@ describe("MockDefi with Proxy contract but no pricing data", function() {
 
 
     priceFeed = (await PriceFeed.deploy()) as MockPriceFeed;
-    defi = (await Defi.deploy()) as SampleStorageBased;
+    sample = (await Defi.deploy()) as SampleStorageBased;
 
-    const proxy = await Proxy.deploy(defi.address, priceFeed.address, admin.address, []);
+    const proxy = await Proxy.deploy(sample.address, priceFeed.address, admin.address, []);
 
-    defi = (await Defi.attach(proxy.address)) as SampleStorageBased;
-    await defi.initialize(priceFeed.address);
+    sample = (await Defi.attach(proxy.address)) as SampleStorageBased;
+    await sample.initialize(priceFeed.address);
     
   });
 
@@ -41,21 +42,21 @@ describe("MockDefi with Proxy contract but no pricing data", function() {
   it("Should send a simple write transaction via proxy contract", async function() {
 
     await priceFeed.setPrice(toBytes32("ETH"), 10);
-    await defi.deposit(toBytes32("ETH"), 100);
+    await sample.deposit(toBytes32("ETH"), 100);
 
   });
 
 
   it("Should send a simple read transaction via proxy contract", async function() {
 
-    expect(await defi.balanceOf(owner.address, toBytes32("ETH"))).to.be.equal(100);
-    expect(await defi.currentValueOf(owner.address, toBytes32("ETH"))).to.be.equal(1000);
+    expect(await sample.balanceOf(owner.address, toBytes32("ETH"))).to.be.equal(100);
+    expect(await sample.currentValueOf(owner.address, toBytes32("ETH"))).to.be.equal(1000);
 
   });
 
 
   it("Should send a reverted transaction via proxy contract", async function() {
-    await expect(defi.deposit(toBytes32("ETH"), 0)).to.be.revertedWith("Amount must be greater than zero");
+    await expect(sample.deposit(toBytes32("ETH"), 0)).to.be.revertedWith("Amount must be greater than zero");
   });
 
 });

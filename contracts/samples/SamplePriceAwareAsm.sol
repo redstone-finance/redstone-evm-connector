@@ -2,21 +2,27 @@
 
 pragma solidity ^0.8.2;
 
-import "../message-based/PriceAware.sol";
 import "../mocks/MockStatePriceProvider.sol";
+import "../message-based/PriceAwareAsm.sol";
 
-contract MockPriceAware is PriceAware {
-  
+/**
+ * @title SamplePriceAwareAsm
+ * @dev An example of a contract using a message-based way of fetching data from RedStone
+ * It has only a few methods used to benchmark gas consumption
+ * It extends PriceAwareAsm and allows changing trusted signer and message delay
+ */
+contract SamplePriceAwareAsm is PriceAwareAsm {
+
   MockStatePriceProvider mockStatePriceProvider = new MockStatePriceProvider();
 
 
   function execute(uint val) public returns(uint256) {
-    getPrice();
+    return getPrice();
   }
 
 
   function executeWithPrice(uint val) public returns(uint256) {
-    getPriceFromMsg(bytes32("ETH"));
+    return getPriceFromMsg(bytes32("IBM"));
   }
 
 

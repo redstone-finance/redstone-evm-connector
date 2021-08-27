@@ -4,7 +4,7 @@ import {solidity} from "ethereum-waffle";
 import {SampleStorageBased} from "../../typechain/SampleStorageBased";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 import redstone from 'redstone-api';
-import {PriceFeed} from "../../typechain";
+import {PriceFeed} from "../../typechain/index";
 import WrapperBuilder from "../../utils/v2/impl/builder/WrapperBuilder";
 
 chai.use(solidity);

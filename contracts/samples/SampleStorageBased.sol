@@ -3,7 +3,6 @@
 pragma solidity ^0.8.2;
 
 import "../commons/PriceFeed.sol";
-import 'hardhat/console.sol';
 
 /***
  * It is an example of a simple defi contract that allows depositing tokens,
@@ -42,8 +41,6 @@ contract SampleStorageBased {
 
     function currentValueOf(address account, bytes32 symbol) external view returns (uint256) {
         uint256 price = priceFeed.getPrice(symbol);
-        console.log("Price: ", price);
-
         return balances[account][symbol] * price;
     }
 

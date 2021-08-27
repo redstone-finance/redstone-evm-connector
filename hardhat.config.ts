@@ -15,7 +15,7 @@ export default {
         },
     },
     paths: {
-        tests: "./test/contracts"
+        tests: "./test/"
     }
 };
 

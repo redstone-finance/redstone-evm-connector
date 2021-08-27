@@ -12,7 +12,7 @@ import EvmPriceSigner from "redstone-node/dist/src/signers/EvmPriceSigner";
 chai.use(solidity);
 const { expect } = chai;
 
-describe("Price data verification", function() {
+describe("Price Verifier", function() {
 
   const PRIV = "0xae2b81c1fe9e3b01f060362f03abd0c80a6447cfe00ff7fc7fcf000000000000";
 
