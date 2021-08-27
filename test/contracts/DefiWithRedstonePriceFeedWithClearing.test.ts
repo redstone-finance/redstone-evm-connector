@@ -18,7 +18,7 @@ const serialized = function (x: number): number {
   return x * 10 ** 8;
 };
 
-describe("MockDefi with Proxy contract and pricing Data (with clearing)", function () {
+describe("MockDefi with Proxy contract and real pricing Data from Redstone (with clearing)", function () {
 
   const REDSTONE_STOCKS_PROVIDER_ADDRESS = "0x926E370fD53c23f8B71ad2B3217b227E41A92b12";
 
@@ -27,7 +27,6 @@ describe("MockDefi with Proxy contract and pricing Data (with clearing)", functi
   let admin: SignerWithAddress;
   let defi: SampleStorageBased;
   let priceFeed: PriceFeedWithClearing;
-  let verifier: PriceVerifier;
   let apiPrices: any;
 
   async function loadApiPrices() {
@@ -71,9 +70,10 @@ describe("MockDefi with Proxy contract and pricing Data (with clearing)", functi
   it("Should inject correct prices from API multi", async function () {
 
     await loadApiPrices();
-
     expect(await defi.currentValueOf(owner.address, toBytes32("GOOG")))
       .to.be.equal(serialized(apiPrices['GOOG'].value).toFixed(0));
+
+    await loadApiPrices();
     expect(await defi.currentValueOf(owner.address, toBytes32("IBM")))
       .to.be.equal(serialized(apiPrices['IBM'].value).toFixed(0));
 
@@ -81,20 +81,16 @@ describe("MockDefi with Proxy contract and pricing Data (with clearing)", functi
 
 
   it("Should deposit - write no pricing info single", async function () {
-
     defi = WrapperBuilder
       .wrap(defi)
       .usingPriceFeed("redstone-stocks", "FB");
 
-    await Promise.all([
-      defi.deposit(toBytes32("FB"), 1),
-      loadApiPrices(),
-    ]);
-
+    await defi.deposit(toBytes32("FB"), 1);
   });
 
 
   it("Should inject correct prices from API single", async function () {
+    await loadApiPrices();
     expect(await defi.currentValueOf(owner.address, toBytes32("FB")))
       .to.be.equal(serialized(apiPrices['FB'].value).toFixed(0));
   });
