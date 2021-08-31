@@ -35,7 +35,7 @@ At a top level, transferring data to an EVM environment requires packing an extr
 
 ### 1. Modifying your contracts
 
-You need to apply a miniam change to the source code to enable smart contract to access data. Your contract needs to extend the [PriceAware](https://github.com/redstone-finance/redstone-flash-storage/blob/price-aware/contracts/message-based/PriceAwareAsm.sol) contract :
+You need to apply a minium change to the source code to enable smart contract to access data. Your contract needs to extend the [PriceAware](https://github.com/redstone-finance/redstone-flash-storage/blob/price-aware/contracts/message-based/PriceAwareAsm.sol) contract :
 
 ```
 contract YourContractName is PriceAwareAsm {
@@ -88,7 +88,7 @@ We're also working on a wrapper for the truffle/web3 contracts. Please let us kn
 
 ### Alternative solutions
 
-If you don't want to modify even a single line of your contract it's possible to use an alternative solution based on the [Proxy pattern](). This approach intercepts a transaction a proxy stage, extracts the price data and delegates the original transaction to your contract. Another advantage of the solution is allowing any contract (including 3rd party ones) to access the data. However, these benefits come at the cost of higher gas consumption. If you're interested in using this approach take a look at the contracts located in the [storage-based](https://github.com/redstone-finance/redstone-flash-storage/tree/price-aware/contracts/storage-based) folder and reach out to us if you need help setting up your environment.  
+If you don't want to modify even a single line of your contract, it's possible to use an alternative solution based on the [Proxy pattern](). This approach intercepts a transaction at a proxy stage, extracts the price data and delegates the original transaction to your contract. Another advantage of the solution is allowing any contract (including 3rd party ones) to access the data. However, these benefits come at the cost of higher gas consumption. If you're interested in using this approach take a look at the contracts located in the [storage-based](https://github.com/redstone-finance/redstone-flash-storage/tree/price-aware/contracts/storage-based) folder and reach out to us if you need help setting up your environment.  
 
 ## Development and contributions
 
