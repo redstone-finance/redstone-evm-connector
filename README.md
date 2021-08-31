@@ -8,8 +8,7 @@ Flash storage implements an alternative design of providing data to smart contra
 
 ## How it works
 
-At a top level, transferring data to an EVM environment requires packing an extra payload to a user's transaction and processing the message on-chain. transfering data to EVM envioronment requires packing extra payload to user transaction and processing the message in an on-chain environment.
-
+At a top level, transferring data to an EVM environment requires packing an extra payload to a user's transaction and processing the message on-chain.
 ### Data packing
 
 1. Relevant data needs to be fetched from the RedStone api
