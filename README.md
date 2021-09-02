@@ -9,7 +9,10 @@ Flash storage implements an alternative design of providing data to smart contra
 ## How it works
 
 At a top level, transferring data to an EVM environment requires packing an extra payload to a user's transaction and processing the message on-chain.
-### Data packing
+
+[![image.png](https://i.postimg.cc/5NZSqtFT/image.png)](https://postimg.cc/xc3m9n53)
+
+### Data packing (off-chain data encoding)
 
 1. Relevant data needs to be fetched from the RedStone api
 2. Data is packed into a message according to the following structure
@@ -22,7 +25,7 @@ At a top level, transferring data to an EVM environment requires packing an extr
 
 *All of the steps are executed automatically by the ContractWrapper and transparent to the end-user*
 
-### Data unpacking
+### Data unpacking (on-chain data verification)
 
 1. The appended data package is extracted from the `msg.data`
 2. The data signature is verified by checking if the signer is one of the approved providers
