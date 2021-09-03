@@ -17,9 +17,7 @@ At a top level, transferring data to an EVM environment requires packing an extr
 1. Relevant data needs to be fetched from the RedStone api
 2. Data is packed into a message according to the following structure
 
-``` 
- [[symbol | 32b][value | 32b] : n times][timestamp | 32b][size | 1b][signature | 65b]
-```
+[![image.png](https://i.postimg.cc/SRgRHHF1/image.png)](https://postimg.cc/jnJR7gjy)
 
 3. The package is appended to the original transaction message, signed and submitted to the network
 
