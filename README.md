@@ -32,6 +32,12 @@ At a top level, transferring data to an EVM environment requires packing an extr
 
 *This logic is executed in the on-chain environment and we optimised the execution using a low-level assembly code to reduce gas consumption to the absolute minimum*
 
+### Benchmarks
+
+We work hard to optimise the code using solidity assembly and reduce the gas costs of our contracts. Below there is a comparison of the read operation gas costs using the most popular Chainlink Reference Data, the standard version of Redstone PriceAware contract and the optimised version where provider address is inlined at the compilation time. The [scripts](https://github.com/redstone-finance/redstone-flash-storage/tree/price-aware/scripts) which generated the data together with [results](https://github.com/redstone-finance/redstone-flash-storage/blob/price-aware/benchmarks.txt) and transactions details could be found in our repository.
+
+[![Screenshot-2021-09-05-at-17-18-25.png](https://i.postimg.cc/CK14BQTC/Screenshot-2021-09-05-at-17-18-25.png)](https://postimg.cc/NK3XZb0L)
+
 ## Getting started
 
 ### 1. Modifying your contracts
