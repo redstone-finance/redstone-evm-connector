@@ -99,15 +99,16 @@ If you don't want to modify even a single line of your contract, it's possible t
 
 ## Development and contributions
 
+The codebase consists of a wrapper written in typescript which is responsible for packing the data and solidity smart contracts that extract the information. We encourage anyone to build and test the code and we welcome any issues with suggestions and pull requests. 
 
-### Building the code
-
-```
-npm i 
-```
-
-### Running tests
+#### Installing the dependencies
 
 ```
-npx hardhat test 
+yarn install 
+```
+
+### Compiling and running the tests
+
+```
+yarn test 
 ```
