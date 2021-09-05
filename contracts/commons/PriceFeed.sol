@@ -16,8 +16,6 @@ import "./PriceVerifier.sol";
  */
 contract PriceFeed is IPriceFeed, PriceVerifier, Ownable {
 
-    uint256 private constant MAX_FUTURE_PRICE_DIFF_MS = 15000;
-
     uint256 public maxPriceDelayMilliseconds = 5 * 60 * 1000;
 
     // A map indicating if a signer could be trusted by a client protocol
@@ -36,13 +34,7 @@ contract PriceFeed is IPriceFeed, PriceVerifier, Ownable {
         address signer = recoverDataSigner(priceData, signature);
         uint256 blockTimestampMillseconds = block.timestamp * 1000;
 
-        require(isSigner(signer), "Unauthorized price data signer");
-        
-        // TODO: check the problem with prices on Kovan
-        //require(blockTimestampMillseconds > priceData.timestamp - MAX_FUTURE_PRICE_DIFF_MS, "Price data timestamp cannot be from the future");
-        //console.log("Block: ", blockTimestampMillseconds);
-        //console.log("Price: ", priceData.timestamp);
-        
+        require(isSigner(signer), "Unauthorized price data signer");      
         require(blockTimestampMillseconds - priceData.timestamp < maxPriceDelayMilliseconds, "Price data timestamp too old");
     }
 

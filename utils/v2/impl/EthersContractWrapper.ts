@@ -19,7 +19,6 @@ export class EthersContractWrapper<T extends Contract> implements ContractWrappe
     functionNames.forEach(functionName => {
       if (functionName.indexOf("(") == -1) {
         const isCall = contract.interface.getFunction(functionName).constant;
-        
         if (functionName == "authorizeSigner") {
             (wrappedContract["authorizeProvider"] as any) = async function () {
             const signer = await self.getSigner();

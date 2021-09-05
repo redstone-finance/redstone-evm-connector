@@ -2,8 +2,6 @@ import {PriceDataType, PriceFeedConnector, SignedPriceDataType} from "../PriceFe
 import axios from "axios";
 import _ from "lodash";
 import EvmPriceSigner from "redstone-node/dist/src/signers/EvmPriceSigner";
-import {ethers} from "hardhat";
-import {MockPriceFeed} from "./MockPriceFeed";
 
 export type RedStoneProvider = "redstone" | "redstone-stocks" | "redstone-rapid";
 

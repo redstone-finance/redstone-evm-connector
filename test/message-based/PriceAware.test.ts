@@ -3,7 +3,7 @@ import {Wallet} from "ethers";
 import chai from "chai";
 import {solidity} from "ethereum-waffle";
 
-import { SampleInlinedPriceAwareAsm } from "../../typechain/SampleInlinedPriceAwareAsm";
+import { SampleInlinedMockPriceAwareAsm } from "../../typechain/SampleInlinedMockPriceAwareAsm";
 import { SamplePriceAwareAsm } from "../../typechain/SamplePriceAwareAsm";
 import { SamplePriceAware } from "../../typechain/SamplePriceAware";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
@@ -46,7 +46,7 @@ describe("Price Aware - inlined assembly version", function () {
     let owner:SignerWithAddress;
     let signer:Wallet;
 
-    let sample: SampleInlinedPriceAwareAsm;
+    let sample: SampleInlinedMockPriceAwareAsm;
 
     const PRIV = "0xae2b81c1fe9e3b01f060362f03abd0c80a6447cfe00ff7fc7fcf000000000000";
 
@@ -55,8 +55,8 @@ describe("Price Aware - inlined assembly version", function () {
 
         signer = new ethers.Wallet(PRIV, owner.provider);
 
-        const SampleInlinedPriceAwareAsm = await ethers.getContractFactory("SampleInlinedPriceAwareAsm");
-        sample = (await SampleInlinedPriceAwareAsm.deploy()) as SampleInlinedPriceAwareAsm;
+        const SampleInlinedPriceAwareAsm = await ethers.getContractFactory("SampleInlinedMockPriceAwareAsm");
+        sample = (await SampleInlinedPriceAwareAsm.deploy()) as SampleInlinedMockPriceAwareAsm;
     });
 
     it("should get price", async function () {
