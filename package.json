@@ -1,6 +1,6 @@
 {
   "name": "redstone-flash-storage",
-  "version": "1.0.7",
+  "version": "1.2.0",
   "description": "",
   "main": "lib/utils/contract-wrapper.js",
   "types": "lib/utils/contract-wrapper.d.ts",
@@ -13,9 +13,22 @@
     "prebuild": "hardhat compile",
     "postversion": "git push && git push --tags"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/redstone-finance/redstone-flash-storage.git"
+  },
   "keywords": [],
-  "author": "",
+  "author": "Redstone Team <dev@redstone.finance>",
+  "contributors": [
+    "Jakub Wojciechowski <jakub@redstone.finance>",
+    "Alex Suvorov <alex@redstone.finance>",
+    "Peter Pedziwiatr <peter@redstone.finance>"
+  ],
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/redstone-finance/redstone-flash-storage/issues"
+  },
+  "homepage": "https://redstone.finance/",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
