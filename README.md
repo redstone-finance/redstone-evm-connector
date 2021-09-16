@@ -90,10 +90,10 @@ You should also update the code responsible for submitting transactions. If you'
 First, you need to import the wrapper code to your project
 ```ts
 // Typescript
-import WrapperBuilder from "redstone-flash-storage/lib/utils/v2/impl/builder/WrapperBuilder";
+import { WrapperBuilder } from "redstone-flash-storage";
 
 // Javascript
-const { default: WrapperBuilder } = require("redstone-flash-storage/lib/utils/v2/impl/builder/WrapperBuilder");
+const { WrapperBuilder } = require("redstone-flash-storage");
 ```
 
 Then you can wrap your ethers contract pointing to the selected Redstone data provider:
