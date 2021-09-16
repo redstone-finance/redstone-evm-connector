@@ -120,6 +120,7 @@ We recommend to use this option. It will automatically authorise the correct pub
 await yourEthersContract.authorizeProvider();
 ```
 ##### 2. Authorization by ethereum address
+This option requires the provider's ethereum address. You can see redstone providers' details using [RedStone API.](https://api.redstone.finance/providers)
 ```js
 await yourEthersContract.authorizeSigner("REAPLCE_WITH_DATA_PROVIDER_ETHEREUM_ADDRESS")
 ```
