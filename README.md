@@ -2,7 +2,21 @@
 
 Putting data directly into storage is the easiest to make information accessible to smart contracts. However, the convenience comes at a high price, as the storage access is the most costly operation in [EVM](https://ethereum.github.io/yellowpaper/paper.pdf) (20k gas for 256bit word ~ $160k for 1Mb checked 30/08/2021) making it prohibitively expensive to use.
 
-Flash storage implements an alternative design of providing data to smart contracts. Instead of constantly persisting data on EVM storage, the information is brought on-chain only when needed (**on-demand fetching**). Until that moment, the data remains available in the [Arweave](https://www.arweave.org/) blockchain where data providers are incentivised to keep information accurate and up to date. Data is transferred to EVM via a mechanism based on a [meta-transaction pattern](https://medium.com/@austin_48503/ethereum-meta-transactions-90ccf0859e84) and the information integrity is verified on-chain through signature checking. 
+Flash storage implements an alternative design of providing data to smart contracts. Instead of constantly persisting data on EVM storage, the information is brought on-chain only when needed (**on-demand fetching**). Until that moment, the data remains available in the [Arweave](https://www.arweave.org/) blockchain where data providers are incentivised to keep information accurate and up to date. Data is transferred to EVM via a mechanism based on a [meta-transaction pattern](https://medium.com/@austin_48503/ethereum-meta-transactions-90ccf0859e84) and the information integrity is verified on-chain through signature checking.
+
+- [How it works](#-how-it-works)
+  - [Data packing (off-chain data encoding)](#data-packing-off-chain-data-encoding)
+  - [Data unpacking (on-chain data verification)](#data-unpacking-on-chain-data-verification)
+  - [Benchmarks](#benchmarks)
+- [Installation](#-installation)
+- [Getting started](#-getting-started)
+  - [1. Modifying your contracts](#1-modifying-your-contracts)
+  - [2. Updating the interface](#2-updating-the-interface)
+  - [Alternative solutions](#alternative-solutions)
+- [Working demo](#-working-demo)
+- [Development and contributions](#-development-and-contributions)
+  - [Installing the dependencies](#core-package)
+  - [Compiling and running the tests](#compiling-and-running-the-tests)
 
 ## 💡 How it works
 
@@ -37,6 +51,8 @@ We work hard to optimise the code using solidity assembly and reduce the gas cos
 [![Screenshot-2021-09-05-at-17-18-25.png](https://i.postimg.cc/CK14BQTC/Screenshot-2021-09-05-at-17-18-25.png)](https://postimg.cc/NK3XZb0L)
 
 ## 📦 Installation
+
+Install [redstone-flash-storage](https://www.npmjs.com/package/redstone-flash-storage) from NPM registry
 ```bash
 # Using yarn
 yarn add redstone-flash-storage
@@ -91,7 +107,7 @@ Now you can access any of the contract's methods in exactly the same way as inte
 yourEthersContract.executeYourMethod();
 ```
 
-💡 Note! If you're the owner of the contract, you should authorise a data provider after the contract deployment. You should do it before users will interact with your contract. Because the provider authenticity will be checked via signature verification whenever a user submits a transaction accessing the data. There are 2 ways od provider authorisation:
+💡 Note! If you're the owner of the contract, you should authorise a data provider after the contract deployment. You should do it before users will interact with your contract. Because the provider authenticity will be checked via signature verification whenever a user submits a transaction accessing the data. There are 2 ways of provider authorisation:
 #### 1. Simple authorisation
 ```js
 await yourEthersContract.authorizeProvider();
@@ -122,11 +138,15 @@ We're also working on a wrapper for the truffle/web3 contracts. Please [let us k
 
 If you don't want to modify even a single line of your contract, it's possible to use an alternative solution based on the [Proxy pattern](https://blog.openzeppelin.com/proxy-patterns/). This approach intercepts a transaction at a proxy stage, extracts the price data and delegates the original transaction to your contract. Another advantage of the solution is allowing any contract (including 3rd party ones) to access the data. However, these benefits come at the cost of higher gas consumption. If you're interested in using this approach take a look at the contracts located in the [storage-based](https://github.com/redstone-finance/redstone-flash-storage/tree/price-aware/contracts/storage-based) folder and [reach out to us](https://redstone.finance/discord) if you need help setting up your environment.  
 
+
+## ✅ Working demo
+You can see examples of `redstone-flash-storage` usage in our [dedicated repo with examples](https://github.com/redstone-finance/redstone-flash-storage-examples).
+
 ## 👨‍💻 Development and contributions
 
 The codebase consists of a wrapper written in typescript which is responsible for packing the data and solidity smart contracts that extract the information. We encourage anyone to build and test the code and we welcome any issues with suggestions and pull requests. 
 
-#### Installing the dependencies
+### Installing the dependencies
 
 ```
 yarn install 
