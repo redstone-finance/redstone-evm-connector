@@ -113,7 +113,7 @@ yourEthersContract.executeYourMethod();
 ```
 
 #### Provider authorisation
-💡 Note! If you're the owner of the contract, you should authorise a data provider after the contract deployment. You should do it before users will interact with your contract. Because the provider authenticity will be checked via signature verification whenever a user submits a transaction accessing the data. There are 2 ways of provider authorisation:
+If you're the owner of the contract, you should authorise a data provider after the contract deployment. You should do it before users will interact with your contract. Because the provider authenticity will be checked via signature verification whenever a user submits a transaction accessing the data. There are 2 ways of provider authorisation:
 ##### 1. Simple authorisation
 We recommend to use this option. It will automatically authorise the correct public address based on your configured price feed.
 ```js

@@ -14,19 +14,19 @@ import {DEFAULT_PRICE, MockableContract} from "../../utils/v2/impl/builder/Mocka
 
 chai.use(solidity);
 
-describe("Price Aware - basic version", function () {
+describe("Price Aware - basic version (v1 version)", function () {
     let owner:SignerWithAddress;
     let signer:Wallet;
 
-    let sample: MockableContract<SamplePriceAware>;
+    let sample: MockableContract<SamplePriceAwareV1>;
 
     it("should deploy contracts", async function () {
         [owner] = await ethers.getSigners();
 
         signer = new ethers.Wallet(MockPriceFeed.P_KEY, owner.provider);
 
-        const SamplePriceAware = await ethers.getContractFactory("SamplePriceAware");
-        sample = (await SamplePriceAware.deploy()) as MockableContract<SamplePriceAware>;
+        const SamplePriceAware = await ethers.getContractFactory("SamplePriceAwareV1");
+        sample = (await SamplePriceAware.deploy()) as MockableContract<SamplePriceAwareV1>;
         await sample.authorizeSigner(signer.address);
     });
 
