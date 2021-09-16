@@ -7,10 +7,11 @@
   "scripts": {
     "build": "tsc",
     "postbuild": "cp -r contracts ./lib",
-    "test": "npx hardhat test",
+    "test": "yarn compile && npx hardhat test",
     "prepare": "yarn build",
     "version": "git add -A ./",
-    "prebuild": "hardhat compile",
+    "prebuild": "yarn compile",
+    "compile": "hardhat compile",
     "postversion": "git push && git push --tags"
   },
   "repository": {

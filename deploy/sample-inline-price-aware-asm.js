@@ -1,9 +1,9 @@
 module.exports = async ({getNamedAccounts, deployments}) => {
   const {deploy} = deployments;
   const {deployer} = await getNamedAccounts();
-  await deploy('SampleInlinedPriceAwareAsm', {
+  await deploy('SampleInlinedPriceAware', {
     from: deployer,
     log: true
   });
 };
-module.exports.tags = ['SampleInlinedPriceAwareAsm'];
+module.exports.tags = ['SampleInlinedPriceAware'];

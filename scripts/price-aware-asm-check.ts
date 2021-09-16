@@ -1,4 +1,4 @@
-const deployedPriceAware = require("../deployments/kovan/SamplePriceAwareAsm.json");
+const deployedPriceAware = require("../deployments/kovan/SamplePriceAware.json");
 const secrets = require("../.secret.json");
 import {Wallet, Contract, getDefaultProvider} from "ethers";
 import WrapperBuilder from "../utils/v2/impl/builder/WrapperBuilder";

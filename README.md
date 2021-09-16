@@ -42,15 +42,15 @@ We work hard to optimise the code using solidity assembly and reduce the gas cos
 
 ### 1. Modifying your contracts
 
-You need to apply a minium change to the source code to enable smart contract to access data. Your contract needs to extend the [PriceAware](https://github.com/redstone-finance/redstone-flash-storage/blob/price-aware/contracts/message-based/PriceAwareAsm.sol) contract :
+You need to apply a minium change to the source code to enable smart contract to access data. Your contract needs to extend the [PriceAware](https://github.com/redstone-finance/redstone-flash-storage/blob/price-aware/contracts/message-based/PriceAware.sol) contract :
 
 ```js
 import "redstone-flash-storage/lib/contracts/message-based/PriceAware.sol";
 
-contract YourContractName is PriceAwareAsm {
+contract YourContractName is PriceAware {
 ```
 
-After applying the mentioned change you will be able to access the data calling the local [getPriceFromMsg](https://github.com/redstone-finance/redstone-flash-storage/blob/price-aware/contracts/message-based/PriceAwareAsm.sol#L29) function:
+After applying the mentioned change you will be able to access the data calling the local [getPriceFromMsg](https://github.com/redstone-finance/redstone-flash-storage/blob/price-aware/contracts/message-based/PriceAware.sol#L29) function:
 
 ```js
 uint256 ethPrice = getPriceFromMsg(bytes32("ETH"));

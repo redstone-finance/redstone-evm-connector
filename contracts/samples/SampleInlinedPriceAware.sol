@@ -2,13 +2,27 @@
 
 pragma solidity ^0.8.2;
 
+
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-contract InlinedPriceAwareAsm  {
+/**
+ * @title SampleInlinedPriceAware
+ * @dev An example of a contract using message-based way of fetching data from RedStone
+ * It has only a few dummy methods used to benchmark gas consumption
+ * It extends InlinedPriceAware which in-lines signer address and maximum delay of price feed
+ * to reduce the gas of every invocation (saving is ~4k gas)
+ */
+contract SampleInlinedPriceAware  {
   using ECDSA for bytes32;
 
   uint constant MAX_DELAY = 3 * 60;
-  address constant TRUSTED_SIGNER = 0xFE71e9691B9524BC932C23d0EeD5c9CE41161884;
+  address constant TRUSTED_SIGNER = 0x926E370fD53c23f8B71ad2B3217b227E41A92b12;
+
+  
+  function executeWithPrice(uint val) public returns(uint256) {
+    return getPriceFromMsg(bytes32("IBM"));
+  }
+  
 
   function getPriceFromMsg(bytes32 symbol) internal view returns(uint256) {
     //The structure of calldata witn n - data items:
@@ -79,15 +93,6 @@ contract InlinedPriceAwareAsm  {
     }
     require(block.timestamp - dataTimestamp < MAX_DELAY, "Data is too old");
 
-    //Debugging logs (to be removed)
-
-    //    console.log("Len: ", messageLength);
-    //    console.logBytes(rawData);
-    //    console.logBytes32(hash);
-    //    console.logBytes(signature);
-    //    console.log("Signer: ", signer);
-
-
     //8. We iterate directly through call data to extract the value for a given symbol
 
     uint256 val;
@@ -107,3 +112,4 @@ contract InlinedPriceAwareAsm  {
   }
 
 }
+
