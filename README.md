@@ -4,9 +4,7 @@ Putting data directly into storage is the easiest to make information accessible
 
 Flash storage implements an alternative design of providing data to smart contracts. Instead of constantly persisting data on EVM storage, the information is brought on-chain only when needed (**on-demand fetching**). Until that moment, the data remains available in the [Arweave](https://www.arweave.org/) blockchain where data providers are incentivised to keep information accurate and up to date. Data is transferred to EVM via a mechanism based on a [meta-transaction pattern](https://medium.com/@austin_48503/ethereum-meta-transactions-90ccf0859e84) and the information integrity is verified on-chain through signature checking. 
 
-
-
-## How it works
+## 💡 How it works
 
 At a top level, transferring data to an EVM environment requires packing an extra payload to a user's transaction and processing the message on-chain.
 
@@ -38,7 +36,16 @@ We work hard to optimise the code using solidity assembly and reduce the gas cos
 
 [![Screenshot-2021-09-05-at-17-18-25.png](https://i.postimg.cc/CK14BQTC/Screenshot-2021-09-05-at-17-18-25.png)](https://postimg.cc/NK3XZb0L)
 
-## Getting started
+## 📦 Installation
+```bash
+# Using yarn
+yarn add redstone-flash-storage
+
+# Using NPM
+npm install redstone-flash-storage
+```
+
+## 🔥 Getting started
 
 ### 1. Modifying your contracts
 
@@ -71,9 +78,11 @@ const { default: WrapperBuilder } = require("redstone-flash-storage/lib/utils/v2
 Then you can wrap your ethers contract pointing to the selected Redstone data provider:
 
 ```js
+let yourEthersContract = new ethers.Contract(addres, abi, provider);
+
 yourEthersContract = WrapperBuilder
-                     .wrapLite(yourEthersContract)
-                     .usingPriceFeed("redstone", "ETH");
+                      .wrapLite(yourEthersContract)
+                      .usingPriceFeed("redstone", "ETH");
 ```
 
 Now you can access any of the contract's methods in exactly the same way as interacting with the ethers-js code:
@@ -82,7 +91,17 @@ Now you can access any of the contract's methods in exactly the same way as inte
 yourEthersContract.executeYourMethod();
 ```
 
-If you're the owner of the contract, the wrapper offers you also a convenient method to authorise a provider without the need of passing the ethereum address (the provider authenticity will be checked via signature verification whenever a user submits a transaction accessing the data):
+💡 Note! If you're the owner of the contract, you should authorise a data provider after the contract deployment. You should do it before users will interact with your contract. Because the provider authenticity will be checked via signature verification whenever a user submits a transaction accessing the data. There are 2 ways od provider authorisation:
+#### 1. Simple authorisation
+```js
+await yourEthersContract.authorizeProvider();
+```
+#### 2. Authorization by ethereum address
+```js
+await yourEthersContract.authorizeSigner("REAPLCE_WITH_DATA_PROVIDER_ETHEREUM_ADDRESS")
+```
+
+We recommend to use the first option, which will automatically authorise the correct public address based on your configured price feed.
 
 ```js
 yourEthersContract.authorizeProvider();
@@ -97,13 +116,13 @@ yourEthersContract = WrapperBuilder
                      .using(DEFAULT_PRICE);
 ```
 
-We're also working on a wrapper for the truffle/web3 contracts. Please let us know if you need a solution for other frameworks as well. 
+We're also working on a wrapper for the truffle/web3 contracts. Please [let us know](https://redstone.finance/discord) if you need a solution for other frameworks as well. 
 
 ### Alternative solutions
 
-If you don't want to modify even a single line of your contract, it's possible to use an alternative solution based on the [Proxy pattern](). This approach intercepts a transaction at a proxy stage, extracts the price data and delegates the original transaction to your contract. Another advantage of the solution is allowing any contract (including 3rd party ones) to access the data. However, these benefits come at the cost of higher gas consumption. If you're interested in using this approach take a look at the contracts located in the [storage-based](https://github.com/redstone-finance/redstone-flash-storage/tree/price-aware/contracts/storage-based) folder and [reach out to us](https://redstone.finance/discord) if you need help setting up your environment.  
+If you don't want to modify even a single line of your contract, it's possible to use an alternative solution based on the [Proxy pattern](https://blog.openzeppelin.com/proxy-patterns/). This approach intercepts a transaction at a proxy stage, extracts the price data and delegates the original transaction to your contract. Another advantage of the solution is allowing any contract (including 3rd party ones) to access the data. However, these benefits come at the cost of higher gas consumption. If you're interested in using this approach take a look at the contracts located in the [storage-based](https://github.com/redstone-finance/redstone-flash-storage/tree/price-aware/contracts/storage-based) folder and [reach out to us](https://redstone.finance/discord) if you need help setting up your environment.  
 
-## Development and contributions
+## 👨‍💻 Development and contributions
 
 The codebase consists of a wrapper written in typescript which is responsible for packing the data and solidity smart contracts that extract the information. We encourage anyone to build and test the code and we welcome any issues with suggestions and pull requests. 
 
