@@ -5,6 +5,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Init test private key
+        env:
+          TEST_PRIV_KEY_JSON: ${{ secrets.TEST_PRIV_KEY_JSON }}
+        run: echo $TEST_PRIV_KEY_JSON > ./.secret.json
       - name: Install modules
         run: yarn
       - name: Run tests
