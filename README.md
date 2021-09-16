@@ -83,6 +83,7 @@ uint256 ethPrice = getPriceFromMsg(bytes32("ETH"));
 
 You should also update the code responsible for submitting transactions. If you're using [ethers.js](https://github.com/ethers-io/ethers.js/), we've prepared a dedicated library to make the transition seamless. First, you need to import the wrapper code to your project:
 
+#### Contract object wrapping
 ```ts
 // Typescript
 import WrapperBuilder from "redstone-flash-storage/lib/utils/v2/impl/builder/WrapperBuilder";
@@ -94,7 +95,7 @@ const { default: WrapperBuilder } = require("redstone-flash-storage/lib/utils/v2
 Then you can wrap your ethers contract pointing to the selected Redstone data provider:
 
 ```js
-let yourEthersContract = new ethers.Contract(addres, abi, provider);
+let yourEthersContract = new ethers.Contract(address, abi, provider);
 
 yourEthersContract = WrapperBuilder
                       .wrapLite(yourEthersContract)
@@ -107,24 +108,21 @@ Now you can access any of the contract's methods in exactly the same way as inte
 yourEthersContract.executeYourMethod();
 ```
 
+#### Provider authorisation
 💡 Note! If you're the owner of the contract, you should authorise a data provider after the contract deployment. You should do it before users will interact with your contract. Because the provider authenticity will be checked via signature verification whenever a user submits a transaction accessing the data. There are 2 ways of provider authorisation:
-#### 1. Simple authorisation
+##### 1. Simple authorisation
+We recommend to use this option. It will automatically authorise the correct public address based on your configured price feed.
 ```js
 await yourEthersContract.authorizeProvider();
 ```
-#### 2. Authorization by ethereum address
+##### 2. Authorization by ethereum address
 ```js
 await yourEthersContract.authorizeSigner("REAPLCE_WITH_DATA_PROVIDER_ETHEREUM_ADDRESS")
 ```
 
-We recommend to use the first option, which will automatically authorise the correct public address based on your configured price feed.
-
-```js
-yourEthersContract.authorizeProvider();
-```
+#### [optional] Test context
 
 If you'd like to use the wrapper in a test context, we recommend using a mock provider when you can easily override the price to test different scenarios:
-
 
 ```js
 yourEthersContract = WrapperBuilder
@@ -148,12 +146,12 @@ The codebase consists of a wrapper written in typescript which is responsible fo
 
 ### Installing the dependencies
 
-```
+```bash
 yarn install 
 ```
 
 ### Compiling and running the tests
 
-```
+```bash
 yarn test 
 ```
