@@ -12,6 +12,9 @@ Flash storage implements an alternative design of providing data to smart contra
 - [Getting started](#-getting-started)
   - [1. Modifying your contracts](#1-modifying-your-contracts)
   - [2. Updating the interface](#2-updating-the-interface)
+    - [Contract object wrapping](#contract-object-wrapping)
+    - [Provider authorisation](#provider-authorisation)
+    - [Mock provider](#mock-provider)
   - [Alternative solutions](#alternative-solutions)
 - [Working demo](#-working-demo)
 - [Development and contributions](#-development-and-contributions)
@@ -81,9 +84,10 @@ uint256 ethPrice = getPriceFromMsg(bytes32("ETH"));
 
 ### 2. Updating the interface
 
-You should also update the code responsible for submitting transactions. If you're using [ethers.js](https://github.com/ethers-io/ethers.js/), we've prepared a dedicated library to make the transition seamless. First, you need to import the wrapper code to your project:
+You should also update the code responsible for submitting transactions. If you're using [ethers.js](https://github.com/ethers-io/ethers.js/), we've prepared a dedicated library to make the transition seamless.
 
 #### Contract object wrapping
+First, you need to import the wrapper code to your project
 ```ts
 // Typescript
 import WrapperBuilder from "redstone-flash-storage/lib/utils/v2/impl/builder/WrapperBuilder";
@@ -120,7 +124,7 @@ await yourEthersContract.authorizeProvider();
 await yourEthersContract.authorizeSigner("REAPLCE_WITH_DATA_PROVIDER_ETHEREUM_ADDRESS")
 ```
 
-#### [optional] Test context
+#### Mock provider
 
 If you'd like to use the wrapper in a test context, we recommend using a mock provider when you can easily override the price to test different scenarios:
 
