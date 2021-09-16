@@ -44,13 +44,15 @@ We work hard to optimise the code using solidity assembly and reduce the gas cos
 
 You need to apply a minium change to the source code to enable smart contract to access data. Your contract needs to extend the [PriceAware](https://github.com/redstone-finance/redstone-flash-storage/blob/price-aware/contracts/message-based/PriceAwareAsm.sol) contract :
 
-```
+```js
+import "redstone-flash-storage/lib/contracts/message-based/PriceAware.sol";
+
 contract YourContractName is PriceAwareAsm {
 ```
 
 After applying the mentioned change you will be able to access the data calling the local [getPriceFromMsg](https://github.com/redstone-finance/redstone-flash-storage/blob/price-aware/contracts/message-based/PriceAwareAsm.sol#L29) function:
 
-```
+```js
 uint256 ethPrice = getPriceFromMsg(bytes32("ETH"));
 ```
 
@@ -58,13 +60,17 @@ uint256 ethPrice = getPriceFromMsg(bytes32("ETH"));
 
 You should also update the code responsible for submitting transactions. If you're using [ethers.js](https://github.com/ethers-io/ethers.js/), we've prepared a dedicated library to make the transition seamless. First, you need to import the wrapper code to your project:
 
-```
-import WrapperBuilder from "redstone-flash-storage";
+```ts
+// Typescript
+import WrapperBuilder from "redstone-flash-storage/lib/utils/v2/impl/builder/WrapperBuilder";
+
+// Javascript
+const { default: WrapperBuilder } = require("redstone-flash-storage/lib/utils/v2/impl/builder/WrapperBuilder");
 ```
 
 Then you can wrap your ethers contract pointing to the selected Redstone data provider:
 
-```
+```js
 yourEthersContract = WrapperBuilder
                      .wrapLite(yourEthersContract)
                      .usingPriceFeed("redstone", "ETH");
@@ -72,20 +78,20 @@ yourEthersContract = WrapperBuilder
 
 Now you can access any of the contract's methods in exactly the same way as interacting with the ethers-js code:
 
-```
+```js
 yourEthersContract.executeYourMethod();
 ```
 
 If you're the owner of the contract, the wrapper offers you also a convenient method to authorise a provider without the need of passing the ethereum address (the provider authenticity will be checked via signature verification whenever a user submits a transaction accessing the data):
 
-```
+```js
 yourEthersContract.authorizeProvider();
 ```
 
 If you'd like to use the wrapper in a test context, we recommend using a mock provider when you can easily override the price to test different scenarios:
 
 
-```
+```js
 yourEthersContract = WrapperBuilder
                      .mockLite(yourEthersContract)
                      .using(DEFAULT_PRICE);
