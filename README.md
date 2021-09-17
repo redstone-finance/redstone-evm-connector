@@ -76,11 +76,13 @@ import "redstone-flash-storage/lib/contracts/message-based/PriceAware.sol";
 contract YourContractName is PriceAware {
 ```
 
-After applying the mentioned change you will be able to access the data calling the local [getPriceFromMsg](https://github.com/redstone-finance/redstone-flash-storage/blob/price-aware/contracts/message-based/PriceAware.sol#L29) function:
+After applying the mentioned change you will be able to access the data calling the local [getPriceFromMsg](https://github.com/redstone-finance/redstone-flash-storage/blob/price-aware/contracts/message-based/PriceAware.sol#L29) function. You should pass the symbol of the asset, converted to `bytes32`:
 
 ```js
 uint256 ethPrice = getPriceFromMsg(bytes32("ETH"));
 ```
+
+You can see all available assets and symbols [in our web app.](https://app.redstone.finance/#/app/providers)
 
 ### 2. Updating the interface
 
@@ -99,17 +101,17 @@ const { WrapperBuilder } = require("redstone-flash-storage");
 Then you can wrap your ethers contract pointing to the selected Redstone data provider:
 
 ```js
-let yourEthersContract = new ethers.Contract(address, abi, provider);
+const yourEthersContract = new ethers.Contract(address, abi, provider);
 
-yourEthersContract = WrapperBuilder
-                      .wrapLite(yourEthersContract)
-                      .usingPriceFeed("redstone", "ETH");
+const wrappedContract = WrapperBuilder
+                          .wrapLite(yourEthersContract)
+                          .usingPriceFeed("redstone", "ETH");
 ```
 
 Now you can access any of the contract's methods in exactly the same way as interacting with the ethers-js code:
 
 ```js
-yourEthersContract.executeYourMethod();
+wrappedContract.executeYourMethod();
 ```
 
 #### Provider authorisation
@@ -117,7 +119,7 @@ If you're the owner of the contract, you should authorise a data provider after 
 ##### 1. Simple authorisation
 We recommend to use this option. It will automatically authorise the correct public address based on your configured price feed.
 ```js
-await yourEthersContract.authorizeProvider();
+await wrappedContract.authorizeProvider();
 ```
 ##### 2. Authorization by ethereum address
 This option requires the provider's ethereum address. You can see redstone providers' details using [RedStone API.](https://api.redstone.finance/providers)
@@ -130,9 +132,9 @@ await yourEthersContract.authorizeSigner("REAPLCE_WITH_DATA_PROVIDER_ETHEREUM_AD
 If you'd like to use the wrapper in a test context, we recommend using a mock provider when you can easily override the price to test different scenarios:
 
 ```js
-yourEthersContract = WrapperBuilder
-                     .mockLite(yourEthersContract)
-                     .using(DEFAULT_PRICE);
+const wrappedContract = WrapperBuilder
+                          .mockLite(yourEthersContract)
+                          .using(DEFAULT_PRICE);
 ```
 
 We're also working on a wrapper for the truffle/web3 contracts. Please [let us know](https://redstone.finance/discord) if you need a solution for other frameworks as well. 
