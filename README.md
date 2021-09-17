@@ -13,7 +13,7 @@ Flash storage implements an alternative design of providing data to smart contra
   - [1. Modifying your contracts](#1-modifying-your-contracts)
   - [2. Updating the interface](#2-updating-the-interface)
     - [Contract object wrapping](#contract-object-wrapping)
-    - [Provider authorisation](#provider-authorisation)
+    - [Provider authorization](#provider-authorization)
     - [Mock provider](#mock-provider)
   - [Alternative solutions](#alternative-solutions)
 - [Working demo](#-working-demo)
@@ -76,7 +76,7 @@ import "redstone-flash-storage/lib/contracts/message-based/PriceAware.sol";
 contract YourContractName is PriceAware {
 ```
 
-After applying the mentioned change you will be able to access the data calling the local [getPriceFromMsg](https://github.com/redstone-finance/redstone-flash-storage/blob/price-aware/contracts/message-based/PriceAware.sol#L29) function. You should pass the symbol of the asset, converted to `bytes32`:
+After applying the mentioned change you will be able to access the data calling the local [getPriceFromMsg](https://github.com/redstone-finance/redstone-flash-storage/blob/price-aware/contracts/message-based/PriceAware.sol#L29) function. You should pass the symbol of the asset converted to `bytes32`:
 
 ```js
 uint256 ethPrice = getPriceFromMsg(bytes32("ETH"));
@@ -98,14 +98,20 @@ import { WrapperBuilder } from "redstone-flash-storage";
 const { WrapperBuilder } = require("redstone-flash-storage");
 ```
 
-Then you can wrap your ethers contract pointing to the selected Redstone data provider:
+Then you can wrap your ethers contract pointing to the selected [Redstone data provider.](https://api.redstone.finance/providers) You can also specify the single asset that you would like to pass to your contract. It helps to decrease transactions GAS cost, because in this case only the data for the provided asset will be passed to the contract.
 
 ```js
 const yourEthersContract = new ethers.Contract(address, abi, provider);
 
+// connecting all provider's prices (consumes more GAS)
 const wrappedContract = WrapperBuilder
                           .wrapLite(yourEthersContract)
-                          .usingPriceFeed("redstone", "ETH");
+                          .usingPriceFeed("redstone");
+
+// connecting a single price from selected provider
+const wrappedContract = WrapperBuilder
+                          .wrapLite(yourEthersContract)
+                          .usingPriceFeed("redstone-stocks", "AAPL");
 ```
 
 Now you can access any of the contract's methods in exactly the same way as interacting with the ethers-js code:
@@ -114,17 +120,17 @@ Now you can access any of the contract's methods in exactly the same way as inte
 wrappedContract.executeYourMethod();
 ```
 
-#### Provider authorisation
-If you're the owner of the contract, you should authorise a data provider after the contract deployment. You should do it before users will interact with your contract. Because the provider authenticity will be checked via signature verification whenever a user submits a transaction accessing the data. There are 2 ways of provider authorisation:
-##### 1. Simple authorisation
-We recommend to use this option. It will automatically authorise the correct public address based on your configured price feed.
+#### Provider authorization
+If you're the owner of the contract, you should authorize a data provider after the contract deployment. You should do it before users will interact with your contract. Because the provider authenticity will be checked via signature verification whenever a user submits a transaction accessing the data. There are 2 ways of provider authorization:
+##### 1. Simple authorization
+We recommend to use this option. It will automatically authorize the correct public address based on your configured price feed.
 ```js
 await wrappedContract.authorizeProvider();
 ```
 ##### 2. Authorization by ethereum address
-This option requires the provider's ethereum address. You can see redstone providers' details using [RedStone API.](https://api.redstone.finance/providers)
+This option requires the provider's ethereum address. You can check the redstone providers' details using [RedStone API.](https://api.redstone.finance/providers)
 ```js
-await yourEthersContract.authorizeSigner("REAPLCE_WITH_DATA_PROVIDER_ETHEREUM_ADDRESS")
+await yourEthersContract.authorizeSigner("REPLACE_WITH_DATA_PROVIDER_ETHEREUM_ADDRESS")
 ```
 
 #### Mock provider
