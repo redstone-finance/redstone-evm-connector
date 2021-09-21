@@ -1,0 +1,140 @@
+import {ethers} from "hardhat";
+import {Wallet} from "ethers";
+import chai from "chai";
+import {solidity} from "ethereum-waffle";
+
+import { SampleInlinedMockPriceAware } from "../../typechain/SampleInlinedMockPriceAware";
+import { SamplePriceAware } from "../../typechain/SamplePriceAware";
+import { SamplePriceAwareV1 } from "../../typechain/SamplePriceAwareV1";
+import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
+import {syncTime} from "../_helpers";
+import {MockPriceFeed} from "../../utils/v2/connector/impl/MockPriceFeed";
+import WrapperBuilder from "../../utils/v2/impl/builder/WrapperBuilder";
+import {DEFAULT_PRICE, MockableContract} from "../../utils/v2/impl/builder/MockableEthersContractWrapperBuilder";
+
+chai.use(solidity);
+
+describe("Price Aware - basic version (v1 version)", function () {
+    let owner:SignerWithAddress;
+    let signer:Wallet;
+
+    let sample: MockableContract<SamplePriceAwareV1>;
+
+    it("should deploy contracts", async function () {
+        [owner] = await ethers.getSigners();
+
+        signer = new ethers.Wallet(MockPriceFeed.P_KEY, owner.provider);
+
+        const SamplePriceAware = await ethers.getContractFactory("SamplePriceAwareV1");
+        sample = (await SamplePriceAware.deploy()) as MockableContract<SamplePriceAwareV1>;
+        await sample.authorizeSigner(signer.address);
+    });
+
+    it("should get price", async function () {
+        await sample.execute(1);
+
+        sample = WrapperBuilder
+          .mock(sample)
+          .using(DEFAULT_PRICE);
+        await syncTime();
+        await sample.executeWithPrice(7);
+    });
+});
+
+
+describe("Price Aware - inlined assembly version", function () {
+    let owner:SignerWithAddress;
+    let signer:Wallet;
+
+    let sample: SampleInlinedMockPriceAware;
+
+    const PRIV = "0xae2b81c1fe9e3b01f060362f03abd0c80a6447cfe00ff7fc7fcf000000000000";
+
+    it("should deploy contracts", async function () {
+        [owner] = await ethers.getSigners();
+
+        signer = new ethers.Wallet(PRIV, owner.provider);
+
+        const SampleInlinedPriceAware = await ethers.getContractFactory("SampleInlinedMockPriceAware");
+        sample = (await SampleInlinedPriceAware.deploy()) as SampleInlinedMockPriceAware;
+    });
+
+    it("should get price", async function () {
+
+        sample = WrapperBuilder
+          .mockLite(sample)
+          .using(DEFAULT_PRICE);
+
+        //await syncTime(); // recommended for hardhat test
+        await sample.executeWithPrice(7);
+    });
+});
+
+
+describe("Price Aware - editable assembly version", function () {
+    let owner:SignerWithAddress;
+    let signer:Wallet;
+
+    let sample: SamplePriceAware;
+
+    it("should deploy contracts", async function () {
+        [owner] = await ethers.getSigners();
+
+        signer = new ethers.Wallet(MockPriceFeed.P_KEY, owner.provider);
+
+        const SamplePriceAware = await ethers.getContractFactory("SamplePriceAware");
+        sample = (await SamplePriceAware.deploy()) as SamplePriceAware;
+    });
+
+    it("should get price", async function () {
+
+        sample = WrapperBuilder
+          .mockLite(sample)
+          .using(DEFAULT_PRICE);
+
+        await sample.authorizeProvider();
+
+        //await syncTime(); // recommended for hardhat test
+        await sample.executeWithPrice(7);
+    });
+});
+
+describe("Price Aware - redstone realtime feed", function () {
+    let owner:SignerWithAddress;
+    let signer:Wallet;
+
+    let sample: SamplePriceAware;
+
+    it("should deploy contracts", async function () {
+        [owner] = await ethers.getSigners();
+
+        signer = new ethers.Wallet(MockPriceFeed.P_KEY, owner.provider);
+
+        const SamplePriceAware = await ethers.getContractFactory("SamplePriceAware");
+        sample = (await SamplePriceAware.deploy()) as SamplePriceAware;
+    });
+
+    it("should get price with single asset", async function () {
+
+        sample = WrapperBuilder
+            .wrapLite(sample)
+            .usingPriceFeed("redstone-stocks", "IBM");
+
+        await sample.authorizeProvider();
+
+        //await syncTime(); // recommended for hardhat test
+        await sample.executeWithPrice(7);
+    });
+
+    it("should get price with multiple assets", async function () {
+
+        sample = WrapperBuilder
+            .wrapLite(sample)
+            .usingPriceFeed("redstone-stocks");
+
+        await sample.authorizeProvider();
+
+        await syncTime(); // recommended for hardhat test
+        await sample.executeWithPrice(7);
+    });
+});

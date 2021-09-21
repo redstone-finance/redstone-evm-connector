@@ -1,46 +1,63 @@
 {
   "name": "redstone-flash-storage",
-  "version": "1.0.7",
+  "version": "1.2.2",
   "description": "",
-  "main": "lib/utils/contract-wrapper.js",
-  "types": "lib/utils/contract-wrapper.d.ts",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "build": "tsc",
     "postbuild": "cp -r contracts ./lib",
-    "test": "hardhat test",
+    "test": "yarn compile && npx hardhat test",
     "prepare": "yarn build",
     "version": "git add -A ./",
-    "prebuild": "hardhat compile",
+    "prebuild": "yarn compile",
+    "compile": "hardhat compile",
     "postversion": "git push && git push --tags"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/redstone-finance/redstone-flash-storage.git"
+  },
   "keywords": [],
-  "author": "",
+  "author": "Redstone Team <dev@redstone.finance>",
+  "contributors": [
+    "Jakub Wojciechowski <jakub@redstone.finance>",
+    "Alex Suvorov <alex@redstone.finance>",
+    "Peter Pedziwiatr <peter@redstone.finance>"
+  ],
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/redstone-finance/redstone-flash-storage/issues"
+  },
+  "homepage": "https://redstone.finance/",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
-    "@types/chai": "^4.2.15",
+    "@types/chai": "^4.2.21",
     "@types/ethereumjs-util": "^6.1.0",
     "@types/lodash": "^4.14.171",
-    "@types/mocha": "^8.2.2",
+    "@types/mocha": "^8.2.3",
     "@types/node": "^14.14.35",
+    "@types/sinon": "^10.0.2",
     "chai": "^4.3.4",
-    "ethereum-waffle": "^3.3.0",
-    "ethers": "^5.0.32",
-    "hardhat": "^2.1.1",
+    "ethereum-waffle": "^3.4.0",
+    "ethers": "^5.4.4",
+    "hardhat": "^2.6.0",
     "hardhat-gas-reporter": "^1.0.4",
-    "ts-node": "^9.1.1",
-    "typescript": "^4.3.2"
+    "ts-node": "^10.2.0",
+    "typescript": "^4.3.5"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.1.0",
     "@openzeppelin/test-helpers": "^0.5.10",
     "@typechain/ethers-v5": "^6.0.5",
     "eth-sig-util": "^3.0.1",
+    "ethereumjs-util": "^7.1.0",
+    "hardhat-deploy": "^0.9.0",
     "hardhat-typechain": "^0.3.5",
     "lodash": "^4.17.21",
     "redstone-api": "^0.4.0",
-    "redstone-node": "^0.4.9",
+    "redstone-node": "^0.4.13",
     "solidity-bytes-utils": "^0.1.2",
     "ts-generator": "^0.1.1",
     "typechain": "^4.0.3"
