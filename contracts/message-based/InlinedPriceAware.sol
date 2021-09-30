@@ -97,9 +97,11 @@ contract InlinedPriceAware  {
     assembly {
       let start := sub(calldatasize(), add(messageLength, 66))
       for { i := 0 } lt(i, max) { i := add(i, 1) } {
-        val := calldataload(add(start, add(32, mul(i, 64))))
         currentSymbol := calldataload(add(start, mul(i, 64)))
-        if eq(currentSymbol, symbol) { i := max }
+        if eq(currentSymbol, symbol) {
+           val := calldataload(add(start, add(32, mul(i, 64))))
+           i := max
+        }
       }
     }
 

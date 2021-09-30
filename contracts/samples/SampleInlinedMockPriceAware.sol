@@ -27,6 +27,11 @@ contract SampleInlinedMockPriceAware is InlinedPriceAware {
   }
 
 
+  function getPriceFromMsgPublic(bytes32 symbol) public view returns(uint256) {
+    return getPriceFromMsg(symbol);
+  }
+
+
   function getPrice() internal view returns(uint256) {
     return mockStatePriceProvider.getPrice(bytes32("ETH"));
   }
