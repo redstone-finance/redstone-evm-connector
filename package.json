@@ -8,6 +8,7 @@
     "build": "tsc",
     "postbuild": "cp -r contracts ./lib",
     "test": "yarn compile && npx hardhat test",
+    "test:quick": "npx hardhat test",
     "prepare": "yarn build",
     "version": "git add -A ./",
     "prebuild": "yarn compile",

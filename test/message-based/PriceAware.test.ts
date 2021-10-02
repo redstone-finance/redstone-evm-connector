@@ -1,16 +1,15 @@
-import {ethers} from "hardhat";
-import {Wallet} from "ethers";
+import { ethers } from "hardhat";
+import { Wallet } from "ethers";
 import chai, { expect } from "chai";
-import {solidity} from "ethereum-waffle";
+import { solidity } from "ethereum-waffle";
 
 import { SampleInlinedMockPriceAware } from "../../typechain/SampleInlinedMockPriceAware";
 import { SamplePriceAware } from "../../typechain/SamplePriceAware";
-import { SamplePriceAwareV1 } from "../../typechain/SamplePriceAwareV1";
-import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
-import {syncTime, toBytes32} from "../_helpers";
-import {MockPriceFeed} from "../../utils/v2/connector/impl/MockPriceFeed";
-import WrapperBuilder from "../../utils/v2/impl/builder/WrapperBuilder";
-import {DEFAULT_PRICE, MockableContract} from "../../utils/v2/impl/builder/MockableEthersContractWrapperBuilder";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { syncTime, toBytes32 } from "../_helpers";
+import { MockPriceFeed } from "../../utils/v2/connector/impl/MockPriceFeed";
+import { WrapperBuilder } from "../../index";
+import { DEFAULT_PRICE } from "../../utils/v2/impl/builder/MockableEthersContractWrapperBuilder";
 import { BigNumber } from "@ethersproject/bignumber";
 
 chai.use(solidity);
@@ -116,6 +115,17 @@ describe("Price Aware - editable assembly version", function () {
 
         const SamplePriceAware = await ethers.getContractFactory("SamplePriceAware");
         sample = (await SamplePriceAware.deploy()) as SamplePriceAware;
+    });
+
+    it("wrapped contract should have ethers methods: connect, attach", function () {
+      sample = WrapperBuilder
+          .mockLite(sample)
+          .using(DEFAULT_PRICE);
+
+      expect(sample.connect).to.not.equal(undefined);
+      expect(sample.attach).to.not.equal(undefined);
+
+      sample.connect(owner);
     });
 
     it("should benchmark costs", async function () {

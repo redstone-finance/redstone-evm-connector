@@ -12,7 +12,10 @@ export class EthersContractWrapper<T extends Contract> implements ContractWrappe
 
   finish(): T {
     const contract = this.baseContract;
-    const wrappedContract = {...contract};
+    const contractPrototype = Object.getPrototypeOf(contract);
+    const wrappedContract = Object.assign(
+      Object.create(contractPrototype),
+      contract);
     const self = this;
 
     const functionNames: string[] = Object.keys(contract.functions);
