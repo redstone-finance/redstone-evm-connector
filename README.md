@@ -137,10 +137,28 @@ await yourEthersContract.authorizeSigner("REPLACE_WITH_DATA_PROVIDER_ETHEREUM_AD
 
 If you'd like to use the wrapper in a test context, we recommend using a mock provider when you can easily override the price to test different scenarios:
 
+##### Option 1. Object with prices
 ```js
 const wrappedContract = WrapperBuilder
                           .mockLite(yourEthersContract)
-                          .using(DEFAULT_PRICE);
+                          .using({'ETH': 2005, 'BTC': 45000, 'REDSTONE': 100000});
+```
+
+##### Option 2. Function (timestamp => PricePackage)
+```js
+function mockPriceFun(curTimestamp) {
+  return {
+    timestamp: curTimestamp - 5000,
+    prices: [
+      { symbol: 'ETH', value: 2005 },
+      { symbol: 'BTC', value: 45000 },
+    ]
+  }
+}
+
+const wrappedContract = WrapperBuilder
+                          .mockLite(yourEthersContract)
+                          .using(mockPriceFun);
 ```
 
 We're also working on a wrapper for the truffle/web3 contracts. Please [let us know](https://redstone.finance/discord) if you need a solution for other frameworks as well. 

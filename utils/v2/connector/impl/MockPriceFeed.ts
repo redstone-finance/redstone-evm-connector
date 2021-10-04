@@ -3,8 +3,11 @@ import {Wallet} from "ethers";
 import {PricePackage, SignedPricePackage} from "redstone-node/dist/src/types";
 import EvmPriceSigner from "redstone-node/dist/src/signers/EvmPriceSigner";
 
+const DEFAULT_TIMESTAMP_DIFF = 5000;
 
-export type MockPricePackage = (forTime: number) => PricePackage;
+type PriceObject = { [symbol: string]: number };
+
+export type MockPricePackage = ((forTime: number) => PricePackage) | PriceObject;
 
 export class MockPriceFeed implements MockablePriceFeedConnector {
 
@@ -22,7 +25,15 @@ export class MockPriceFeed implements MockablePriceFeedConnector {
 
   async getSignedPrice(): Promise<SignedPriceDataType> {
     const currentTime = Math.round(new Date().getTime());
-    const pricePackage: PricePackage = this._mockedPricePackage(currentTime);
+    let pricePackage: PricePackage;
+
+    if (typeof this._mockedPricePackage == "function") {
+      pricePackage = this._mockedPricePackage(currentTime);
+    } else {
+      pricePackage = this.convertPriceObjectToPricePackage(
+        this._mockedPricePackage,
+        currentTime);
+    }
 
     const signedPackage: SignedPricePackage = this.priceSigner.signPricePackage(
       pricePackage, this.signer.privateKey);
@@ -33,6 +44,18 @@ export class MockPriceFeed implements MockablePriceFeedConnector {
       signer: signedPackage.signer,
       signature: signedPackage.signature,
       liteSignature: signedPackage.liteSignature
+    };
+  }
+
+  private convertPriceObjectToPricePackage(priceObject: PriceObject, currentTime: number): PricePackage {
+    const prices = [];
+    for (const [symbol, value] of Object.entries(priceObject)) {
+      prices.push({symbol, value});
+    }
+
+    return {
+      prices,
+      timestamp: currentTime - DEFAULT_TIMESTAMP_DIFF,
     };
   }
   

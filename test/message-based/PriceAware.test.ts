@@ -153,6 +153,18 @@ describe("Price Aware - editable assembly version", function () {
         expect(price).to.equal(BigNumber.from("1000000000"));
     });
 
+    it("should return the correct 1st price (passing object with values)", async function () {
+      sample = WrapperBuilder
+        .mockLite(sample)
+        .using({"ETH": 125});
+
+      await sample.authorizeProvider();
+
+      await syncTime(); // recommended for hardhat test
+      let price = await sample.getPriceFromMsgPublic(toBytes32("ETH"));
+      expect(price).to.equal(BigNumber.from(125 * 10 ** 8));
+  });
+
 
     it("should return the correct 2nd price", async function () {
         sample = WrapperBuilder
