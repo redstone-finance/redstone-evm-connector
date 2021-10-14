@@ -5,7 +5,10 @@ import { solidity } from "ethereum-waffle";
 
 import { SampleInlinedMockPriceAware } from "../../typechain/SampleInlinedMockPriceAware";
 import { SamplePriceAware } from "../../typechain/SamplePriceAware";
+import { SamplePriceAwareUpgradeable } from "../../typechain/SamplePriceAwareUpgradeable";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import {TransparentUpgradeableProxy} from "../../typechain/TransparentUpgradeableProxy";
+import {SamplePriceAwareUpgradeable__factory, TransparentUpgradeableProxy__factory} from "../../typechain";
 import { syncTime, toBytes32 } from "../_helpers";
 import { MockPriceFeed } from "../../utils/v2/connector/impl/MockPriceFeed";
 import { WrapperBuilder } from "../../index";
@@ -230,3 +233,48 @@ describe("Price Aware - editable assembly version", function () {
 //         await sample.executeWithPrice(toBytes32("IBM"));
 //     });
 // });
+
+describe("Price Aware - upgradeable version", function () {
+    let owner:SignerWithAddress;
+    let admin:SignerWithAddress;
+    let signer:Wallet;
+    let sample: SamplePriceAwareUpgradeable;
+    let proxy: TransparentUpgradeableProxy;
+
+    it("should deploy contracts", async function () {
+        [owner] = await ethers.getSigners();
+
+        signer = new ethers.Wallet(MockPriceFeed.P_KEY, owner.provider);
+
+        const SamplePriceAwareUpgradeable = await ethers.getContractFactory("SamplePriceAwareUpgradeable");
+        sample = (await SamplePriceAwareUpgradeable.deploy()) as SamplePriceAwareUpgradeable;
+        await sample.initialize();
+    });
+
+    it("should get price", async function () {
+
+        sample = WrapperBuilder
+            .mockLite(sample)
+            .using(DEFAULT_PRICE);
+
+        await sample.authorizeProvider();
+
+        //await syncTime(); // recommended for hardhat test
+        await sample.executeWithPrice(7);
+    });
+
+    it("should deploy a contract behind a proxy", async () => {
+        [owner, admin] = await ethers.getSigners();
+        const SamplePriceAwareUpgradeable = await ethers.getContractFactory("SamplePriceAwareUpgradeable");
+        sample = (await SamplePriceAwareUpgradeable.deploy()) as SamplePriceAwareUpgradeable;
+
+        proxy = await (new TransparentUpgradeableProxy__factory(owner).deploy(sample.address, admin.address, []));
+        sample = await (new SamplePriceAwareUpgradeable__factory(owner).attach(proxy.address));
+
+        expect(await sample.maxDelay()).equals(0);
+
+        await sample.initialize();
+
+        expect(await sample.maxDelay()).equals(180);
+    });
+});
