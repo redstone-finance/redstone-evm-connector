@@ -5,7 +5,6 @@ pragma experimental ABIEncoderV2;
 
 
 import './IPriceFeed.sol';
-import 'hardhat/console.sol';
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./PriceVerifier.sol";
 

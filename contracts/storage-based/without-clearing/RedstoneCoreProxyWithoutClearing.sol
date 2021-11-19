@@ -3,7 +3,6 @@
 pragma solidity ^0.8.2;
 
 import "../../commons/BytesLib.sol";
-import 'hardhat/console.sol';
 import '../../commons/PriceFeed.sol';
 import "@openzeppelin/contracts/proxy/Proxy.sol";
 

@@ -5,7 +5,6 @@ pragma solidity ^0.8.2;
 import "../commons/PriceVerifier.sol";
 import "../commons/BytesLib.sol";
 import '../commons/PriceFeed.sol';
-import 'hardhat/console.sol';
 import "@openzeppelin/contracts/proxy/Proxy.sol";
 
 
