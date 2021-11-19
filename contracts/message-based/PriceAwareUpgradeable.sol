@@ -24,7 +24,6 @@ contract PriceAwareUpgradeable is OwnableUpgradeable {
         require(_trustedSigner != address(0));
         trustedSigner = _trustedSigner;
 
-        console.log('trustedSigner: ', trustedSigner);
 
         emit TrustedSignerChanged(trustedSigner);
     }

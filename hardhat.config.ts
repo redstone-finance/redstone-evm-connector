@@ -5,7 +5,7 @@ import "hardhat-deploy";
 const secrets = require("./.secret.json");
 
 export default {
-    solidity: "0.8.2",
+    solidity: "0.8.4",
     networks: {
         hardhat: {
             chainId: 7
