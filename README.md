@@ -180,6 +180,14 @@ The codebase consists of a wrapper written in typescript which is responsible fo
 ```bash
 yarn install 
 ```
+### Set up secrets file
+
+In root directory create file ./.secrets.json:
+```
+{
+    "testPrivKey": "0x123123123123123123123123123123123123"
+}
+```
 
 ### Compiling and running the tests
 
