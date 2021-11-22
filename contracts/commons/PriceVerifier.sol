@@ -5,7 +5,6 @@ pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import './PriceModel.sol';
-import 'hardhat/console.sol';
 
 contract PriceVerifier is PriceModel {
     using ECDSA for bytes32;

@@ -4,7 +4,6 @@ pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "hardhat/console.sol";
 
 contract PriceAwareUpgradeable is OwnableUpgradeable {
     using ECDSA for bytes32;
@@ -25,7 +24,6 @@ contract PriceAwareUpgradeable is OwnableUpgradeable {
         require(_trustedSigner != address(0));
         trustedSigner = _trustedSigner;
 
-        console.log('trustedSigner: ', trustedSigner);
 
         emit TrustedSignerChanged(trustedSigner);
     }

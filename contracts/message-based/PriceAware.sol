@@ -4,7 +4,6 @@ pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "hardhat/console.sol";
 
 contract PriceAware is Ownable  {
   using ECDSA for bytes32;
