@@ -10,4 +10,4 @@ artifacts
 lib
 typechain
 
-.secret.json
+.secret.*json

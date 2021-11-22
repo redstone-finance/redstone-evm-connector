@@ -180,14 +180,9 @@ The codebase consists of a wrapper written in typescript which is responsible fo
 ```bash
 yarn install 
 ```
-### Set up secrets file
+### [Optional] Set up secrets file
 
-In root directory create file ./.secrets.json:
-```
-{
-    "testPrivKey": "0x123123123123123123123123123123123123"
-}
-```
+If you want to run the scripts located in the [./scripts](scripts) folder from your ethereum wallet you should create a `.secret.json` file based on the [sample.secret.json](sample.secret.json) and update it with your private key. The `.secret.json` file should not be commited when you push your changes to github (it's added to .gitignore).
 
 ### Compiling and running the tests
 

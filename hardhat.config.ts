@@ -2,7 +2,12 @@ import "@nomiclabs/hardhat-waffle";
 import "hardhat-gas-reporter";
 import "hardhat-typechain";
 import "hardhat-deploy";
-const secrets = require("./.secret.json");
+import fs from "fs";
+
+const pathToSecrets = "./.secret.json";
+const secrets = fs.existsSync(pathToSecrets)
+    ? require(pathToSecrets)
+    : require("./sample.secret.json");
 
 export default {
     solidity: "0.8.4",
