@@ -29,7 +29,7 @@ At a top level, transferring data to an EVM environment requires packing an extr
 
 ### Data packing (off-chain data encoding)
 
-1. Relevant data needs to be fetched from the RedStone api
+1. Relevant data needs to be fetched from the RedStone api (or streamr network as a backup source)
 2. Data is packed into a message according to the following structure
 
 [![image.png](https://i.postimg.cc/SRgRHHF1/image.png)](https://postimg.cc/jnJR7gjy)
