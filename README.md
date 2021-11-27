@@ -1,8 +1,8 @@
-# ⚡️ Flash storage
+# 🔗 RedStone EVM connector
 
 Putting data directly into storage is the easiest to make information accessible to smart contracts. However, the convenience comes at a high price, as the storage access is the most costly operation in [EVM](https://ethereum.github.io/yellowpaper/paper.pdf) (20k gas for 256bit word ~ $160k for 1Mb checked 30/08/2021) making it prohibitively expensive to use.
 
-Flash storage implements an alternative design of providing data to smart contracts. Instead of constantly persisting data on EVM storage, the information is brought on-chain only when needed (**on-demand fetching**). Until that moment, the data remains available in the [Arweave](https://www.arweave.org/) blockchain where data providers are incentivised to keep information accurate and up to date. Data is transferred to EVM via a mechanism based on a [meta-transaction pattern](https://medium.com/@austin_48503/ethereum-meta-transactions-90ccf0859e84) and the information integrity is verified on-chain through signature checking.
+RedStone EVM connector implements an alternative design of providing data to smart contracts. Instead of constantly persisting data on EVM storage, the information is brought on-chain only when needed (**on-demand fetching**). Until that moment, the data remains available in the [Arweave](https://www.arweave.org/) blockchain where data providers are incentivised to keep information accurate and up to date. Data is transferred to EVM via a mechanism based on a [meta-transaction pattern](https://medium.com/@austin_48503/ethereum-meta-transactions-90ccf0859e84) and the information integrity is verified on-chain through signature checking.
 
 - [How it works](#-how-it-works)
   - [Data packing (off-chain data encoding)](#data-packing-off-chain-data-encoding)
@@ -29,7 +29,7 @@ At a top level, transferring data to an EVM environment requires packing an extr
 
 ### Data packing (off-chain data encoding)
 
-1. Relevant data needs to be fetched from the RedStone api
+1. Relevant data needs to be fetched from the RedStone api (or streamr network as a backup source)
 2. Data is packed into a message according to the following structure
 
 [![image.png](https://i.postimg.cc/SRgRHHF1/image.png)](https://postimg.cc/jnJR7gjy)
@@ -49,34 +49,34 @@ At a top level, transferring data to an EVM environment requires packing an extr
 
 ### Benchmarks
 
-We work hard to optimise the code using solidity assembly and reduce the gas costs of our contracts. Below there is a comparison of the read operation gas costs using the most popular Chainlink Reference Data, the standard version of Redstone PriceAware contract and the optimised version where provider address is inlined at the compilation time. The [scripts](https://github.com/redstone-finance/redstone-flash-storage/tree/price-aware/scripts) which generated the data together with [results](https://github.com/redstone-finance/redstone-flash-storage/blob/price-aware/benchmarks.txt) and transactions details could be found in our repository.
+We work hard to optimise the code using solidity assembly and reduce the gas costs of our contracts. Below there is a comparison of the read operation gas costs using the most popular Chainlink Reference Data, the standard version of Redstone PriceAware contract and the optimised version where provider address is inlined at the compilation time. The [scripts](https://github.com/redstone-finance/redstone-evm-connector/tree/price-aware/scripts) which generated the data together with [results](https://github.com/redstone-finance/redstone-evm-connector/blob/price-aware/benchmarks.txt) and transactions details could be found in our repository.
 
 [![Screenshot-2021-09-05-at-17-18-25.png](https://i.postimg.cc/CK14BQTC/Screenshot-2021-09-05-at-17-18-25.png)](https://postimg.cc/NK3XZb0L)
 
 ## 📦 Installation
 
-Install [redstone-flash-storage](https://www.npmjs.com/package/redstone-flash-storage) from NPM registry
+Install [redstone-evm-connector](https://www.npmjs.com/package/redstone-evm-connector) from NPM registry
 ```bash
 # Using yarn
-yarn add redstone-flash-storage
+yarn add redstone-evm-connector
 
 # Using NPM
-npm install redstone-flash-storage
+npm install redstone-evm-connector
 ```
 
 ## 🔥 Getting started
 
 ### 1. Modifying your contracts
 
-You need to apply a minium change to the source code to enable smart contract to access data. Your contract needs to extend the [PriceAware](https://github.com/redstone-finance/redstone-flash-storage/blob/price-aware/contracts/message-based/PriceAware.sol) contract :
+You need to apply a minium change to the source code to enable smart contract to access data. Your contract needs to extend the [PriceAware](https://github.com/redstone-finance/redstone-evm-connector/blob/price-aware/contracts/message-based/PriceAware.sol) contract :
 
 ```js
-import "redstone-flash-storage/lib/contracts/message-based/PriceAware.sol";
+import "redstone-evm-connector/lib/contracts/message-based/PriceAware.sol";
 
 contract YourContractName is PriceAware {
 ```
 
-After applying the mentioned change you will be able to access the data calling the local [getPriceFromMsg](https://github.com/redstone-finance/redstone-flash-storage/blob/price-aware/contracts/message-based/PriceAware.sol#L29) function. You should pass the symbol of the asset converted to `bytes32`:
+After applying the mentioned change you will be able to access the data calling the local [getPriceFromMsg](https://github.com/redstone-finance/redstone-evm-connector/blob/price-aware/contracts/message-based/PriceAware.sol#L29) function. You should pass the symbol of the asset converted to `bytes32`:
 
 ```js
 uint256 ethPrice = getPriceFromMsg(bytes32("ETH"));
@@ -92,10 +92,10 @@ You should also update the code responsible for submitting transactions. If you'
 First, you need to import the wrapper code to your project
 ```ts
 // Typescript
-import { WrapperBuilder } from "redstone-flash-storage";
+import { WrapperBuilder } from "redstone-evm-connector";
 
 // Javascript
-const { WrapperBuilder } = require("redstone-flash-storage");
+const { WrapperBuilder } = require("redstone-evm-connector");
 ```
 
 Then you can wrap your ethers contract pointing to the selected [Redstone data provider.](https://api.redstone.finance/providers) You can also specify the single asset that you would like to pass to your contract. It helps to decrease transactions GAS cost, because in this case only the data for the provided asset will be passed to the contract.
@@ -165,11 +165,11 @@ We're also working on a wrapper for the truffle/web3 contracts. Please [let us k
 
 ### Alternative solutions
 
-If you don't want to modify even a single line of your contract, it's possible to use an alternative solution based on the [Proxy pattern](https://blog.openzeppelin.com/proxy-patterns/). This approach intercepts a transaction at a proxy stage, extracts the price data and delegates the original transaction to your contract. Another advantage of the solution is allowing any contract (including 3rd party ones) to access the data. However, these benefits come at the cost of higher gas consumption. If you're interested in using this approach take a look at the contracts located in the [storage-based](https://github.com/redstone-finance/redstone-flash-storage/tree/price-aware/contracts/storage-based) folder and [reach out to us](https://redstone.finance/discord) if you need help setting up your environment.  
+If you don't want to modify even a single line of your contract, it's possible to use an alternative solution based on the [Proxy pattern](https://blog.openzeppelin.com/proxy-patterns/). This approach intercepts a transaction at a proxy stage, extracts the price data and delegates the original transaction to your contract. Another advantage of the solution is allowing any contract (including 3rd party ones) to access the data. However, these benefits come at the cost of higher gas consumption. If you're interested in using this approach take a look at the contracts located in the [storage-based](https://github.com/redstone-finance/redstone-evm-connector/tree/price-aware/contracts/storage-based) folder and [reach out to us](https://redstone.finance/discord) if you need help setting up your environment.  
 
 
 ## ✅ Working demo
-You can see examples of `redstone-flash-storage` usage in our [dedicated repo with examples](https://github.com/redstone-finance/redstone-flash-storage-examples).
+You can see examples of `redstone-evm-connector` usage in our [dedicated repo with examples](https://github.com/redstone-finance/redstone-evm-connector-examples).
 
 ## 👨‍💻 Development and contributions
 
