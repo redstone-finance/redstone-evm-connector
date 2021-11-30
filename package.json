@@ -9,7 +9,7 @@
     "postbuild": "cp -r contracts ./lib",
     "test": "yarn compile && npx hardhat test",
     "test:quick": "npx hardhat test",
-    "prepare": "yarn build",
+    "preversion": "yarn build",
     "version": "git add -A ./",
     "prebuild": "yarn compile",
     "compile": "hardhat compile",
@@ -61,6 +61,7 @@
     "redstone-api": "^0.4.0",
     "redstone-node": "^0.4.13",
     "solidity-bytes-utils": "^0.1.2",
+    "streamr-client": "6.0.0-alpha.17",
     "ts-generator": "^0.1.1",
     "typechain": "^4.0.3"
   },
