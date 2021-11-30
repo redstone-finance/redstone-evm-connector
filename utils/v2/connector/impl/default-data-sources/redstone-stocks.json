@@ -22,5 +22,5 @@
   "valueSelectionAlgorithm": "latest-valid",
   "timeoutMilliseconds": 10000,
   "maxTimestampDiffMilliseconds": 150000,
-  "verifySignatureOffchain": true
+  "preVerifySignatureOffchain": true
 }

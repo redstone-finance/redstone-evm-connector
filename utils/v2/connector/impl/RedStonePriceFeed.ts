@@ -18,7 +18,7 @@ export interface DataSourcesConfig {
   valueSelectionAlgorithm: ValueSelectionAlgorithm,
   timeoutMilliseconds: number;
   maxTimestampDiffMilliseconds: number;
-  verifySignatureOffchain: boolean;
+  preVerifySignatureOffchain: boolean;
   sources: SourceConfig[],
 };
 
