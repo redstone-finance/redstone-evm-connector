@@ -1,0 +1,12 @@
+{
+  "sources": [
+    {
+      "type": "cache-layer",
+      "url": "https://api.redstone.finance"
+    }
+  ],
+  "valueSelectionAlgorithm": "latest-valid",
+  "timeoutMilliseconds": 10000,
+  "maxTimestampDiffMilliseconds": 150000,
+  "verifySignatureOffchain": true
+}
