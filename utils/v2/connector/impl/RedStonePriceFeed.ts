@@ -2,7 +2,7 @@ import {PriceDataType, PriceFeedConnector, SignedPriceDataType} from "../PriceFe
 import axios from "axios";
 import _ from "lodash";
 import EvmPriceSigner from "redstone-node/dist/src/signers/EvmPriceSigner";
-import StreamrClient from "streamr-client";
+// import StreamrClient from "streamr-client";
 
 export type ValueSelectionAlgorithm = "latest-valid" | "oldest-valid"; // wa can add "median-valid" in future
 export type SourceType = "cache-layer" | "streamr" | "streamr-historical";
@@ -37,7 +37,8 @@ export class RedStonePriceFeed implements PriceFeedConnector {
 
   private readonly priceSigner = new EvmPriceSigner();
   private cachedSigner?: string;
-  private streamrClient?: StreamrClient;
+  // private streamrClient?: StreamrClient;
+  private streamrClient?: any;
   private latestValueFromStreamr: any;
 
   constructor(
@@ -53,11 +54,12 @@ export class RedStonePriceFeed implements PriceFeedConnector {
 
   private lazyInitializeStreamrClient() {
     if (!this.streamrClient) {
-      this.streamrClient = new StreamrClient({
-        auth: {
-          privateKey: (StreamrClient.generateEthereumAccount()).privateKey,
-        },
-      });
+      // this.streamrClient = new StreamrClient({
+      //   auth: {
+      //     privateKey: (StreamrClient.generateEthereumAccount()).privateKey,
+      //   },
+      // });
+      this.streamrClient = {};
     }
   }
 
@@ -148,16 +150,16 @@ export class RedStonePriceFeed implements PriceFeedConnector {
         if (source.type == "streamr") {
           // Subscribe to a single assets stream
           if (this.priceFeedOptions.asset && !source.disabledForSinglePrices) {
-            this.streamrClient!.subscribe(`${source.streamrEndpointPrefix}/prices`, value => {
-              this.latestValueFromStreamr = value;
-            });
+            this.streamrClient!.subscribe(
+              `${source.streamrEndpointPrefix}/prices`,
+              (value: any) => { this.latestValueFromStreamr = value; });
           }
 
           // Subscribe to a package stream
           if (!this.priceFeedOptions.asset) {
-            this.streamrClient!.subscribe(`${source.streamrEndpointPrefix}/prices`, value => {
-              this.latestValueFromStreamr = value;
-            });
+            this.streamrClient!.subscribe(
+              `${source.streamrEndpointPrefix}/prices`,
+              (value: any) => { this.latestValueFromStreamr = value; });
           }
         }
       }

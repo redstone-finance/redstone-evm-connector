@@ -80,7 +80,7 @@ describe("MockDefi with Proxy contract and real pricing Data", function () {
 
     defi = WrapperBuilder
       .wrap(defi)
-      .usingPriceFeed("redstone-stocks", "FB");
+      .usingPriceFeed("redstone-stocks", { asset: "FB" });
 
     await Promise.all([
       defi.deposit(toBytes32("FB"), 1),
