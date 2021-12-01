@@ -2,7 +2,7 @@ import {PriceDataType, PriceFeedConnector, SignedPriceDataType} from "../PriceFe
 import axios from "axios";
 import _ from "lodash";
 import EvmPriceSigner from "redstone-node/dist/src/signers/EvmPriceSigner";
-// import StreamrClient from "streamr-client";
+import StreamrClient from "streamr-client";
 
 export type ValueSelectionAlgorithm = "latest-valid" | "oldest-valid"; // wa can add "median-valid" in future
 export type SourceType = "cache-layer" | "streamr" | "streamr-historical";
@@ -27,6 +27,13 @@ export interface PriceFeedOptions {
   asset?: string;
 }
 
+export interface SignedDataPackageResponse {
+  timestamp: number;
+  prices: { symbol: string; value: any }[];
+  signature: string;
+  liteSignature: string;
+}
+
 export type RedStoneProvider =
   | "redstone"
   | "redstone-stocks"
@@ -37,8 +44,7 @@ export class RedStonePriceFeed implements PriceFeedConnector {
 
   private readonly priceSigner = new EvmPriceSigner();
   private cachedSigner?: string;
-  // private streamrClient?: StreamrClient;
-  private streamrClient?: any;
+  private streamrClient?: StreamrClient;
   private latestValueFromStreamr: any;
 
   constructor(
@@ -50,20 +56,24 @@ export class RedStonePriceFeed implements PriceFeedConnector {
       }
 
       this.maybeSubscribeToStreamr();
+      this.getSigner(); // we are loading signer public key in advance
   }
 
   private lazyInitializeStreamrClient() {
     if (!this.streamrClient) {
-      // this.streamrClient = new StreamrClient({
-      //   auth: {
-      //     privateKey: (StreamrClient.generateEthereumAccount()).privateKey,
-      //   },
-      // });
-      this.streamrClient = {};
+      this.streamrClient = new StreamrClient({
+        auth: {
+          privateKey: (StreamrClient.generateEthereumAccount()).privateKey,
+        },
+      });
     }
   }
 
   async getSignedPrice(): Promise<SignedPriceDataType> {
+    // We need to get signer public key firstly
+    // It will be used to pre-verify signatures off-chain
+    await this.getSigner();
+
     // Fetching data simultaneously
     const promises = [];
     for (const source of this.priceFeedOptions.dataSources!.sources!) {
@@ -72,14 +82,14 @@ export class RedStonePriceFeed implements PriceFeedConnector {
     }
     const results = await Promise.allSettled(promises);
 
-    // Validating fetched data and selecting the final value
+    // Validating fetched data
     const validDataPackages = this.filterValidDataPackages(results);
-
     if (validDataPackages.length === 0) {
       console.error(results);
       throw new Error(`Failed to load valid data packages`);
     }
 
+    // Selecting the final value
     return this.selectResultDataPackage(validDataPackages);
   }
 
@@ -105,6 +115,11 @@ export class RedStonePriceFeed implements PriceFeedConnector {
   // TODO: implement signature verification
   // TODO: implement timestamp delay verification
   private filterValidDataPackages(fetchedPackages: PromiseSettledResult<SignedPriceDataType>[]): SignedPriceDataType[] {
+
+    console.log("========================================================");
+    console.log(JSON.stringify(fetchedPackages, null, 2));
+    console.log("========================================================");
+
     const result: SignedPriceDataType[] = [];
     for (const fetchedPackage of fetchedPackages) {
       if (fetchedPackage.status === "fulfilled") {
@@ -115,9 +130,42 @@ export class RedStonePriceFeed implements PriceFeedConnector {
     return result;
   }
 
-  // TODO: implement
   async fetchFromSource(source: SourceConfig): Promise<SignedPriceDataType> {
-    throw "TODO: implement";
+    switch (source.type) {
+      case "cache-layer":
+        const url = `${source.url}/packages/latest`;
+        const response = await axios.get(url, {
+          params: {
+            provider: this.providerId,
+            symbol: this.priceFeedOptions.asset, // asset may be undefined, then we'll fetch the whole package
+          },
+        });
+        return this.convertResponseToPricePackage(response.data);
+      case "streamr":
+        let responseData: SignedDataPackageResponse;
+        const lastResponse = this.latestValueFromStreamr;
+        if (this.priceFeedOptions.asset) {
+          // console.log({ latestValueFromStreamr: lastResponse });
+          throw "Not implemented - streamr single asset";
+        } else {
+          responseData = {
+            timestamp: lastResponse.pricePackage.timestamp,
+            signature: lastResponse.signature,
+            liteSignature: lastResponse.liteSignature,
+            prices: lastResponse.pricePackage.prices,
+          };
+        }
+        return this.convertResponseToPricePackage(responseData);
+      case "streamr-historical":
+        // const data = this.streamrClient?.resend({
+        //   stream: source.streamrEndpointPrefix,
+        //   resend: { last: 1 },
+        // }, )
+        throw "Not implemented - historical";
+        return {} as any;
+      default:
+        throw new Error(`Unsupported data source type: "${source.type}"`);
+    }
 
     // // TODO: fetch from all sources 
     // const response = await axios.get(this.apiUrl);
@@ -135,32 +183,57 @@ export class RedStonePriceFeed implements PriceFeedConnector {
     // };
   }
 
+  private convertResponseToPricePackage(data: SignedDataPackageResponse): SignedPriceDataType {
+    const pricePackage = _.pick(data, ["prices", "timestamp"]);
+    const serialized = this.priceSigner.serializeToMessage(pricePackage);
+    const priceData: PriceDataType = serialized as PriceDataType;
+    return {
+      priceData,
+      signature: data.signature,
+      liteSignature: data.liteSignature,
+      signer: this.cachedSigner!, // TODO: force signer loading before
+    };
+  }
+
   async getSigner(): Promise<string> {
-      if (!this.cachedSigner) {
-          const response = await axios.get("https://api.redstone.finance/providers");
-          this.cachedSigner = response.data[this.providerId].evmAddress;
-      }
-      return this.cachedSigner as string;
+    if (!this.cachedSigner) {
+      const response = await axios.get("https://api.redstone.finance/providers");
+      this.cachedSigner = response.data[this.providerId].evmAddress;
+    }
+    return this.cachedSigner as string;
   }
 
   private maybeSubscribeToStreamr() {
     for (const source of this.priceFeedOptions.dataSources!.sources!) {
-      if (source.type === "streamr" || source.type === "streamr-historical") {
+      console.log({ source });
+      if (source.type === "streamr") {
         this.lazyInitializeStreamrClient();
-        if (source.type == "streamr") {
-          // Subscribe to a single assets stream
-          if (this.priceFeedOptions.asset && !source.disabledForSinglePrices) {
-            this.streamrClient!.subscribe(
-              `${source.streamrEndpointPrefix}/prices`,
-              (value: any) => { this.latestValueFromStreamr = value; });
-          }
 
-          // Subscribe to a package stream
-          if (!this.priceFeedOptions.asset) {
-            this.streamrClient!.subscribe(
-              `${source.streamrEndpointPrefix}/prices`,
-              (value: any) => { this.latestValueFromStreamr = value; });
-          }
+        // TODO: maybe refactor this code
+        // Because subscribing logic is very similar
+
+        // Subscribe to a single assets stream
+        if (this.priceFeedOptions.asset && !source.disabledForSinglePrices) {
+          const streamId = `${source.streamrEndpointPrefix}/prices`;
+          this.streamrClient!.subscribe(
+            streamId,
+            (value: any) => {
+              console.log(`Received new value from: ${streamId}`);
+              this.latestValueFromStreamr = value;
+            });
+          console.log(`Subscribed to streamr: ${streamId}`);
+        }
+
+        // Subscribe to a package stream
+        if (!this.priceFeedOptions.asset) {
+          const streamId = `${source.streamrEndpointPrefix}/package`;
+          this.streamrClient!.subscribe(
+            streamId,
+            (value: any) => {
+              console.log(`Received new value from: ${streamId}`, value); // TODO: remove value
+              this.latestValueFromStreamr = value;
+            });
+          console.log(`Subscribed to streamr: ${streamId}`);
         }
       }
     }

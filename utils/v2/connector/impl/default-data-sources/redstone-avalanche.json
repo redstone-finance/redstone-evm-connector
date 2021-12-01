@@ -3,12 +3,12 @@
     {
       "type": "streamr",
       "streamrEndpointPrefix": "0x3a7d971de367fe15d164cdd952f64205f2d9f10c/redstone-oracle",
-      "disabledForSinglePrices": true
+      "disabledForSinglePrices": false
     },
     {
       "type": "streamr-historical",
       "streamrEndpointPrefix": "0x3a7d971de367fe15d164cdd952f64205f2d9f10c/redstone-oracle",
-      "disabledForSinglePrices": true
+      "disabledForSinglePrices": false
     },
     {
       "type": "cache-layer",

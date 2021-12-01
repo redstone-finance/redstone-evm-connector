@@ -194,45 +194,51 @@ describe("Price Aware - editable assembly version", function () {
     });
 });
 
-// describe("Price Aware - redstone realtime feed", function () {
-//     let owner:SignerWithAddress;
-//     let signer:Wallet;
+describe("Price Aware - redstone realtime feed", function () {
+    let owner:SignerWithAddress;
+    let signer:Wallet;
 
-//     let sample: SamplePriceAware;
+    let sample: SamplePriceAware;
 
-//     it("should deploy contracts", async function () {
-//         [owner] = await ethers.getSigners();
+    it("should deploy contracts", async function () {
+        [owner] = await ethers.getSigners();
 
-//         signer = new ethers.Wallet(MockPriceFeed.P_KEY, owner.provider);
+        signer = new ethers.Wallet(MockPriceFeed.P_KEY, owner.provider);
 
-//         const SamplePriceAware = await ethers.getContractFactory("SamplePriceAware");
-//         sample = (await SamplePriceAware.deploy()) as SamplePriceAware;
-//     });
+        const SamplePriceAware = await ethers.getContractFactory("SamplePriceAware");
+        sample = (await SamplePriceAware.deploy()) as SamplePriceAware;
+    });
 
-//     it("should get price with single asset", async function () {
+    it("should get price with single asset", async function () {
 
-//         sample = WrapperBuilder
-//             .wrapLite(sample)
-//             .usingPriceFeed("redstone-stocks", "IBM");
+        sample = WrapperBuilder
+            .wrapLite(sample)
+            .usingPriceFeed("redstone-avalanche", { asset: "AVAX" });
 
-//         await sample.authorizeProvider();
+        // To test streamr
+        await new Promise((resolve) => setTimeout(resolve, 5000));
 
-//         //await syncTime(); // recommended for hardhat test
-//         await sample.executeWithPrice(toBytes32("IBM"));
-//     });
+        await sample.authorizeProvider();
 
-//     it("should get price with multiple assets", async function () {
+        //await syncTime(); // recommended for hardhat test
+        await sample.executeWithPrice(toBytes32("IBM"));
+    });
 
-//         sample = WrapperBuilder
-//             .wrapLite(sample)
-//             .usingPriceFeed("redstone-stocks");
+    it("should get price with multiple assets", async function () {
 
-//         await sample.authorizeProvider();
+        sample = WrapperBuilder
+            .wrapLite(sample)
+            .usingPriceFeed("redstone-avalanche");
 
-//         await syncTime(); // recommended for hardhat test
-//         await sample.executeWithPrice(toBytes32("IBM"));
-//     });
-// });
+        await sample.authorizeProvider();
+
+        // To test streamr
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+
+        await syncTime(); // recommended for hardhat test
+        await sample.executeWithPrice(toBytes32("AVAX"));
+    });
+});
 
 describe("Price Aware - upgradeable version", function () {
     let owner:SignerWithAddress;
