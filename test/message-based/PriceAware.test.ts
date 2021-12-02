@@ -17,6 +17,10 @@ import { BigNumber } from "@ethersproject/bignumber";
 
 chai.use(solidity);
 
+async function sleep(ms: number): Promise<void> {
+    await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 // describe("Price Aware - basic version (v1 version)", function () {
 //     let owner:SignerWithAddress;
 //     let signer:Wallet;
@@ -216,7 +220,7 @@ describe("Price Aware - redstone realtime feed", function () {
             .usingPriceFeed("redstone-avalanche", { asset: "AVAX" });
 
         // To test streamr
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await sleep(5000);
 
         await sample.authorizeProvider();
 
@@ -233,7 +237,7 @@ describe("Price Aware - redstone realtime feed", function () {
         await sample.authorizeProvider();
 
         // To test streamr
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await sleep(5000);
 
         await syncTime(); // recommended for hardhat test
         await sample.executeWithPrice(toBytes32("AVAX"));
