@@ -9,11 +9,18 @@ contract PriceAwareUpgradeable is OwnableUpgradeable {
     using ECDSA for bytes32;
 
     uint public maxDelay;
-    address public trustedSigner;
+    address private trustedSigner;
+
+
+    function getTrustedSigner() virtual public view returns (address) {
+        return trustedSigner;
+    }
+
 
     function __PriceAware_init() internal initializer {
         maxDelay = 3 * 60;
     }
+
 
     function setMaxDelay(uint256 _maxDelay) onlyOwner external {
         maxDelay = _maxDelay;
@@ -86,7 +93,7 @@ contract PriceAwareUpgradeable is OwnableUpgradeable {
         // 6. We verify the off-chain signature against on-chain hashed data
 
         address signer = hashWithPrefix.recover(signature);
-        require(signer == trustedSigner, "Signer not authorized");
+        require(signer == getTrustedSigner(), "Signer not authorized");
 
         //7. We extract timestamp from callData
 
@@ -118,10 +125,12 @@ contract PriceAwareUpgradeable is OwnableUpgradeable {
         uint256 i;
         assembly {
             let start := sub(calldatasize(), add(messageLength, 66))
-            for {i := 0} lt(i, max) {i := add(i, 1)} {
-                val := calldataload(add(start, add(32, mul(i, 64))))
+            for { i := 0 } lt(i, max) { i := add(i, 1) } {
                 currentSymbol := calldataload(add(start, mul(i, 64)))
-                if eq(currentSymbol, symbol) {i := max}
+                if eq(currentSymbol, symbol) {
+                    val := calldataload(add(start, add(32, mul(i, 64))))
+                    i := max
+                }
             }
         }
 
