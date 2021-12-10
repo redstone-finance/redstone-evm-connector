@@ -1,4 +1,4 @@
-import { ethers } from "hardhat";
+import {ethers, waffle} from "hardhat";
 import { Wallet } from "ethers";
 import chai, { expect } from "chai";
 import { solidity } from "ethereum-waffle";
@@ -234,6 +234,16 @@ describe("Price Aware - editable assembly version", function () {
 //     });
 // });
 
+const ASSET_PRICES = (forTime: number) => ({
+    prices: [
+        {symbol: "ETH", value: 10},
+        {symbol: "AVAX", value: 5},
+        {symbol: "BTC", value: 30},
+        {symbol: "LINK", value: 2}
+    ],
+    timestamp: forTime - 1000
+});
+
 describe("Price Aware - upgradeable version", function () {
     let owner:SignerWithAddress;
     let admin:SignerWithAddress;
@@ -251,16 +261,59 @@ describe("Price Aware - upgradeable version", function () {
         await sample.initialize();
     });
 
-    it("should get price", async function () {
+    it("should get price for one asset", async function () {
 
         sample = WrapperBuilder
             .mockLite(sample)
-            .using(DEFAULT_PRICE);
+            .using(ASSET_PRICES);
 
         await sample.authorizeProvider();
 
-        //await syncTime(); // recommended for hardhat test
-        await sample.executeWithPrice(7);
+        await syncTime(); // recommended for hardhat test
+
+        const price = await sample.getPrice(toBytes32("BTC"));
+
+        expect(price).to.be.equal(3000000000);
+    });
+
+    it("should get prices for several assets", async function () {
+
+        sample = WrapperBuilder
+            .mockLite(sample)
+            .using(ASSET_PRICES);
+
+        await sample.authorizeProvider();
+
+        await syncTime(); // recommended for hardhat test
+
+        const prices = await sample.getPrices([
+            toBytes32("ETH"),
+            toBytes32("LINK"),
+            toBytes32("BTC"),
+            toBytes32("AVAX")
+        ]);
+
+        expect(prices.join(',')).to.be.equal('1000000000,200000000,3000000000,500000000');
+    });
+
+    it("should return 0 price for non-supported assets", async function () {
+
+        sample = WrapperBuilder
+            .mockLite(sample)
+            .using(ASSET_PRICES);
+
+        await sample.authorizeProvider();
+
+        await syncTime(); // recommended for hardhat test
+
+        const prices = await sample.getPrices([
+            toBytes32("ETH"),
+            toBytes32("NON_SUPPORTED_TOKEN_1"),
+            toBytes32("BTC"),
+            toBytes32("NON_SUPPORTED_TOKEN_2")
+        ]);
+
+        expect(prices.join(',')).to.be.equal('1000000000,0,3000000000,0');
     });
 
     it("should deploy a contract behind a proxy", async () => {

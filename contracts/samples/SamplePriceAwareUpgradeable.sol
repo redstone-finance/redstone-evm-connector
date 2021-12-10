@@ -5,6 +5,7 @@ pragma solidity ^0.8.2;
 import "../mocks/MockStatePriceProvider.sol";
 import "../message-based/PriceAwareUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "hardhat/console.sol";
 
 /**
  * @title SamplePriceAware
@@ -23,8 +24,12 @@ contract SamplePriceAwareUpgradeable is OwnableUpgradeable, PriceAwareUpgradeabl
   }
 
 
-  function executeWithPrice(uint val) public returns(uint256) {
-    return getPriceFromMsg(bytes32("IBM"));
+  function getPrice(bytes32 asset) external view returns(uint32) {
+    return getPriceFromMsg(asset);
   }
 
+
+  function getPrices(bytes32[] memory assets) external view returns(uint32[] memory) {
+    return getPricesFromMsg(assets);
+  }
 }
