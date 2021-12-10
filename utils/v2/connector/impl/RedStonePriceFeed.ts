@@ -7,8 +7,8 @@ import { timeout } from "promise-timeout";
 
 const DEFAULT_TIMEOUT_MILLISECONDS = 10000; // 10 seconds
 
-export type ValueSelectionAlgorithm = "newest-valid" | "oldest-valid"; // wa can add "median-valid" in future
-export type SourceType = "cache-layer" | "streamr" | "streamr-historical";
+export type ValueSelectionAlgorithm = "first-valid" | "newest-valid" | "oldest-valid"; // wa can add "median-valid" in future
+export type SourceType = "cache-layer" | "streamr" | "streamr-storage";
 
 export interface SourceConfig {
   type: SourceType;

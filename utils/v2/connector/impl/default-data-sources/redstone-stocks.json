@@ -6,7 +6,7 @@
       "disabledForSinglePrices": true
     },
     {
-      "type": "streamr-historical",
+      "type": "streamr-storage",
       "streamrEndpointPrefix": "0x926e370fd53c23f8b71ad2b3217b227e41a92b12/redstone-oracle",
       "disabledForSinglePrices": true
     },
