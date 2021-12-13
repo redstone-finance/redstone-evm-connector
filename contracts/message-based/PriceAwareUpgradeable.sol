@@ -126,7 +126,6 @@ contract PriceAwareUpgradeable is OwnableUpgradeable {
 
 
     function _readFromCallData(bytes32[] memory symbols, uint256 dataSize, uint16 messageLength) private view returns (uint32[] memory) {
-        bytes32[] memory resultSymbols;
         uint32[] memory values;
         uint256 i;
         uint256 j;
@@ -137,7 +136,7 @@ contract PriceAwareUpgradeable is OwnableUpgradeable {
             let start := sub(calldatasize(), add(messageLength, 66))
 
             values := msize()
-            mstore(add(values, 0), mload(symbols))
+            mstore(values, mload(symbols))
             mstore(0x40, add(add(values, 0x20), mul(mload(symbols), 0x20)))
 
             for {i := 0} lt(i, dataSize) { i := add(i, 1) } {
