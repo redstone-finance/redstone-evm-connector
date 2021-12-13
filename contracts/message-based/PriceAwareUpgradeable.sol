@@ -36,19 +36,19 @@ contract PriceAwareUpgradeable is OwnableUpgradeable {
     }
 
 
-    function getPricesFromMsg(bytes32[] memory symbols) internal view returns (uint32[] memory) {
+    function getPricesFromMsg(bytes32[] memory symbols) internal view returns (uint256[] memory) {
         return _getPricesFromMsg(symbols);
     }
 
 
-    function getPriceFromMsg(bytes32 symbol) internal view returns (uint32) {
+    function getPriceFromMsg(bytes32 symbol) internal view returns (uint256) {
         bytes32[] memory symbols = new bytes32[](1);
         symbols[0] = symbol;
         return _getPricesFromMsg(symbols)[0];
     }
 
 
-    function _getPricesFromMsg(bytes32[] memory symbols) private view returns (uint32[] memory) {
+    function _getPricesFromMsg(bytes32[] memory symbols) private view returns (uint256[] memory) {
         //The structure of calldata witn n - data items:
         //The data that is signed (symbols, values, timestamp) are inside the {} brackets
         //[origina_call_data| ?]{[[symbol | 32][value | 32] | n times][timestamp | 32]}[size | 1][signature | 65]
@@ -125,8 +125,8 @@ contract PriceAwareUpgradeable is OwnableUpgradeable {
     }
 
 
-    function _readFromCallData(bytes32[] memory symbols, uint256 dataSize, uint16 messageLength) private view returns (uint32[] memory) {
-        uint32[] memory values;
+    function _readFromCallData(bytes32[] memory symbols, uint256 dataSize, uint16 messageLength) private view returns (uint256[] memory) {
+        uint256[] memory values;
         uint256 i;
         uint256 j;
         uint256 readyAssets;
@@ -139,7 +139,7 @@ contract PriceAwareUpgradeable is OwnableUpgradeable {
             mstore(values, mload(symbols))
             mstore(0x40, add(add(values, 0x20), mul(mload(symbols), 0x20)))
 
-            for {i := 0} lt(i, dataSize) { i := add(i, 1) } {
+            for { i := 0 } lt(i, dataSize) { i := add(i, 1) } {
                 currentSymbol := calldataload(add(start, mul(i, 64)))
 
                 for { j := 0 } lt(j, mload(symbols)) { j := add(j, 1) } {

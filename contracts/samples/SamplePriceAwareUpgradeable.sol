@@ -29,7 +29,7 @@ contract SamplePriceAwareUpgradeable is OwnableUpgradeable, PriceAwareUpgradeabl
   }
 
 
-  function executeWithPrices(bytes32[] memory assets) public returns(uint32[] memory) {
+  function executeWithPrices(bytes32[] memory assets) public returns(uint256[] memory) {
     return getPricesFromMsg(assets);
   }
 
@@ -39,7 +39,7 @@ contract SamplePriceAwareUpgradeable is OwnableUpgradeable, PriceAwareUpgradeabl
   }
 
 
-  function getPrices(bytes32[] memory assets) external view returns(uint32[] memory) {
+  function getPrices(bytes32[] memory assets) external view returns(uint256[] memory) {
     return getPricesFromMsg(assets);
   }
 }

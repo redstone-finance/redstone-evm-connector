@@ -431,6 +431,20 @@ describe("Price Aware - upgradeable version", function () {
         await expect(sample.getPrices(["BTC"])).to.be.reverted;
     });
 
+    it("should benchmark gas costs", async function () {
+
+        sample = WrapperBuilder
+            .mockLite(sample)
+            .using(ASSET_PRICES);
+
+        await sample.authorizeProvider();
+
+        await syncTime(); // recommended for hardhat test
+
+        await sample.executeWithPrice(toBytes32("BTC"));
+        await sample.executeWithPrices([toBytes32("BTC")]);
+    });
+
     it("should deploy a contract behind a proxy", async () => {
         [owner, admin] = await ethers.getSigners();
         const SamplePriceAwareUpgradeable = await ethers.getContractFactory("SamplePriceAwareUpgradeable");
@@ -444,19 +458,5 @@ describe("Price Aware - upgradeable version", function () {
         await sample.initialize();
 
         expect(await sample.maxDelay()).equals(180);
-    });
-
-    it("should benchmark gas costs", async function () {
-
-        sample = WrapperBuilder
-            .mockLite(sample)
-            .using(ASSET_PRICES);
-
-        await sample.authorizeProvider();
-
-        await syncTime(); // recommended for hardhat test
-
-        await sample.executeWithPrice(toBytes32("BTC"));
-        await sample.executeWithPrices([toBytes32("BTC")]);
     });
 });
