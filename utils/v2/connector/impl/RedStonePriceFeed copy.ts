@@ -4,15 +4,12 @@ import _ from "lodash";
 import StreamrClient from "streamr-client";
 import { timeout } from "promise-timeout";
 import EvmPriceSigner from "redstone-node/dist/src/signers/EvmPriceSigner";
-import { Fetcher } from "./fetchers/Fetcher";
-import { createFetcher } from "./fetchers";
 
 const DEFAULT_TIMEOUT_MILLISECONDS = 10000; // 10 seconds
 
 export type ValueSelectionAlgorithm = "first-valid" | "newest-valid" | "oldest-valid"; // wa can add "median-valid" in future
 export type SourceType = "cache-layer" | "streamr" | "streamr-storage";
 
-// TODO: remove
 export interface SourceConfig {
   type: SourceType;
   url?: string; // required for "cache-layer" sources
@@ -32,7 +29,7 @@ export interface DataSourcesConfig {
 export interface PriceFeedOptions {
   dataSources?: DataSourcesConfig;
   asset?: string;
-};
+}
 
 // TODO: remove SignedDataPackageResponse
 export interface SignedDataPackageResponse {
@@ -40,7 +37,7 @@ export interface SignedDataPackageResponse {
   prices: { symbol: string; value: any }[];
   signature: string;
   liteSignature: string;
-};
+}
 
 export type RedStoneProvider =
   | "redstone"
@@ -54,29 +51,27 @@ export class RedStonePriceFeed implements PriceFeedConnector {
   private cachedSigner?: string;
   private streamrClient?: StreamrClient;
   private latestValueFromStreamr: any;
-  private fetchers: Fetcher[] = [];
 
   constructor(
     private providerId: RedStoneProvider,
     private priceFeedOptions: PriceFeedOptions = {}) {
 
-      // Getting default data sources config for provider if not specified
       if (!this.priceFeedOptions.dataSources) {
         this.priceFeedOptions.dataSources = getDefaultDataSourceConfig(providerId);
       }
 
-      // Init fetchers
-      for (const [i, source] of this.priceFeedOptions.dataSources!.sources!.entries()) {
-        if (priceFeedOptions.asset && source.disabledForSinglePrices) {
-          console.log(`Skipping ${i} (${source.type}) source init`);
-        } else {
-          const fetcherForSource = createFetcher(source, priceFeedOptions.asset);
-          this.fetchers.push(fetcherForSource);
-        }
-      }
-
-      // TODO: get rid of it, it's a potential single point of failure
+      this.maybeSubscribeToStreamr();
       this.getSigner(); // we are loading signer public key in advance
+  }
+
+  private lazyInitializeStreamrClient() {
+    if (!this.streamrClient) {
+      this.streamrClient = new StreamrClient({
+        auth: {
+          privateKey: (StreamrClient.generateEthereumAccount()).privateKey,
+        },
+      });
+    }
   }
 
   // This is the entrypoint function of this module
@@ -86,11 +81,16 @@ export class RedStonePriceFeed implements PriceFeedConnector {
     await this.getSigner();
 
     // Fetching data simultaneously
-    const timeoutMilliseconds =
-      this.priceFeedOptions.dataSources?.timeoutMilliseconds || DEFAULT_TIMEOUT_MILLISECONDS;
-    
-    // TODO: check if bind is not required here
-    const promises = this.fetchers.map(fetcher => fetcher.getLatestData(timeoutMilliseconds));
+    const promises = [];
+    for (const source of this.priceFeedOptions.dataSources!.sources!) {
+      // TODO: move timeout logic to the `fetchFromSource` method
+      const timeoutMilliseconds =
+        this.priceFeedOptions.dataSources?.timeoutMilliseconds || DEFAULT_TIMEOUT_MILLISECONDS;
+      console.log(
+        `Fetching data from source "${source.type}" with timeout: ${timeoutMilliseconds} ms`);
+      const fetchPromise = timeout(this.fetchFromSource(source), timeoutMilliseconds);
+      promises.push(fetchPromise);
+    }
     const results = await Promise.allSettled(promises);
 
     // Validating fetched data
