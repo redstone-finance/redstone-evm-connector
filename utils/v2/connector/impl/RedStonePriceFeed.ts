@@ -1,9 +1,9 @@
-import {PriceDataType, PriceFeedConnector, SignedPriceDataType} from "../PriceFeedConnector";
+import { PriceDataType, PriceFeedConnector, SignedPriceDataType } from "../PriceFeedConnector";
 import axios from "axios";
 import _ from "lodash";
-import EvmPriceSigner from "redstone-node/dist/src/signers/EvmPriceSigner";
 import StreamrClient from "streamr-client";
 import { timeout } from "promise-timeout";
+import EvmPriceSigner from "redstone-node/dist/src/signers/EvmPriceSigner";
 
 const DEFAULT_TIMEOUT_MILLISECONDS = 10000; // 10 seconds
 
@@ -14,7 +14,7 @@ export interface SourceConfig {
   type: SourceType;
   url?: string; // required for "cache-layer" sources
   streamrEndpointPrefix?: string; // required for "streamr" and "streamr-historical" sources
-  disabledForSinglePrices: boolean;
+  disabledForSinglePrices?: boolean;
 };
 
 export interface DataSourcesConfig {
@@ -22,6 +22,7 @@ export interface DataSourcesConfig {
   timeoutMilliseconds: number;
   maxTimestampDiffMilliseconds: number;
   preVerifySignatureOffchain: boolean;
+  signers?: string[], // Will be used in future (after multi-nodes creation)
   sources: SourceConfig[],
 };
 
@@ -144,7 +145,6 @@ export class RedStonePriceFeed implements PriceFeedConnector {
             + `Source index: ${sourceIndex}`);
         } else {
 
-
           // TODO: move signature verification to a separate function
 
           // Verifying signature off-chain if needed
@@ -193,7 +193,8 @@ export class RedStonePriceFeed implements PriceFeedConnector {
       case "streamr":
         const lastResponse = this.latestValueFromStreamr;
         if (this.priceFeedOptions.asset) {
-          const assetData = lastResponse.find(
+          const assetsArray: any[] = Object.values(lastResponse);
+          const assetData = assetsArray.find(
             ({ symbol }: any) => symbol === this.priceFeedOptions.asset);
           if (!assetData) {
             throw new Error(
@@ -202,8 +203,8 @@ export class RedStonePriceFeed implements PriceFeedConnector {
           return {
             timestamp: assetData.timestamp,
             prices: [_.pick(assetData, ["symbol", "value"])],
-            signature: lastResponse.evmSignature,
-            liteSignature: lastResponse.liteEvmSignature,
+            signature: assetData.evmSignature,
+            liteSignature: assetData.liteEvmSignature,
           };
         } else {
           return {
@@ -213,8 +214,8 @@ export class RedStonePriceFeed implements PriceFeedConnector {
             prices: lastResponse.pricePackage.prices,
           };
         }
-      case "streamr-historical":
-        throw "streamr-historical source is not implemented";
+      case "streamr-storage":
+        throw "streamr-storage source is not implemented";
       default:
         throw new Error(`Unsupported data source type: "${source.type}"`);
     }

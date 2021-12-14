@@ -17,190 +17,158 @@ import { BigNumber } from "@ethersproject/bignumber";
 
 chai.use(solidity);
 
-async function sleep(ms: number): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, ms));
-}
+// describe("Price Aware - inlined assembly version", function () {
+//     let owner: SignerWithAddress;
+//     let signer: Wallet;
 
-// describe("Price Aware - basic version (v1 version)", function () {
+//     let sample: SampleInlinedMockPriceAware;
+
+//     const PRIV = "0xae2b81c1fe9e3b01f060362f03abd0c80a6447cfe00ff7fc7fcf000000000000";
+
+//     it("should deploy contracts", async function () {
+//         [owner] = await ethers.getSigners();
+
+//         signer = new ethers.Wallet(PRIV, owner.provider);
+
+//         const SampleInlinedPriceAware = await ethers.getContractFactory("SampleInlinedMockPriceAware");
+//         sample = (await SampleInlinedPriceAware.deploy()) as SampleInlinedMockPriceAware;
+//     });
+
+//     it("should benchmark costs", async function () {
+
+//         sample = WrapperBuilder
+//           .mockLite(sample)
+//           .using(DEFAULT_PRICE);
+
+//         await syncTime(); // recommended for hardhat test
+//         await sample.executeWithPrice(toBytes32("ETH"));
+//     });
+
+//     it("should return the correct 1st price", async function () {
+//         sample = WrapperBuilder
+//           .mockLite(sample)
+//           .using(DEFAULT_PRICE);
+
+//         await syncTime(); // recommended for hardhat test
+//         let price = await sample.getPriceFromMsgPublic(toBytes32("ETH"));
+//         expect(price).to.equal(BigNumber.from("1000000000"));
+//     });
+
+
+//     it("should return the correct 2nd price", async function () {
+//         sample = WrapperBuilder
+//           .mockLite(sample)
+//           .using(DEFAULT_PRICE);
+
+//         await syncTime(); // recommended for hardhat test
+//         let price = await sample.getPriceFromMsgPublic(toBytes32("AVAX"));
+//         expect(price).to.equal(BigNumber.from("500000000"));
+//     });
+
+//     it("should return 0 for non-existing price", async function () {
+//         sample = WrapperBuilder
+//           .mockLite(sample)
+//           .using(DEFAULT_PRICE);
+
+//         await syncTime(); // recommended for hardhat test
+//         let price = await sample.getPriceFromMsgPublic(toBytes32("LOL"));
+//         expect(price).to.equal(BigNumber.from("0"));
+//     });
+// });
+
+
+// describe("Price Aware - editable assembly version", function () {
 //     let owner:SignerWithAddress;
 //     let signer:Wallet;
 
-//     let sample: MockableContract<SamplePriceAwareV1>;
+//     let sample: SamplePriceAware;
 
 //     it("should deploy contracts", async function () {
 //         [owner] = await ethers.getSigners();
 
 //         signer = new ethers.Wallet(MockPriceFeed.P_KEY, owner.provider);
 
-//         const SamplePriceAware = await ethers.getContractFactory("SamplePriceAwareV1");
-//         sample = (await SamplePriceAware.deploy()) as MockableContract<SamplePriceAwareV1>;
-//         await sample.authorizeSigner(signer.address);
+//         const SamplePriceAware = await ethers.getContractFactory("SamplePriceAware");
+//         sample = (await SamplePriceAware.deploy()) as SamplePriceAware;
 //     });
 
-//     it("should get price", async function () {
-//         await sample.execute(1);
+//     it("wrapped contract should have ethers methods: connect, attach", function () {
+//       sample = WrapperBuilder
+//           .mockLite(sample)
+//           .using(DEFAULT_PRICE);
+
+//       expect(sample.connect).to.not.equal(undefined);
+//       expect(sample.attach).to.not.equal(undefined);
+
+//       sample.connect(owner);
+//     });
+
+//     it("should benchmark costs", async function () {
 
 //         sample = WrapperBuilder
-//           .mock(sample)
+//           .mockLite(sample)
 //           .using(DEFAULT_PRICE);
-//         await syncTime();
-//         await sample.executeWithPrice(7);
+
+//         await sample.authorizeProvider();
+
+//         await syncTime(); // recommended for hardhat test
+//         await sample.executeWithPrice(toBytes32("ETH"));
+//     });
+
+
+//     it("should return the correct 1st price", async function () {
+//         sample = WrapperBuilder
+//           .mockLite(sample)
+//           .using(DEFAULT_PRICE);
+
+//         await sample.authorizeProvider();
+
+//         await syncTime(); // recommended for hardhat test
+//         let price = await sample.getPriceFromMsgPublic(toBytes32("ETH"));
+//         expect(price).to.equal(BigNumber.from("1000000000"));
+//     });
+
+//     it("should return the correct 1st price (passing object with values)", async function () {
+//       sample = WrapperBuilder
+//         .mockLite(sample)
+//         .using({"ETH": 125});
+
+//       await sample.authorizeProvider();
+
+//       await syncTime(); // recommended for hardhat test
+//       let price = await sample.getPriceFromMsgPublic(toBytes32("ETH"));
+//       expect(price).to.equal(BigNumber.from(125 * 10 ** 8));
+//   });
+
+
+//     it("should return the correct 2nd price", async function () {
+//         sample = WrapperBuilder
+//           .mockLite(sample)
+//           .using(DEFAULT_PRICE);
+
+//         await sample.authorizeProvider();
+
+//         await syncTime(); // recommended for hardhat test
+//         let price = await sample.getPriceFromMsgPublic(toBytes32("AVAX"));
+//         expect(price).to.equal(BigNumber.from("500000000"));
+//     });
+
+//     it("should return 0 for non-existing price", async function () {
+//         sample = WrapperBuilder
+//           .mockLite(sample)
+//           .using(DEFAULT_PRICE);
+
+//         await sample.authorizeProvider();
+
+//         await syncTime(); // recommended for hardhat test
+//         let price = await sample.getPriceFromMsgPublic(toBytes32("LOL"));
+//         expect(price).to.equal(BigNumber.from("0"));
 //     });
 // });
 
-
-describe("Price Aware - inlined assembly version", function () {
-    let owner:SignerWithAddress;
-    let signer:Wallet;
-
-    let sample: SampleInlinedMockPriceAware;
-
-    const PRIV = "0xae2b81c1fe9e3b01f060362f03abd0c80a6447cfe00ff7fc7fcf000000000000";
-
-    it("should deploy contracts", async function () {
-        [owner] = await ethers.getSigners();
-
-        signer = new ethers.Wallet(PRIV, owner.provider);
-
-        const SampleInlinedPriceAware = await ethers.getContractFactory("SampleInlinedMockPriceAware");
-        sample = (await SampleInlinedPriceAware.deploy()) as SampleInlinedMockPriceAware;
-    });
-
-    it("should benchmark costs", async function () {
-
-        sample = WrapperBuilder
-          .mockLite(sample)
-          .using(DEFAULT_PRICE);
-
-        await syncTime(); // recommended for hardhat test
-        await sample.executeWithPrice(toBytes32("ETH"));
-    });
-
-    it("should return the correct 1st price", async function () {
-        sample = WrapperBuilder
-          .mockLite(sample)
-          .using(DEFAULT_PRICE);
-
-        await syncTime(); // recommended for hardhat test
-        let price = await sample.getPriceFromMsgPublic(toBytes32("ETH"));
-        expect(price).to.equal(BigNumber.from("1000000000"));
-    });
-
-
-    it("should return the correct 2nd price", async function () {
-        sample = WrapperBuilder
-          .mockLite(sample)
-          .using(DEFAULT_PRICE);
-
-        await syncTime(); // recommended for hardhat test
-        let price = await sample.getPriceFromMsgPublic(toBytes32("AVAX"));
-        expect(price).to.equal(BigNumber.from("500000000"));
-    });
-
-    it("should return 0 for non-existing price", async function () {
-        sample = WrapperBuilder
-          .mockLite(sample)
-          .using(DEFAULT_PRICE);
-
-        await syncTime(); // recommended for hardhat test
-        let price = await sample.getPriceFromMsgPublic(toBytes32("LOL"));
-        expect(price).to.equal(BigNumber.from("0"));
-    });
-});
-
-
-describe("Price Aware - editable assembly version", function () {
-    let owner:SignerWithAddress;
-    let signer:Wallet;
-
-    let sample: SamplePriceAware;
-
-    it("should deploy contracts", async function () {
-        [owner] = await ethers.getSigners();
-
-        signer = new ethers.Wallet(MockPriceFeed.P_KEY, owner.provider);
-
-        const SamplePriceAware = await ethers.getContractFactory("SamplePriceAware");
-        sample = (await SamplePriceAware.deploy()) as SamplePriceAware;
-    });
-
-    it("wrapped contract should have ethers methods: connect, attach", function () {
-      sample = WrapperBuilder
-          .mockLite(sample)
-          .using(DEFAULT_PRICE);
-
-      expect(sample.connect).to.not.equal(undefined);
-      expect(sample.attach).to.not.equal(undefined);
-
-      sample.connect(owner);
-    });
-
-    it("should benchmark costs", async function () {
-
-        sample = WrapperBuilder
-          .mockLite(sample)
-          .using(DEFAULT_PRICE);
-
-        await sample.authorizeProvider();
-
-        await syncTime(); // recommended for hardhat test
-        await sample.executeWithPrice(toBytes32("ETH"));
-    });
-
-
-    it("should return the correct 1st price", async function () {
-        sample = WrapperBuilder
-          .mockLite(sample)
-          .using(DEFAULT_PRICE);
-
-        await sample.authorizeProvider();
-
-        await syncTime(); // recommended for hardhat test
-        let price = await sample.getPriceFromMsgPublic(toBytes32("ETH"));
-        expect(price).to.equal(BigNumber.from("1000000000"));
-    });
-
-    it("should return the correct 1st price (passing object with values)", async function () {
-      sample = WrapperBuilder
-        .mockLite(sample)
-        .using({"ETH": 125});
-
-      await sample.authorizeProvider();
-
-      await syncTime(); // recommended for hardhat test
-      let price = await sample.getPriceFromMsgPublic(toBytes32("ETH"));
-      expect(price).to.equal(BigNumber.from(125 * 10 ** 8));
-  });
-
-
-    it("should return the correct 2nd price", async function () {
-        sample = WrapperBuilder
-          .mockLite(sample)
-          .using(DEFAULT_PRICE);
-
-        await sample.authorizeProvider();
-
-        await syncTime(); // recommended for hardhat test
-        let price = await sample.getPriceFromMsgPublic(toBytes32("AVAX"));
-        expect(price).to.equal(BigNumber.from("500000000"));
-    });
-
-    it("should return 0 for non-existing price", async function () {
-        sample = WrapperBuilder
-          .mockLite(sample)
-          .using(DEFAULT_PRICE);
-
-        await sample.authorizeProvider();
-
-        await syncTime(); // recommended for hardhat test
-        let price = await sample.getPriceFromMsgPublic(toBytes32("LOL"));
-        expect(price).to.equal(BigNumber.from("0"));
-    });
-});
-
 describe("Price Aware - redstone realtime feed", function () {
-    let owner:SignerWithAddress;
-    let signer:Wallet;
+    let owner: SignerWithAddress;
+    let signer: Wallet;
 
     let sample: SamplePriceAware;
 
@@ -219,12 +187,9 @@ describe("Price Aware - redstone realtime feed", function () {
             .wrapLite(sample)
             .usingPriceFeed("redstone-avalanche", { asset: "AVAX" });
 
-        // To test streamr
-        await sleep(5000);
-
         await sample.authorizeProvider();
 
-        //await syncTime(); // recommended for hardhat test
+        await syncTime(); // recommended for hardhat test
         await sample.executeWithPrice(toBytes32("IBM"));
     });
 
@@ -236,7 +201,122 @@ describe("Price Aware - redstone realtime feed", function () {
 
         await sample.authorizeProvider();
 
-        // To test streamr
+        await syncTime(); // recommended for hardhat test
+        await sample.executeWithPrice(toBytes32("AVAX"));
+    });
+});
+
+// describe("Price Aware - upgradeable version", function () {
+//     let owner:SignerWithAddress;
+//     let admin:SignerWithAddress;
+//     let signer:Wallet;
+//     let sample: SamplePriceAwareUpgradeable;
+//     let proxy: TransparentUpgradeableProxy;
+
+//     it("should deploy contracts", async function () {
+//         [owner] = await ethers.getSigners();
+
+//         signer = new ethers.Wallet(MockPriceFeed.P_KEY, owner.provider);
+
+//         const SamplePriceAwareUpgradeable = await ethers.getContractFactory("SamplePriceAwareUpgradeable");
+//         sample = (await SamplePriceAwareUpgradeable.deploy()) as SamplePriceAwareUpgradeable;
+//         await sample.initialize();
+//     });
+
+//     it("should get price", async function () {
+
+//         sample = WrapperBuilder
+//             .mockLite(sample)
+//             .using(DEFAULT_PRICE);
+
+//         await sample.authorizeProvider();
+
+//         //await syncTime(); // recommended for hardhat test
+//         await sample.executeWithPrice(7);
+//     });
+
+//     it("should deploy a contract behind a proxy", async () => {
+//         [owner, admin] = await ethers.getSigners();
+//         const SamplePriceAwareUpgradeable = await ethers.getContractFactory("SamplePriceAwareUpgradeable");
+//         sample = (await SamplePriceAwareUpgradeable.deploy()) as SamplePriceAwareUpgradeable;
+
+//         proxy = await (new TransparentUpgradeableProxy__factory(owner).deploy(sample.address, admin.address, []));
+//         sample = await (new SamplePriceAwareUpgradeable__factory(owner).attach(proxy.address));
+
+//         expect(await sample.maxDelay()).equals(0);
+
+//         await sample.initialize();
+
+//         expect(await sample.maxDelay()).equals(180);
+//     });
+// });
+
+describe("Price Aware - streamr", function () {
+    let owner: SignerWithAddress;
+    let signer: Wallet;
+
+    let sample: SamplePriceAware;
+
+    it("should deploy contracts", async function () {
+        [owner] = await ethers.getSigners();
+
+        signer = new ethers.Wallet(MockPriceFeed.P_KEY, owner.provider);
+
+        const SamplePriceAware = await ethers.getContractFactory("SamplePriceAware");
+        sample = (await SamplePriceAware.deploy()) as SamplePriceAware;
+    });
+
+    it("should get price with single asset from streamr", async function () {
+        sample = WrapperBuilder
+            .wrapLite(sample)
+            .usingPriceFeed("redstone-avalanche", {
+                asset: "AVAX",
+                dataSources: {
+                    sources: [
+                        {
+                            type: "streamr",
+                            streamrEndpointPrefix: "0x3a7d971de367fe15d164cdd952f64205f2d9f10c/redstone-oracle",
+                            disabledForSinglePrices: false
+                        },
+                    ],
+                    valueSelectionAlgorithm: "newest-valid",
+                    timeoutMilliseconds: 10000,
+                    maxTimestampDiffMilliseconds: 150000,
+                    preVerifySignatureOffchain: true,
+                },
+            });
+
+        await sample.authorizeProvider();
+
+        // To wait for package from streamr
+        await sleep(5000);
+
+        await syncTime(); // recommended for hardhat test
+        await sample.executeWithPrice(toBytes32("AVAX"));
+    });
+
+    it("should get price with multiple assets from streamr", async function () {
+        sample = WrapperBuilder
+            .wrapLite(sample)
+            .usingPriceFeed("redstone-avalanche", {
+                dataSources: {
+                    sources: [
+                        {
+                            type: "streamr",
+                            streamrEndpointPrefix: "0x3a7d971de367fe15d164cdd952f64205f2d9f10c/redstone-oracle",
+                            disabledForSinglePrices: false
+                        },
+                    ],
+                    valueSelectionAlgorithm: "newest-valid",
+                    timeoutMilliseconds: 10000,
+                    maxTimestampDiffMilliseconds: 150000,
+                    preVerifySignatureOffchain: true,
+                },
+            });
+
+        await sample.authorizeProvider();
+
+        // To wait for package from streamr
         await sleep(5000);
 
         await syncTime(); // recommended for hardhat test
@@ -244,47 +324,6 @@ describe("Price Aware - redstone realtime feed", function () {
     });
 });
 
-describe("Price Aware - upgradeable version", function () {
-    let owner:SignerWithAddress;
-    let admin:SignerWithAddress;
-    let signer:Wallet;
-    let sample: SamplePriceAwareUpgradeable;
-    let proxy: TransparentUpgradeableProxy;
-
-    it("should deploy contracts", async function () {
-        [owner] = await ethers.getSigners();
-
-        signer = new ethers.Wallet(MockPriceFeed.P_KEY, owner.provider);
-
-        const SamplePriceAwareUpgradeable = await ethers.getContractFactory("SamplePriceAwareUpgradeable");
-        sample = (await SamplePriceAwareUpgradeable.deploy()) as SamplePriceAwareUpgradeable;
-        await sample.initialize();
-    });
-
-    it("should get price", async function () {
-
-        sample = WrapperBuilder
-            .mockLite(sample)
-            .using(DEFAULT_PRICE);
-
-        await sample.authorizeProvider();
-
-        //await syncTime(); // recommended for hardhat test
-        await sample.executeWithPrice(7);
-    });
-
-    it("should deploy a contract behind a proxy", async () => {
-        [owner, admin] = await ethers.getSigners();
-        const SamplePriceAwareUpgradeable = await ethers.getContractFactory("SamplePriceAwareUpgradeable");
-        sample = (await SamplePriceAwareUpgradeable.deploy()) as SamplePriceAwareUpgradeable;
-
-        proxy = await (new TransparentUpgradeableProxy__factory(owner).deploy(sample.address, admin.address, []));
-        sample = await (new SamplePriceAwareUpgradeable__factory(owner).attach(proxy.address));
-
-        expect(await sample.maxDelay()).equals(0);
-
-        await sample.initialize();
-
-        expect(await sample.maxDelay()).equals(180);
-    });
-});
+async function sleep(ms: number): Promise<void> {
+    await new Promise((resolve) => setTimeout(resolve, ms));
+}
