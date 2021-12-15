@@ -2,13 +2,13 @@
 
 pragma solidity ^0.8.2;
 
-import "../commons/PriceVerifier.sol";
-import "../commons/BytesLib.sol";
-import '../commons/PriceFeed.sol';
+import "../../commons/PriceVerifier.sol";
+import "../../commons/BytesLib.sol";
+import '../../commons/PriceFeed.sol';
 import "@openzeppelin/contracts/proxy/Proxy.sol";
 
 
-contract PriceAwareV1 is PriceFeed {
+contract NonAssemblySinglePriceAware is PriceFeed {
     using BytesLib for bytes;
 
     bytes32 constant MARKER = keccak256("Redstone.version.0.0.1");

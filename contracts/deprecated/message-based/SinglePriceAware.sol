@@ -5,7 +5,7 @@ pragma solidity ^0.8.2;
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract PriceAware is Ownable  {
+contract SinglePriceAware is Ownable  {
   using ECDSA for bytes32;
   
   uint public maxDelay = 3 * 60;
@@ -23,16 +23,10 @@ contract PriceAware is Ownable  {
 
     emit TrustedSignerChanged(trustedSigner);
   }
+  
 
-
-  function getPriceFromMsg(bytes32 symbol) internal view returns (uint256) {
-    bytes32[] memory symbols = new bytes32[](1);
-    symbols[0] = symbol;
-    return getPricesFromMsg(symbols)[0];
-  }
-
-
-  function getPricesFromMsg(bytes32[] memory symbols) internal view returns (uint256[] memory) {    //The structure of calldata witn n - data items:
+  function getPriceFromMsg(bytes32 symbol) internal view returns(uint256) {
+    //The structure of calldata witn n - data items:
     //The data that is signed (symbols, values, timestamp) are inside the {} brackets
     //[origina_call_data| ?]{[[symbol | 32][value | 32] | n times][timestamp | 32]}[size | 1][signature | 65]
     
@@ -98,41 +92,25 @@ contract PriceAware is Ownable  {
       dataTimestamp := calldataload(sub(calldatasize(), 98))
     }    
     require(block.timestamp - dataTimestamp < maxDelay, "Data is too old");
+    
+    //8. We iterate directly through call data to extract the value for a given symbol
 
-    return _readFromCallData(symbols, uint256(dataSize), messageLength);
-  }
-
-
-  function _readFromCallData(bytes32[] memory symbols, uint256 dataSize, uint16 messageLength) private view returns (uint256[] memory) {
-    uint256[] memory values;
-    uint256 i;
-    uint256 j;
-    uint256 readyAssets;
+    uint256 val;
+    uint256 max = dataSize;
     bytes32 currentSymbol;
-
-    //We iterate directly through call data to extract the values of symbols
+    uint256 i;
     assembly {
       let start := sub(calldatasize(), add(messageLength, 66))
-
-      values := msize()
-      mstore(values, mload(symbols))
-      mstore(0x40, add(add(values, 0x20), mul(mload(symbols), 0x20)))
-
-      for { i := 0 } lt(i, dataSize) { i := add(i, 1) } {
-        currentSymbol := calldataload(add(start, mul(i, 64)))
-
-        for { j := 0 } lt(j, mload(symbols)) { j := add(j, 1) } {
-          if eq(mload(add(add(symbols, 32), mul(j, 32))), currentSymbol) {
-            mstore(add(add(values, 32), mul(j, 32)), calldataload(add(add(start, mul(i, 64)), 32)))
-            readyAssets := add(readyAssets, 1)
-          }
-
-          if eq(readyAssets, mload(symbols)) {i := dataSize}
+      for { i := 0 } lt(i, max) { i := add(i, 1) } {
+        currentSymbol := calldataload(add(start, mul(i, 64)))        
+        if eq(currentSymbol, symbol) {
+           val := calldataload(add(start, add(32, mul(i, 64))))
+           i := max
         }
       }
     }
-
-    return (values);
+    
+    return val;
   }
 
 
