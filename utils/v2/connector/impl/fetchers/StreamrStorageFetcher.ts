@@ -1,17 +1,24 @@
-import { Fetcher, SignedDataPackageResponse } from "./Fetcher";
+import { SignedDataPackageResponse, SourceConfig } from "./Fetcher";
+import { StreamrFetcher } from "./StreamrFetcher";
 
-// interface StreamrFetcherConfig {
-
-// };
-
-export class StreamrStorageFetcher extends Fetcher {
-  private cache: { [key: string]: any } = {};
-
-  // init(config: ) {
-  //   // TODO: subscribe to stream
-  // }
+export class StreamrStorageFetcher extends StreamrFetcher {
+  constructor(config: SourceConfig, asset?: string) {
+    super(config, asset);
+  }
 
   getLatestData(): Promise<SignedDataPackageResponse> {
-    throw 1;
+    const streamId = this.getStreamId();
+    return new Promise((resolve) => {
+
+      // Getting data from streamr storage
+      this.streamrClient.resend({
+        stream: streamId,
+        resend: {
+          last: 1,
+        },
+      }, (value: any) => {
+        resolve(this.extractPriceValue(value));
+      })
+    });
   }
 }

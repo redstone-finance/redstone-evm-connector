@@ -3,8 +3,8 @@ import _ from "lodash";
 import { Fetcher, SignedDataPackageResponse, SourceConfig } from "./Fetcher";
 
 export class StreamrFetcher extends Fetcher {
-  private lastValue?: SignedDataPackageResponse;
-  private streamrClient: StreamrClient;
+  protected lastValue?: SignedDataPackageResponse;
+  protected streamrClient: StreamrClient;
 
   constructor(config: SourceConfig, asset?: string) {
     super(config, asset);
@@ -33,12 +33,12 @@ export class StreamrFetcher extends Fetcher {
     return this.lastValue;
   }
 
-  private getStreamId() {
+  protected getStreamId() {
     return `${this.config.streamrEndpointPrefix!}/`
       + (this.asset ? "prices" : "package");
   }
 
-  private extractPriceValue(receivedValue: any): SignedDataPackageResponse {
+  protected extractPriceValue(receivedValue: any): SignedDataPackageResponse {
     if (this.asset) {
       const assetsArray: any[] = Object.values(receivedValue);
       const assetData = assetsArray.find(
