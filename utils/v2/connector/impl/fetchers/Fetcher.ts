@@ -1,3 +1,5 @@
+import { timeout } from "promise-timeout";
+
 export type SourceType = "cache-layer" | "streamr" | "streamr-storage";
 
 export interface SignedDataPackageResponse {
@@ -15,11 +17,18 @@ export interface SourceConfig {
 }
 
 export abstract class Fetcher {
-  constructor() {}
+  constructor(protected config: SourceConfig, protected asset?: string) {}
 
   // By default it doesn't do anything
   // But for e.g. streamr fetchers it can subscribe to a stream
-  async init(..._args: any[]): Promise<void> {}
+  init(): void {}
 
-  abstract getLatestData(timeoutMs: number): Promise<SignedDataPackageResponse>;
+  abstract getLatestData(providerId: string): Promise<SignedDataPackageResponse>;
+
+  async getLatestDataWithTimeout(
+    providerId: string,
+    timeoutMs: number,
+  ): Promise<SignedDataPackageResponse> {
+    return await timeout(this.getLatestData(providerId), timeoutMs);
+  }
 }

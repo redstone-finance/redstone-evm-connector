@@ -1,24 +1,14 @@
 import { PriceDataType, PriceFeedConnector, SignedPriceDataType } from "../PriceFeedConnector";
 import axios from "axios";
 import _ from "lodash";
-import StreamrClient from "streamr-client";
-import { timeout } from "promise-timeout";
 import EvmPriceSigner from "redstone-node/dist/src/signers/EvmPriceSigner";
-import { Fetcher } from "./fetchers/Fetcher";
+import { Fetcher, SignedDataPackageResponse, SourceConfig } from "./fetchers/Fetcher";
 import { createFetcher } from "./fetchers";
 
 const DEFAULT_TIMEOUT_MILLISECONDS = 10000; // 10 seconds
 
 export type ValueSelectionAlgorithm = "first-valid" | "newest-valid" | "oldest-valid"; // wa can add "median-valid" in future
 export type SourceType = "cache-layer" | "streamr" | "streamr-storage";
-
-// TODO: remove
-export interface SourceConfig {
-  type: SourceType;
-  url?: string; // required for "cache-layer" sources
-  streamrEndpointPrefix?: string; // required for "streamr" and "streamr-historical" sources
-  disabledForSinglePrices?: boolean;
-};
 
 export interface DataSourcesConfig {
   valueSelectionAlgorithm: ValueSelectionAlgorithm,
@@ -34,14 +24,6 @@ export interface PriceFeedOptions {
   asset?: string;
 };
 
-// TODO: remove SignedDataPackageResponse
-export interface SignedDataPackageResponse {
-  timestamp: number;
-  prices: { symbol: string; value: any }[];
-  signature: string;
-  liteSignature: string;
-};
-
 export type RedStoneProvider =
   | "redstone"
   | "redstone-stocks"
@@ -52,8 +34,6 @@ export class RedStonePriceFeed implements PriceFeedConnector {
 
   private readonly priceSigner = new EvmPriceSigner();
   private cachedSigner?: string;
-  private streamrClient?: StreamrClient;
-  private latestValueFromStreamr: any;
   private fetchers: Fetcher[] = [];
 
   constructor(
@@ -84,13 +64,13 @@ export class RedStonePriceFeed implements PriceFeedConnector {
     // We need to get signer public key firstly
     // It will be used to pre-verify signatures off-chain
     await this.getSigner();
-
-    // Fetching data simultaneously
-    const timeoutMilliseconds =
-      this.priceFeedOptions.dataSources?.timeoutMilliseconds || DEFAULT_TIMEOUT_MILLISECONDS;
     
-    // TODO: check if bind is not required here
-    const promises = this.fetchers.map(fetcher => fetcher.getLatestData(timeoutMilliseconds));
+    // Fetching data from all sources simultaneously with timeout
+    const timeoutMilliseconds =
+      this.priceFeedOptions.dataSources?.timeoutMilliseconds
+      || DEFAULT_TIMEOUT_MILLISECONDS;
+    const promises = this.fetchers.map(fetcher =>
+      fetcher.getLatestDataWithTimeout(this.providerId, timeoutMilliseconds));
     const results = await Promise.allSettled(promises);
 
     // Validating fetched data
@@ -106,25 +86,29 @@ export class RedStonePriceFeed implements PriceFeedConnector {
     return this.convertResponseToPricePackage(finalResponse);
   }
 
-  // TODO: improve the implementation
   private selectResultDataPackage(packages: SignedDataPackageResponse[]): SignedDataPackageResponse {
+    const sortedPackages = [...packages];
+    sortedPackages.sort((p1, p2) => p1.timestamp - p2.timestamp); // sorting prices from oldest to newest
     const { valueSelectionAlgorithm } = this.priceFeedOptions.dataSources!;
     switch (valueSelectionAlgorithm) {
-      case "newest-valid": {
-        // TODO: improve the implementation
-        return packages[0];
-      }
-      case "oldest-valid": {
-        // TODO: improve the implementation
+
+      // TODO: improve the implementation for first-valid
+      case "first-valid":
         return packages[packages.length - 1];
-      }
-      default: {
+
+      case "newest-valid":
+        return packages[packages.length - 1];
+
+      case "oldest-valid":
+        return packages[0];
+
+      default:
         throw new Error(
           `Unsupported value for valueSelectionAlgorithm: ${valueSelectionAlgorithm}`);
-      }
     }
   }
 
+  // TODO: refactor this implementation with checker modules
   private filterValidDataPackages(
     fetchedPackages: PromiseSettledResult<SignedDataPackageResponse>[],
   ): SignedDataPackageResponse[] {
@@ -147,13 +131,11 @@ export class RedStonePriceFeed implements PriceFeedConnector {
             + `Source index: ${sourceIndex}`);
         } else {
 
-          // TODO: move signature verification to a separate function
-
           // Verifying signature off-chain if needed
           if (this.priceFeedOptions.dataSources?.preVerifySignatureOffchain) {
+
             // Signature verification
             // Currently only lite signature verification is implemented
-
             const isValidSignature = this.priceSigner.verifyLiteSignature({
               pricePackage: {
                 prices: fetchedPackage.value.prices,
@@ -181,48 +163,6 @@ export class RedStonePriceFeed implements PriceFeedConnector {
     return result;
   }
 
-  async fetchFromSource(source: SourceConfig): Promise<SignedDataPackageResponse> {
-    switch (source.type) {
-      case "cache-layer":
-        const url = `${source.url}/packages/latest`;
-        const response = await axios.get(url, {
-          params: {
-            provider: this.providerId,
-            symbol: this.priceFeedOptions.asset, // asset may be undefined, then we'll fetch the whole package
-          },
-        });
-        return response.data;
-      case "streamr":
-        const lastResponse = this.latestValueFromStreamr;
-        if (this.priceFeedOptions.asset) {
-          const assetsArray: any[] = Object.values(lastResponse);
-          const assetData = assetsArray.find(
-            ({ symbol }: any) => symbol === this.priceFeedOptions.asset);
-          if (!assetData) {
-            throw new Error(
-              `Data not found for symbol: ${this.priceFeedOptions.asset}`);
-          }
-          return {
-            timestamp: assetData.timestamp,
-            prices: [_.pick(assetData, ["symbol", "value"])],
-            signature: assetData.evmSignature,
-            liteSignature: assetData.liteEvmSignature,
-          };
-        } else {
-          return {
-            timestamp: lastResponse.pricePackage.timestamp,
-            signature: lastResponse.signature,
-            liteSignature: lastResponse.liteSignature,
-            prices: lastResponse.pricePackage.prices,
-          };
-        }
-      case "streamr-storage":
-        throw "streamr-storage source is not implemented";
-      default:
-        throw new Error(`Unsupported data source type: "${source.type}"`);
-    }
-  }
-
   private convertResponseToPricePackage(data: SignedDataPackageResponse): SignedPriceDataType {
     const pricePackage = _.pick(data, ["prices", "timestamp"]);
     const serialized = this.priceSigner.serializeToMessage(pricePackage);
@@ -235,47 +175,14 @@ export class RedStonePriceFeed implements PriceFeedConnector {
     };
   }
 
+  // TODO: get rid of it later
+  // It is a potential single point of failure
   async getSigner(): Promise<string> {
     if (!this.cachedSigner) {
       const response = await axios.get("https://api.redstone.finance/providers");
       this.cachedSigner = response.data[this.providerId].evmAddress;
     }
     return this.cachedSigner as string;
-  }
-
-  private maybeSubscribeToStreamr() {
-    for (const source of this.priceFeedOptions.dataSources!.sources!) {
-      if (source.type === "streamr") {
-        this.lazyInitializeStreamrClient();
-
-        // TODO: maybe refactor this code
-        // Because subscribing logic is very similar
-
-        // Subscribe to a single assets stream
-        if (this.priceFeedOptions.asset && !source.disabledForSinglePrices) {
-          const streamId = `${source.streamrEndpointPrefix}/prices`;
-          this.streamrClient!.subscribe(
-            streamId,
-            (value: any) => {
-              console.log(`Received new value from: ${streamId}`);
-              this.latestValueFromStreamr = value;
-            });
-          console.log(`Subscribed to streamr: ${streamId}`);
-        }
-
-        // Subscribe to a package stream
-        if (!this.priceFeedOptions.asset) {
-          const streamId = `${source.streamrEndpointPrefix}/package`;
-          this.streamrClient!.subscribe(
-            streamId,
-            (value: any) => {
-              console.log(`Received new value from: ${streamId}`);
-              this.latestValueFromStreamr = value;
-            });
-          console.log(`Subscribed to streamr: ${streamId}`);
-        }
-      }
-    }
   }
 
 }

@@ -1,12 +1,15 @@
-import { Fetcher } from "./Fetcher";
+import axios from "axios";
+import { Fetcher, SignedDataPackageResponse, SourceConfig } from "./Fetcher";
 
 export class CacheLayerFetcher extends Fetcher {
-  
 
-  constructor (url: string, asset?: string) {
-    // TODO: subscribe to stream
-    super();
+  async getLatestData(providerId: string): Promise<SignedDataPackageResponse> {
+    const response = await axios.get(`${this.config.url!}/packages/latest`, {
+      params: {
+        asset: this.asset,
+        provider: providerId,
+      },
+    });
+    return response.data;
   }
-
-  
 }
