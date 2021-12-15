@@ -9,9 +9,14 @@ contract PriceAware is Ownable  {
   using ECDSA for bytes32;
   
   uint public maxDelay = 3 * 60;
-  address public trustedSigner;
-  
-  
+  address private trustedSigner;
+
+
+  function getTrustedSigner() virtual public view returns (address) {
+    return trustedSigner;
+  }
+
+
   function setMaxDelay(uint256 _maxDelay) onlyOwner external {
     maxDelay = _maxDelay;
   }
@@ -96,7 +101,8 @@ contract PriceAware is Ownable  {
       //The last 65 bytes are for signature + 1 for data size
       //We load the previous 32 bytes
       dataTimestamp := calldataload(sub(calldatasize(), 98))
-    }    
+    }
+
     require(block.timestamp - dataTimestamp < maxDelay, "Data is too old");
 
     return _readFromCallData(symbols, uint256(dataSize), messageLength);
@@ -110,7 +116,7 @@ contract PriceAware is Ownable  {
     uint256 readyAssets;
     bytes32 currentSymbol;
 
-    //We iterate directly through call data to extract the values of symbols
+    //We iterate directly through call data to extract the values for symbols
     assembly {
       let start := sub(calldatasize(), add(messageLength, 66))
 

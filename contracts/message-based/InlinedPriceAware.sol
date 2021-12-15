@@ -8,7 +8,12 @@ contract InlinedPriceAware  {
   using ECDSA for bytes32;
 
   uint constant MAX_DELAY = 3 * 60;
-  address constant TRUSTED_SIGNER = 0xFE71e9691B9524BC932C23d0EeD5c9CE41161884;
+  address private constant TRUSTED_SIGNER = 0xFE71e9691B9524BC932C23d0EeD5c9CE41161884;
+
+
+  function getTrustedSigner() virtual public view returns (address) {
+    return TRUSTED_SIGNER;
+  }
 
 
   function getPriceFromMsg(bytes32 symbol) internal view returns (uint256) {

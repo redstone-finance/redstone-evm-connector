@@ -11,7 +11,7 @@ import {DEFAULT_PRICE, MockableContract} from "../../utils/v2/impl/builder/Mocka
 
 chai.use(solidity);
 
-describe("Price Aware - basic version (v1 version)", function () {
+describe("Non Assembly Single Price Aware - basic version (v1 version)", function () {
     let owner:SignerWithAddress;
     let signer:Wallet;
 

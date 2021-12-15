@@ -9,7 +9,12 @@ contract SinglePriceAware is Ownable  {
   using ECDSA for bytes32;
   
   uint public maxDelay = 3 * 60;
-  address public trustedSigner;
+  address private trustedSigner;
+
+
+  function getTrustedSigner() virtual public view returns (address) {
+    return trustedSigner;
+  }
   
   
   function setMaxDelay(uint256 _maxDelay) onlyOwner external {
