@@ -12,24 +12,21 @@ import "../commons/IPriceFeed.sol";
  * and provides a lower bound for gas cost benchmarks.
  */
 contract MockStatePriceProvider is IPriceFeed {
-  
   uint256 price = 777;
 
   /**
-  * @dev gets mocked price
-  * @param symbol of the price - kept for interface compatibility
-  **/
-  function getPrice(bytes32 symbol) public override view returns(uint256) {
+   * @dev gets mocked price
+   * @param symbol of the price - kept for interface compatibility
+   **/
+  function getPrice(bytes32 symbol) public view override returns (uint256) {
     return price;
   }
 
-
   /**
-  * @dev sets new price allowing to update the mocked value
-  * @param _price value of a new price
-  **/
-  function setPrice(uint _price) external {
+   * @dev sets new price allowing to update the mocked value
+   * @param _price value of a new price
+   **/
+  function setPrice(uint256 _price) external {
     price = _price;
   }
-
 }

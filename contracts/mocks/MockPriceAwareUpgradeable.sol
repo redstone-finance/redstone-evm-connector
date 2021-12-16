@@ -6,11 +6,11 @@ import "../message-based/PriceAwareUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
-contract MockPriceAwareUpgradeable is OwnableUpgradeable, PriceAwareUpgradeable {
-
-
-    function executeWithPrice(uint val) public returns(uint256) {
-        return getPriceFromMsg(bytes32("TSLA"));
-    }
-
+contract MockPriceAwareUpgradeable is
+  OwnableUpgradeable,
+  PriceAwareUpgradeable
+{
+  function executeWithPrice(uint256 val) public returns (uint256) {
+    return getPriceFromMsg(bytes32("TSLA"));
+  }
 }

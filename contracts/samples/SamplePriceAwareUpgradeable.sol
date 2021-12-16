@@ -12,33 +12,37 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
  * It has only a few methods used to benchmark gas consumption
  * It extends PriceAware and allows changing trusted signer and message delay
  */
-contract SamplePriceAwareUpgradeable is OwnableUpgradeable, PriceAwareUpgradeable {
-
+contract SamplePriceAwareUpgradeable is
+  OwnableUpgradeable,
+  PriceAwareUpgradeable
+{
   MockStatePriceProvider mockStatePriceProvider = new MockStatePriceProvider();
-
 
   function initialize() external initializer {
     __Ownable_init();
     __PriceAware_init();
   }
 
-
-  function getPrice(bytes32 asset) external view returns(uint256) {
+  function getPrice(bytes32 asset) external view returns (uint256) {
     return getPriceFromMsg(asset);
   }
 
-
-  function getPrices(bytes32[] memory assets) external view returns(uint256[] memory) {
+  function getPrices(bytes32[] memory assets)
+    external
+    view
+    returns (uint256[] memory)
+  {
     return getPricesFromMsg(assets);
   }
 
-
-  function executeWithPrice(bytes32 asset) public returns(uint256) {
+  function executeWithPrice(bytes32 asset) public returns (uint256) {
     return getPriceFromMsg(asset);
   }
 
-
-  function executeWithPrices(bytes32[] memory assets) public returns(uint256[] memory) {
+  function executeWithPrices(bytes32[] memory assets)
+    public
+    returns (uint256[] memory)
+  {
     return getPricesFromMsg(assets);
   }
 }

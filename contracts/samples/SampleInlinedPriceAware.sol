@@ -13,21 +13,20 @@ import "../message-based/InlinedPriceAware.sol";
  * to reduce the gas of every invocation (saving is ~4k gas)
  */
 contract SampleInlinedPriceAware is InlinedPriceAware {
-
   MockStatePriceProvider mockStatePriceProvider = new MockStatePriceProvider();
 
-
-  function getPrice(bytes32 asset) external view returns(uint256) {
+  function getPrice(bytes32 asset) external view returns (uint256) {
     return getPriceFromMsg(asset);
   }
 
-
-  function executeWithPrice(bytes32 asset) public returns(uint256) {
+  function executeWithPrice(bytes32 asset) public returns (uint256) {
     return getPriceFromMsg(asset);
   }
 
-
-  function executeWithPrices(bytes32[] memory assets) public returns(uint256[] memory) {
+  function executeWithPrices(bytes32[] memory assets)
+    public
+    returns (uint256[] memory)
+  {
     return getPricesFromMsg(assets);
   }
 }

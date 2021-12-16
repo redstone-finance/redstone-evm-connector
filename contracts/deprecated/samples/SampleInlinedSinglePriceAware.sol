@@ -13,16 +13,13 @@ import "../../mocks/MockStatePriceProvider.sol";
  * to reduce the gas of every invocation (saving is ~4k gas)
  */
 contract SampleInlinedSinglePriceAware is InlinedSinglePriceAware {
-
   MockStatePriceProvider mockStatePriceProvider = new MockStatePriceProvider();
 
-
-  function executeWithPrice(bytes32 symbol) public returns(uint256) {
+  function executeWithPrice(bytes32 symbol) public returns (uint256) {
     return getPriceFromMsg(symbol);
   }
 
-
-  function getTime() public view returns(uint256) {
+  function getTime() public view returns (uint256) {
     return block.timestamp;
   }
 }
