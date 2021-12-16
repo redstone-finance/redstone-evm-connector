@@ -1,9 +1,9 @@
-import { PriceDataType, PriceFeedConnector, SignedPriceDataType } from "../PriceFeedConnector";
+import { PriceFeedConnector, SignedPriceDataType } from "../PriceFeedConnector";
 import axios from "axios";
 import _ from "lodash";
-import EvmPriceSigner from "redstone-node/dist/src/signers/EvmPriceSigner";
 import { Fetcher, SignedDataPackageResponse, SourceConfig } from "./fetchers/Fetcher";
 import { createFetcher } from "./fetchers";
+import { convertResponseToPricePackage, selectDataPackage, validateDataPackage } from "./DataPackageUtils";
 
 const DEFAULT_TIMEOUT_MILLISECONDS = 10000; // 10 seconds
 
@@ -32,7 +32,8 @@ export type RedStoneProvider =
 
 export class RedStonePriceFeed implements PriceFeedConnector {
 
-  private readonly priceSigner = new EvmPriceSigner();
+  // TODO: remove
+  // private readonly priceSigner = new EvmPriceSigner();
   private cachedSigner?: string;
   private fetchers: Fetcher[] = [];
 
@@ -74,105 +75,28 @@ export class RedStonePriceFeed implements PriceFeedConnector {
     const results = await Promise.allSettled(promises);
 
     // Validating fetched data
-    const validDataPackages = this.filterValidDataPackages(results);
+    const fulfilledPromisesResults = results.filter(r => r.status === "fulfilled") as
+      PromiseFulfilledResult<SignedDataPackageResponse>[];
+    const dataPackages = fulfilledPromisesResults.map(r => r.value);
+    const validDataPackages = dataPackages.filter(p =>
+      validateDataPackage(
+        p,
+        this.priceFeedOptions,
+        this.cachedSigner!,
+      )
+    );
+
     if (validDataPackages.length === 0) {
       console.error(results);
       throw new Error(`Failed to load valid data packages`);
     }
 
     // Selecting the final value
-    const finalResponse = this.selectResultDataPackage(validDataPackages);
+    const finalResponse = selectDataPackage(
+      validDataPackages,
+      this.priceFeedOptions.dataSources!.valueSelectionAlgorithm);
 
-    return this.convertResponseToPricePackage(finalResponse);
-  }
-
-  private selectResultDataPackage(packages: SignedDataPackageResponse[]): SignedDataPackageResponse {
-    const sortedPackages = [...packages];
-    sortedPackages.sort((p1, p2) => p1.timestamp - p2.timestamp); // sorting prices from oldest to newest
-    const { valueSelectionAlgorithm } = this.priceFeedOptions.dataSources!;
-    switch (valueSelectionAlgorithm) {
-
-      // TODO: improve the implementation for first-valid
-      case "first-valid":
-        return packages[packages.length - 1];
-
-      case "newest-valid":
-        return packages[packages.length - 1];
-
-      case "oldest-valid":
-        return packages[0];
-
-      default:
-        throw new Error(
-          `Unsupported value for valueSelectionAlgorithm: ${valueSelectionAlgorithm}`);
-    }
-  }
-
-  // TODO: refactor this implementation with checker modules
-  private filterValidDataPackages(
-    fetchedPackages: PromiseSettledResult<SignedDataPackageResponse>[],
-  ): SignedDataPackageResponse[] {
-
-    const result: SignedDataPackageResponse[] = [];
-    const maxTimestampDiffMilliseconds =
-      this.priceFeedOptions.dataSources?.maxTimestampDiffMilliseconds;
-    let sourceIndex = 0;
-
-    for (const fetchedPackage of fetchedPackages) {
-      // Checking promise status
-      if (fetchedPackage.status === "fulfilled") {
-
-        // Checking timestamp diff
-        const timeDiffMilliseconds =
-          Date.now() - fetchedPackage.value.timestamp;
-        if (maxTimestampDiffMilliseconds && maxTimestampDiffMilliseconds < timeDiffMilliseconds) {
-          console.warn(
-            `Timestamp is too old: ${fetchedPackage.value.timestamp}. `
-            + `Source index: ${sourceIndex}`);
-        } else {
-
-          // Verifying signature off-chain if needed
-          if (this.priceFeedOptions.dataSources?.preVerifySignatureOffchain) {
-
-            // Signature verification
-            // Currently only lite signature verification is implemented
-            const isValidSignature = this.priceSigner.verifyLiteSignature({
-              pricePackage: {
-                prices: fetchedPackage.value.prices,
-                timestamp: fetchedPackage.value.timestamp,
-              },
-              signer: this.cachedSigner!,
-              signature: fetchedPackage.value.signature,
-              liteSignature: fetchedPackage.value.liteSignature,
-            });
-
-            if (isValidSignature) {
-              result.push(fetchedPackage.value);
-            }
-          } else {
-            // Skipping signature verification
-            result.push(fetchedPackage.value);
-          }
-          
-        }
-      }
-
-      sourceIndex++;
-    }
-
-    return result;
-  }
-
-  private convertResponseToPricePackage(data: SignedDataPackageResponse): SignedPriceDataType {
-    const pricePackage = _.pick(data, ["prices", "timestamp"]);
-    const serialized = this.priceSigner.serializeToMessage(pricePackage);
-    const priceData: PriceDataType = serialized as PriceDataType;
-    return {
-      priceData,
-      signature: data.signature,
-      liteSignature: data.liteSignature,
-      signer: this.cachedSigner!,
-    };
+    return convertResponseToPricePackage(finalResponse, this.cachedSigner!);
   }
 
   // TODO: get rid of it later
