@@ -3,45 +3,25 @@
 pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-contract PriceAwareUpgradeable is OwnableUpgradeable {
+contract InlinedSinglePriceAware {
   using ECDSA for bytes32;
 
-  uint256 public maxDelay;
-  address private trustedSigner;
+  uint256 constant MAX_DELAY = 3 * 60;
+  address private constant TRUSTED_SIGNER =
+    0xFE71e9691B9524BC932C23d0EeD5c9CE41161884;
 
   function getTrustedSigner() public view virtual returns (address) {
-    return trustedSigner;
+    return TRUSTED_SIGNER;
   }
 
-  function __PriceAware_init() internal initializer {
-    maxDelay = 3 * 60;
-  }
-
-  function setMaxDelay(uint256 _maxDelay) external onlyOwner {
-    maxDelay = _maxDelay;
-  }
-
-  function authorizeSigner(address _trustedSigner) external onlyOwner {
-    require(_trustedSigner != address(0));
-    trustedSigner = _trustedSigner;
-
-    emit TrustedSignerChanged(trustedSigner);
-  }
-
-  function getPriceFromMsg(bytes32 symbol) internal view returns (uint256) {bytes32[] memory symbols = new bytes32[](1); symbols[0] = symbol;
-    return getPricesFromMsg(symbols)[0];
-  }
-
-  function getPricesFromMsg(bytes32[] memory symbols) internal view returns (uint256[] memory) {
+  function getPriceFromMsg(bytes32 symbol) internal view returns (uint256) {
     //The structure of calldata witn n - data items:
     //The data that is signed (symbols, values, timestamp) are inside the {} brackets
     //[origina_call_data| ?]{[[symbol | 32][value | 32] | n times][timestamp | 32]}[size | 1][signature | 65]
 
     //1. First we extract dataSize - the number of data items (symbol,value pairs) in the message
-    uint8 dataSize;
-    //Number of data entries
+    uint8 dataSize; //Number of data entries
     assembly {
       //Calldataload loads slots of 32 bytes
       //The last 65 bytes are for signature
@@ -51,8 +31,7 @@ contract PriceAwareUpgradeable is OwnableUpgradeable {
 
     // 2. We calculate the size of signable message expressed in bytes
     // ((symbolLen(32) + valueLen(32)) * dataSize + timeStamp length
-    uint16 messageLength = uint16(dataSize) * 64 + 32;
-    //Length of data message in bytes
+    uint16 messageLength = uint16(dataSize) * 64 + 32; //Length of data message in bytes
 
     // 3. We extract the signableMessage
 
@@ -105,55 +84,29 @@ contract PriceAwareUpgradeable is OwnableUpgradeable {
       //We load the previous 32 bytes
       dataTimestamp := calldataload(sub(calldatasize(), 98))
     }
+    require(block.timestamp - dataTimestamp < MAX_DELAY, "Data is too old");
 
-    require(block.timestamp - dataTimestamp < maxDelay, "Data is too old");
+    //8. We iterate directly through call data to extract the value for a given symbol
 
-    //We iterate directly through call data to extract the values of symbols
-
-    return _readFromCallData(symbols, uint256(dataSize), messageLength);
-  }
-
-  function _readFromCallData(bytes32[] memory symbols, uint256 dataSize, uint16 messageLength) private view returns (uint256[] memory) {
-    uint256[] memory values;
-    uint256 i;
-    uint256 j;
-    uint256 readyAssets;
+    uint256 val;
+    uint256 max = dataSize;
     bytes32 currentSymbol;
-
+    uint256 i;
     assembly {
       let start := sub(calldatasize(), add(messageLength, 66))
-
-      values := msize()
-      mstore(values, mload(symbols))
-      mstore(0x40, add(add(values, 0x20), mul(mload(symbols), 0x20)))
-
-      for { i := 0 } lt(i, dataSize) { i := add(i, 1) } {
+      for {
+        i := 0
+      } lt(i, max) {
+        i := add(i, 1)
+      } {
         currentSymbol := calldataload(add(start, mul(i, 64)))
-
-        for { j := 0 } lt(j, mload(symbols)) { j := add(j, 1) } {
-          if eq(mload(add(add(symbols, 32), mul(j, 32))), currentSymbol) {
-            mstore(
-              add(add(values, 32), mul(j, 32)),
-              calldataload(add(add(start, mul(i, 64)), 32))
-            )
-            readyAssets := add(readyAssets, 1)
-          }
-
-          if eq(readyAssets, mload(symbols)) {
-            i := dataSize
-          }
+        if eq(currentSymbol, symbol) {
+          val := calldataload(add(start, add(32, mul(i, 64))))
+          i := max
         }
       }
     }
 
-    return (values);
+    return val;
   }
-
-  /* ========== EVENTS ========== */
-
-  /**
-   * @dev emitted after the owner updates trusted signer
-   * @param newSigner the address of the new signer
-   **/
-  event TrustedSignerChanged(address indexed newSigner);
 }

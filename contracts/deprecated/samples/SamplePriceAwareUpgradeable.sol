@@ -2,19 +2,19 @@
 
 pragma solidity ^0.8.2;
 
-import "../mocks/MockStatePriceProvider.sol";
-import "../message-based/PriceAwareUpgradeable.sol";
+import "../../mocks/MockStatePriceProvider.sol";
+import "../message-based/SinglePriceAwareUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 /**
- * @title SamplePriceAware
+ * @title SampleSinglePriceAwareUpgradeable
  * @dev An example of a contract using a message-based way of fetching data from RedStone
  * It has only a few methods used to benchmark gas consumption
  * It extends PriceAware and allows changing trusted signer and message delay
  */
-contract SamplePriceAwareUpgradeable is
+contract SampleSinglePriceAwareUpgradeable is
   OwnableUpgradeable,
-  PriceAwareUpgradeable
+  SinglePriceAwareUpgradeable
 {
   MockStatePriceProvider mockStatePriceProvider = new MockStatePriceProvider();
 
@@ -23,26 +23,7 @@ contract SamplePriceAwareUpgradeable is
     __PriceAware_init();
   }
 
-  function getPrice(bytes32 asset) external view returns (uint256) {
-    return getPriceFromMsg(asset);
-  }
-
-  function getPrices(bytes32[] memory assets)
-    external
-    view
-    returns (uint256[] memory)
-  {
-    return getPricesFromMsg(assets);
-  }
-
   function executeWithPrice(bytes32 asset) public returns (uint256) {
     return getPriceFromMsg(asset);
-  }
-
-  function executeWithPrices(bytes32[] memory assets)
-    public
-    returns (uint256[] memory)
-  {
-    return getPricesFromMsg(assets);
   }
 }

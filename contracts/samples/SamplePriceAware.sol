@@ -12,32 +12,20 @@ import "../message-based/PriceAware.sol";
  * It extends PriceAware and allows changing trusted signer and message delay
  */
 contract SamplePriceAware is PriceAware {
-
   MockStatePriceProvider mockStatePriceProvider = new MockStatePriceProvider();
 
-
-  function execute(bytes32 symbol) public returns(uint256) {
-    return getPrice(symbol);
+  function getPrice(bytes32 asset) external view returns (uint256) {
+    return getPriceFromMsg(asset);
   }
 
-
-  function executeWithPrice(bytes32 symbol) public returns(uint256) {
-    return getPriceFromMsg(symbol);
+  function executeWithPrice(bytes32 asset) public returns (uint256) {
+    return getPriceFromMsg(asset);
   }
 
-
-  function getPrice(bytes32 symbol) internal view returns(uint256) {
-    return mockStatePriceProvider.getPrice(symbol);
+  function executeWithPrices(bytes32[] memory assets)
+    public
+    returns (uint256[] memory)
+  {
+    return getPricesFromMsg(assets);
   }
-
-
-  function getPriceFromMsgPublic(bytes32 symbol) public view returns(uint256) {
-    return getPriceFromMsg(symbol);
-  }
-
-
-  function getTime() public view returns(uint256) {
-    return block.timestamp;
-  }
-
 }
