@@ -10,18 +10,8 @@ contract SampleNonAssemblySinglePriceAware is NonAssemblySinglePriceAware {
   MockStatePriceProvider mockStatePriceProvider = new MockStatePriceProvider();
 
 
-  function execute(bytes32 symbol) public returns(uint256) {
-    return getAssetPrice(symbol);
-  }
-
-
   function executeWithPrice(bytes32 symbol) public returns(uint256) {
-    return getAssetPrice(symbol);
-  }
-
-
-  function getAssetPrice(bytes32 symbol) internal view returns(uint256) {
-    return mockStatePriceProvider.getPrice(symbol);
+    return getPriceFromMsg(symbol);
   }
 
 

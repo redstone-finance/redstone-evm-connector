@@ -85,7 +85,7 @@ contract SinglePriceAware is Ownable  {
     // 6. We verify the off-chain signature against on-chain hashed data
     
     address signer = hashWithPrefix.recover(signature);
-    require(signer == trustedSigner, "Signer not authorized");
+    require(signer == getTrustedSigner(), "Signer not authorized");
 
     //7. We extract timestamp from callData
     

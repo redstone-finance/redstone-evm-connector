@@ -26,9 +26,4 @@ contract SampleSinglePriceAwareUpgradeable is OwnableUpgradeable, SinglePriceAwa
   function executeWithPrice(bytes32 asset) public returns(uint256) {
     return getPriceFromMsg(asset);
   }
-
-
-  function getPrice(bytes32 asset) external view returns(uint256) {
-    return getPriceFromMsg(asset);
-  }
 }

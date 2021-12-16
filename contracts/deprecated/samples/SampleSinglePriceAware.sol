@@ -16,22 +16,7 @@ contract SampleSinglePriceAware is SinglePriceAware {
   MockStatePriceProvider mockStatePriceProvider = new MockStatePriceProvider();
 
 
-  function execute(bytes32 symbol) public returns(uint256) {
-    return getPrice(symbol);
-  }
-
-
   function executeWithPrice(bytes32 symbol) public returns(uint256) {
-    return getPriceFromMsg(symbol);
-  }
-
-
-  function getPrice(bytes32 symbol) internal view returns(uint256) {
-    return mockStatePriceProvider.getPrice(symbol);
-  }
-
-
-  function getPriceFromMsgPublic(bytes32 symbol) public view returns(uint256) {
     return getPriceFromMsg(symbol);
   }
 

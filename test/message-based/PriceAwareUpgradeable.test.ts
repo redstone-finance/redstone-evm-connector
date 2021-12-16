@@ -52,7 +52,6 @@ describe("Price Aware - upgradeable version", function () {
 
         await syncTime(); // recommended for hardhat test
 
-        await sample.getPrice(toBytes32("BTC"));
         const price = await sample.getPrice(toBytes32("BTC"));
 
         expect(price).to.be.equal(3000000000);

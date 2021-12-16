@@ -4,6 +4,7 @@ import chai from "chai";
 import {solidity} from "ethereum-waffle";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 import {
+    PriceFeedWithClearing,
     SampleNonAssemblySinglePriceAware,
     SampleSinglePriceAware,
     SamplePriceAware,
@@ -15,13 +16,15 @@ import {
 import {syncTime, toBytes32} from "../../_helpers";
 import {MockPriceFeed} from "../../../utils/v2/connector/impl/MockPriceFeed";
 import {WrapperBuilder} from "../../../index";
-import {MockableContract} from "../../../utils/v2/impl/builder/MockableEthersContractWrapperBuilder";
+import {DEFAULT_PRICE, MockableContract} from "../../../utils/v2/impl/builder/MockableEthersContractWrapperBuilder";
+import {PriceDataType} from "../../../utils/v2/connector/PriceFeedConnector";
+import EvmPriceSigner from "redstone-node/dist/src/signers/EvmPriceSigner";
 
 chai.use(solidity);
 
 describe("Benchmark- price aware contracts", function () {
-    let owner:SignerWithAddress;
-    let signer:Wallet;
+    let owner: SignerWithAddress;
+    let signer: Wallet;
 
     let nonAssemblySinglePriceAware: MockableContract<SampleNonAssemblySinglePriceAware>;
     let singlePriceAware: MockableContract<SampleSinglePriceAware>;
@@ -40,7 +43,10 @@ describe("Benchmark- price aware contracts", function () {
 
         const SampleNonAssemblySinglePriceAware = await ethers.getContractFactory("SampleNonAssemblySinglePriceAware");
         nonAssemblySinglePriceAware = (await SampleNonAssemblySinglePriceAware.deploy()) as MockableContract<SampleNonAssemblySinglePriceAware>;
-        nonAssemblySinglePriceAware = wrapContract(nonAssemblySinglePriceAware);
+        nonAssemblySinglePriceAware = WrapperBuilder
+            .mock(nonAssemblySinglePriceAware)
+            .using(assetPrices);
+        await nonAssemblySinglePriceAware.authorizeSigner(signer.address);
 
         const SampleSinglePriceAware = await ethers.getContractFactory("SampleSinglePriceAware");
         singlePriceAware = (await SampleSinglePriceAware.deploy()) as MockableContract<SampleSinglePriceAware>;
@@ -84,27 +90,21 @@ describe("Benchmark- price aware contracts", function () {
 
         return WrapperBuilder
             .mockLite(contract)
-            .using(ASSET_PRICES_3);
+            .using(assetPrices);
     }
 
     it("should benchmark costs for 3rd asset", async function () {
-        await nonAssemblySinglePriceAware.executeWithPrice(toBytes32("ETH"));
-        await syncTime(); // recommended for hardhat test
+        await nonAssemblySinglePriceAware.executeWithPrice(toBytes32("BTC"));
         await singlePriceAware.executeWithPrice(toBytes32("BTC"));
-        await syncTime(); // recommended for hardhat test
         await priceAware.executeWithPrice(toBytes32("BTC"));
-        await syncTime(); // recommended for hardhat test
         await inlinedSinglePriceAware.executeWithPrice(toBytes32("BTC"));
-        await syncTime(); // recommended for hardhat test
         await inlinedPriceAware.executeWithPrice(toBytes32("BTC"));
-        await syncTime(); // recommended for hardhat test
         await singlePriceAwareUpgradeable.executeWithPrice(toBytes32("BTC"));
-        await syncTime(); // recommended for hardhat test
         await priceAwareUpgradeable.executeWithPrice(toBytes32("BTC"));
     });
 });
 
-const ASSET_PRICES_3 = (forTime: number) => ({
+const assetPrices = (forTime: number) => ({
     prices: [
         {symbol: "ETH", value: 10},
         {symbol: "AVAX", value: 5},

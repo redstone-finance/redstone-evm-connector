@@ -36,7 +36,7 @@ describe("Price Aware - inlined assembly version", function () {
           .using(DEFAULT_PRICE);
 
         await syncTime(); // recommended for hardhat test
-        let price = await sample.getPriceFromMsgPublic(toBytes32("ETH"));
+        let price = await sample.getPrice(toBytes32("ETH"));
         expect(price).to.equal(BigNumber.from("1000000000"));
     });
 
@@ -47,7 +47,7 @@ describe("Price Aware - inlined assembly version", function () {
           .using(DEFAULT_PRICE);
 
         await syncTime(); // recommended for hardhat test
-        let price = await sample.getPriceFromMsgPublic(toBytes32("AVAX"));
+        let price = await sample.getPrice(toBytes32("AVAX"));
         expect(price).to.equal(BigNumber.from("500000000"));
     });
 
@@ -57,7 +57,7 @@ describe("Price Aware - inlined assembly version", function () {
           .using(DEFAULT_PRICE);
 
         await syncTime(); // recommended for hardhat test
-        let price = await sample.getPriceFromMsgPublic(toBytes32("LOL"));
+        let price = await sample.getPrice(toBytes32("LOL"));
         expect(price).to.equal(BigNumber.from("0"));
     });
 });

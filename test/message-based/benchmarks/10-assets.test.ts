@@ -40,7 +40,10 @@ describe("Benchmark- price aware contracts", function () {
 
         const SampleNonAssemblySinglePriceAware = await ethers.getContractFactory("SampleNonAssemblySinglePriceAware");
         nonAssemblySinglePriceAware = (await SampleNonAssemblySinglePriceAware.deploy()) as MockableContract<SampleNonAssemblySinglePriceAware>;
-        nonAssemblySinglePriceAware = wrapContract(nonAssemblySinglePriceAware);
+        nonAssemblySinglePriceAware = WrapperBuilder
+            .mock(nonAssemblySinglePriceAware)
+            .using(assetPrices);
+        await nonAssemblySinglePriceAware.authorizeSigner(signer.address);
 
         const SampleSinglePriceAware = await ethers.getContractFactory("SampleSinglePriceAware");
         singlePriceAware = (await SampleSinglePriceAware.deploy()) as MockableContract<SampleSinglePriceAware>;
@@ -84,27 +87,21 @@ describe("Benchmark- price aware contracts", function () {
 
         return WrapperBuilder
             .mockLite(contract)
-            .using(ASSET_PRICES_10);
+            .using(assetPrices);
     }
 
     it("should benchmark costs for 10th asset", async function () {
         await nonAssemblySinglePriceAware.executeWithPrice(toBytes32("ETH"));
-        await syncTime(); // recommended for hardhat test
         await singlePriceAware.executeWithPrice(toBytes32("TRX"));
-        await syncTime(); // recommended for hardhat test
         await priceAware.executeWithPrice(toBytes32("BTC"));
-        await syncTime(); // recommended for hardhat test
         await inlinedSinglePriceAware.executeWithPrice(toBytes32("TRX"));
-        await syncTime(); // recommended for hardhat test
         await inlinedPriceAware.executeWithPrice(toBytes32("TRX"));
-        await syncTime(); // recommended for hardhat test
         await singlePriceAwareUpgradeable.executeWithPrice(toBytes32("TRX"));
-        await syncTime(); // recommended for hardhat test
         await priceAwareUpgradeable.executeWithPrice(toBytes32("TRX"));
     });
 });
 
-const ASSET_PRICES_10 = (forTime: number) => ({
+const assetPrices = (forTime: number) => ({
     prices: [
         {symbol: "ETH", value: 10},
         {symbol: "AVAX", value: 5},

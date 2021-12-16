@@ -17,28 +17,17 @@ contract SampleInlinedPriceAware is InlinedPriceAware {
   MockStatePriceProvider mockStatePriceProvider = new MockStatePriceProvider();
 
 
-  function execute(uint val) public returns(uint256) {
-    return getPrice();
+  function getPrice(bytes32 asset) external view returns(uint256) {
+    return getPriceFromMsg(asset);
   }
 
 
-  function executeWithPrice(uint val) public returns(uint256) {
-    return getPriceFromMsg(bytes32("ETH"));
+  function executeWithPrice(bytes32 asset) public returns(uint256) {
+    return getPriceFromMsg(asset);
   }
 
 
-  function getPriceFromMsgPublic(bytes32 symbol) public view returns(uint256) {
-    return getPriceFromMsg(symbol);
+  function executeWithPrices(bytes32[] memory assets) public returns(uint256[] memory) {
+    return getPricesFromMsg(assets);
   }
-
-
-  function getPrice() internal view returns(uint256) {
-    return mockStatePriceProvider.getPrice(bytes32("ETH"));
-  }
-
-
-  function getTime() public view returns(uint256) {
-    return block.timestamp;
-  }
-
 }
