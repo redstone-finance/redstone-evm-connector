@@ -1,5 +1,6 @@
 import { PriceFeedConnector, SignedPriceDataType } from "../PriceFeedConnector";
 import axios from "axios";
+import bluebird from "bluebird";
 import _ from "lodash";
 import { Fetcher, SignedDataPackageResponse, SourceConfig } from "./fetchers/Fetcher";
 import { createFetcher } from "./fetchers";
@@ -65,11 +66,45 @@ export class RedStonePriceFeed implements PriceFeedConnector {
     // We need to get signer public key firstly
     // It will be used to pre-verify signatures off-chain
     await this.getSigner();
-    
-    // Fetching data from all sources simultaneously with timeout
+
     const timeoutMilliseconds =
       this.priceFeedOptions.dataSources?.timeoutMilliseconds
       || DEFAULT_TIMEOUT_MILLISECONDS;
+    const useFirstValid =
+      this.priceFeedOptions.dataSources!.valueSelectionAlgorithm === "first-valid";
+
+    const selectedResponse = useFirstValid
+      ? await this.fetchFirstValid(timeoutMilliseconds)
+      : await this.fetchAllAndSelectValid(timeoutMilliseconds);
+
+    return convertResponseToPricePackage(selectedResponse, this.cachedSigner!);
+  }
+
+  private async fetchFirstValid(timeoutMilliseconds: number): Promise<SignedDataPackageResponse> {
+    let fetcherIndex = 0;
+    const promises = this.fetchers.map(fetcher => {
+      fetcherIndex++;
+      return (async () => {
+        const response = await fetcher.getLatestDataWithTimeout(
+          this.providerId,
+          timeoutMilliseconds);
+        const isValid = validateDataPackage(response, this.priceFeedOptions, this.cachedSigner!);
+        if (isValid) {
+          return response;
+        } else {
+          console.warn("Invalid response: " + JSON.stringify(response));
+          throw new Error(
+            `Received invalid response from fetcher: ${fetcherIndex}/${this.fetchers.length}`);
+        }
+      })();
+    });
+
+    // Returning the reponse from the first resolved promise
+    return await bluebird.Promise.any(promises);
+  }
+
+  private async fetchAllAndSelectValid(timeoutMilliseconds: number): Promise<SignedDataPackageResponse> {
+    // Fetching data from all sources simultaneously with timeout
     const promises = this.fetchers.map(fetcher =>
       fetcher.getLatestDataWithTimeout(this.providerId, timeoutMilliseconds));
     const results = await Promise.allSettled(promises);
@@ -92,11 +127,11 @@ export class RedStonePriceFeed implements PriceFeedConnector {
     }
 
     // Selecting the final value
-    const finalResponse = selectDataPackage(
+    const selectedResponse = selectDataPackage(
       validDataPackages,
       this.priceFeedOptions.dataSources!.valueSelectionAlgorithm);
 
-    return convertResponseToPricePackage(finalResponse, this.cachedSigner!);
+    return selectedResponse;
   }
 
   // TODO: get rid of it later

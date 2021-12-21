@@ -13,7 +13,7 @@
       "url": "https://container-service-1.dv9sai71f4rsq.eu-central-1.cs.amazonlightsail.com"
     }
   ],
-  "valueSelectionAlgorithm": "newest-valid",
+  "valueSelectionAlgorithm": "first-valid",
   "timeoutMilliseconds": 10000,
   "maxTimestampDiffMilliseconds": 150000,
   "preVerifySignatureOffchain": true

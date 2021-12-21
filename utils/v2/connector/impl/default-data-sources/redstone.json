@@ -5,7 +5,7 @@
       "url": "https://api.redstone.finance"
     }
   ],
-  "valueSelectionAlgorithm": "newest-valid",
+  "valueSelectionAlgorithm": "first-valid",
   "timeoutMilliseconds": 10000,
   "maxTimestampDiffMilliseconds": 150000,
   "preVerifySignatureOffchain": true

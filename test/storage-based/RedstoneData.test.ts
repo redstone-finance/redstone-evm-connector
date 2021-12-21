@@ -15,6 +15,10 @@ const toBytes32 = ethers.utils.formatBytes32String;
 const serialized = function (x: number): number {
   return x * 10 ** 8;
 };
+function checkPricesDeviation(value1: number, value2: number, maxPercentageDiff: number = 5) {
+  const percentDiff = 100 * Math.abs(1 - value1 / value2);
+  expect(percentDiff).to.be.lessThan(maxPercentageDiff);
+}
 
 describe("MockDefi with Proxy contract and real pricing Data", function () {
 
@@ -65,14 +69,15 @@ describe("MockDefi with Proxy contract and real pricing Data", function () {
 
 
   it("Should inject correct prices from API multi", async function () {
+    await loadApiPrices();
+    const smartContractValueGoog = (await defi.currentValueOf(owner.address, toBytes32("GOOG"))).toNumber();
+    const httpApiValueGoog = serialized(apiPrices['GOOG'].value);
+    checkPricesDeviation(smartContractValueGoog, httpApiValueGoog);
 
     await loadApiPrices();
-
-    expect(await defi.currentValueOf(owner.address, toBytes32("GOOG")))
-      .to.be.equal(serialized(apiPrices['GOOG'].value).toFixed(0));
-    expect(await defi.currentValueOf(owner.address, toBytes32("IBM")))
-      .to.be.equal(serialized(apiPrices['IBM'].value).toFixed(0));
-
+    const smartContractValueIBM = (await defi.currentValueOf(owner.address, toBytes32("IBM"))).toNumber();
+    const httpApiValueIBM = serialized(apiPrices['IBM'].value);
+    checkPricesDeviation(smartContractValueIBM, httpApiValueIBM);
   });
 
 
@@ -91,8 +96,9 @@ describe("MockDefi with Proxy contract and real pricing Data", function () {
 
 
   it("Should inject correct prices from API single", async function () {
-    expect(await defi.currentValueOf(owner.address, toBytes32("FB")))
-      .to.be.equal(serialized(apiPrices['FB'].value).toFixed(0));
+    const pricesFromSmartContract = (await defi.currentValueOf(owner.address, toBytes32("FB"))).toNumber();
+    const httpApiPricesSerialised = serialized(apiPrices['FB'].value);
+    checkPricesDeviation(pricesFromSmartContract, httpApiPricesSerialised);
   });
 
 

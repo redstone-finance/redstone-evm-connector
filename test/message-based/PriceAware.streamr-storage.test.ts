@@ -26,7 +26,7 @@ describe("Price Aware - streamr", function () {
       sample = (await SamplePriceAware.deploy()) as SamplePriceAware;
   });
 
-  it("should get price with single asset from streamr", async function () {
+  it("should get price with single asset from streamr (newest-valid)", async function () {
       sample = WrapperBuilder
           .wrapLite(sample)
           .usingPriceFeed("redstone-avalanche", {
@@ -52,7 +52,7 @@ describe("Price Aware - streamr", function () {
       await sample.executeWithPrice(toBytes32("AVAX"));
   });
 
-  it("should get price with multiple assets from streamr", async function () {
+  it("should get price with multiple assets from streamr (newest-valid)", async function () {
       sample = WrapperBuilder
           .wrapLite(sample)
           .usingPriceFeed("redstone-avalanche", {
@@ -74,5 +74,55 @@ describe("Price Aware - streamr", function () {
       await sample.authorizeProvider();
       await syncTime(); // recommended for hardhat test
       await sample.executeWithPrice(toBytes32("AVAX"));
+  });
+
+  it("should get price with single asset from streamr (first-valid)", async function () {
+    sample = WrapperBuilder
+        .wrapLite(sample)
+        .usingPriceFeed("redstone-avalanche", {
+            asset: "AVAX",
+            dataSources: {
+                sources: [
+                    {
+                        type: "streamr-storage",
+                        streamrEndpointPrefix: "0x3a7d971de367fe15d164cdd952f64205f2d9f10c/redstone-oracle",
+                        disabledForSinglePrices: false
+                    },
+                ],
+                valueSelectionAlgorithm: "first-valid",
+                timeoutMilliseconds: 10000,
+                maxTimestampDiffMilliseconds: 150000,
+                preVerifySignatureOffchain: true,
+            },
+        });
+
+    await sample.authorizeProvider();
+
+    await syncTime(); // recommended for hardhat test
+    await sample.executeWithPrice(toBytes32("AVAX"));
+  });
+
+  it("should get price with multiple assets from streamr (first-valid)", async function () {
+    sample = WrapperBuilder
+        .wrapLite(sample)
+        .usingPriceFeed("redstone-avalanche", {
+            dataSources: {
+                sources: [
+                    {
+                        type: "streamr-storage",
+                        streamrEndpointPrefix: "0x3a7d971de367fe15d164cdd952f64205f2d9f10c/redstone-oracle",
+                        disabledForSinglePrices: false
+                    },
+                ],
+                valueSelectionAlgorithm: "first-valid",
+                timeoutMilliseconds: 10000,
+                maxTimestampDiffMilliseconds: 150000,
+                preVerifySignatureOffchain: true,
+            },
+        });
+
+    await sample.authorizeProvider();
+    await syncTime(); // recommended for hardhat test
+    await sample.executeWithPrice(toBytes32("AVAX"));
   });
 });

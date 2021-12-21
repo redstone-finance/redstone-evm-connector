@@ -18,6 +18,11 @@ const serialized = function (x: number): number {
   return x * 10 ** 8;
 };
 
+function checkPricesDeviation(value1: number, value2: number, maxPercentageDiff: number = 5) {
+  const percentDiff = 100 * Math.abs(1 - value1 / value2);
+  expect(percentDiff).to.be.lessThan(maxPercentageDiff);
+}
+
 describe("MockDefi with Proxy contract and real pricing Data from Redstone (with clearing)", function () {
 
   const REDSTONE_STOCKS_PROVIDER_ADDRESS = "0x926E370fD53c23f8B71ad2B3217b227E41A92b12";
@@ -68,15 +73,15 @@ describe("MockDefi with Proxy contract and real pricing Data from Redstone (with
 
 
   it("Should inject correct prices from API multi", async function () {
+    await loadApiPrices();
+    const smartContractValueGoog = (await defi.currentValueOf(owner.address, toBytes32("GOOG"))).toNumber();
+    const httpApiValueGoog = serialized(apiPrices['GOOG'].value);
+    checkPricesDeviation(smartContractValueGoog, httpApiValueGoog);
 
     await loadApiPrices();
-    expect(await defi.currentValueOf(owner.address, toBytes32("GOOG")))
-      .to.be.equal(serialized(apiPrices['GOOG'].value).toFixed(0));
-
-    await loadApiPrices();
-    expect(await defi.currentValueOf(owner.address, toBytes32("IBM")))
-      .to.be.equal(serialized(apiPrices['IBM'].value).toFixed(0));
-
+    const smartContractValueIBM = (await defi.currentValueOf(owner.address, toBytes32("IBM"))).toNumber();
+    const httpApiValueIBM = serialized(apiPrices['IBM'].value);
+    checkPricesDeviation(smartContractValueIBM, httpApiValueIBM);
   });
 
 
@@ -91,8 +96,9 @@ describe("MockDefi with Proxy contract and real pricing Data from Redstone (with
 
   it("Should inject correct prices from API single", async function () {
     await loadApiPrices();
-    expect(await defi.currentValueOf(owner.address, toBytes32("FB")))
-      .to.be.equal(serialized(apiPrices['FB'].value).toFixed(0));
+    const smartContractValueFB = (await defi.currentValueOf(owner.address, toBytes32("FB"))).toNumber();
+    const httpApiValueFB = serialized(apiPrices['FB'].value);
+    checkPricesDeviation(smartContractValueFB, httpApiValueFB);
   });
 
 

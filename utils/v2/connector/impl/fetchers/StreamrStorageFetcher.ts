@@ -6,6 +6,11 @@ export class StreamrStorageFetcher extends StreamrFetcher {
     super(config, asset);
   }
 
+  // Overriding StreamrFetcher implementation
+  // of init. As it's not required to subscribe to any stream
+  // in the StreamrStorageFetcher
+  init() {}
+
   getLatestData(): Promise<SignedDataPackageResponse> {
     const streamId = this.getStreamId();
     return new Promise((resolve) => {

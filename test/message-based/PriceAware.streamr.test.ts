@@ -26,7 +26,7 @@ describe("Price Aware - streamr", function () {
       sample = (await SamplePriceAware.deploy()) as SamplePriceAware;
   });
 
-  it("should get price with single asset from streamr", async function () {
+  it("should get price with single asset from streamr (first-valid)", async function () {
       sample = WrapperBuilder
           .wrapLite(sample)
           .usingPriceFeed("redstone-avalanche", {
@@ -39,7 +39,7 @@ describe("Price Aware - streamr", function () {
                           disabledForSinglePrices: false
                       },
                   ],
-                  valueSelectionAlgorithm: "newest-valid",
+                  valueSelectionAlgorithm: "first-valid",
                   timeoutMilliseconds: 10000,
                   maxTimestampDiffMilliseconds: 150000,
                   preVerifySignatureOffchain: true,
@@ -55,7 +55,7 @@ describe("Price Aware - streamr", function () {
       await sample.executeWithPrice(toBytes32("AVAX"));
   });
 
-  it("should get price with multiple assets from streamr", async function () {
+  it("should get price with multiple assets from streamr (newest-valid)", async function () {
       sample = WrapperBuilder
           .wrapLite(sample)
           .usingPriceFeed("redstone-avalanche", {
@@ -82,7 +82,38 @@ describe("Price Aware - streamr", function () {
       await syncTime(); // recommended for hardhat test
       await sample.executeWithPrice(toBytes32("AVAX"));
   });
+
+  it("should get price with multiple assets from streamr (newest-valid)", async function () {
+    sample = WrapperBuilder
+        .wrapLite(sample)
+        .usingPriceFeed("redstone-avalanche", {
+            dataSources: {
+                sources: [
+                    {
+                        type: "streamr",
+                        streamrEndpointPrefix: "0x3a7d971de367fe15d164cdd952f64205f2d9f10c/redstone-oracle",
+                        disabledForSinglePrices: false
+                    },
+                ],
+                valueSelectionAlgorithm: "newest-valid",
+                timeoutMilliseconds: 10000,
+                maxTimestampDiffMilliseconds: 150000,
+                preVerifySignatureOffchain: true,
+            },
+        });
+
+    await sample.authorizeProvider();
+
+    // To wait for package from streamr
+    await sleep(5000);
+
+    await syncTime(); // recommended for hardhat test
+    await sample.executeWithPrice(toBytes32("AVAX"));
+  });
+
 });
+
+
 
 async function sleep(ms: number): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, ms));

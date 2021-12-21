@@ -14,12 +14,8 @@ export function selectDataPackage(
   sortedPackages.sort((p1, p2) => p1.timestamp - p2.timestamp); // sorting prices from oldest to newest
   switch (valueSelectionAlgorithm) {
 
-    // TODO: improve the implementation for first-valid
-    // We don't really need to wait for all responses within
-    // the first-valid method. It's enough to receive the first
-    // valid answer
-    case "first-valid":
-      return packages[packages.length - 1];
+    // We don't handle first-valid here, because it works in a completely different way
+    // than other value selection algorithms and it doesn't use this function
 
     case "newest-valid":
       return packages[packages.length - 1];
