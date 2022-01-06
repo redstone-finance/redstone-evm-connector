@@ -16,7 +16,6 @@ contract SamplePriceAwareUpgradeable is
   OwnableUpgradeable,
   PriceAwareUpgradeable
 {
-  MockStatePriceProvider mockStatePriceProvider = new MockStatePriceProvider();
 
   function initialize() external initializer {
     __Ownable_init();
