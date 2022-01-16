@@ -85,9 +85,7 @@ export class RedStonePriceFeed implements PriceFeedConnector {
     const promises = this.fetchers.map(fetcher => {
       fetcherIndex++;
       return (async () => {
-        const response = await fetcher.getLatestDataWithTimeout(
-          this.providerId,
-          timeoutMilliseconds);
+        const response = await fetcher.getLatestDataWithTimeout(timeoutMilliseconds);
         const isValid = validateDataPackage(response, this.priceFeedOptions, this.cachedSigner!);
         if (isValid) {
           return response;
@@ -106,7 +104,7 @@ export class RedStonePriceFeed implements PriceFeedConnector {
   private async fetchAllAndSelectValid(timeoutMilliseconds: number): Promise<SignedDataPackageResponse> {
     // Fetching data from all sources simultaneously with timeout
     const promises = this.fetchers.map(fetcher =>
-      fetcher.getLatestDataWithTimeout(this.providerId, timeoutMilliseconds));
+      fetcher.getLatestDataWithTimeout(timeoutMilliseconds));
     const results = await Promise.allSettled(promises);
 
     // Validating fetched data

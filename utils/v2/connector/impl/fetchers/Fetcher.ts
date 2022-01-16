@@ -12,6 +12,7 @@ export interface SignedDataPackageResponse {
 export interface SourceConfig {
   type: SourceType;
   url?: string; // required for "cache-layer" sources
+  providerId?: string; // required for "cache-layer" sources (it's and Arweave address of provider)
   streamrEndpointPrefix?: string; // required for "streamr" and "streamr-historical" sources
   disabledForSinglePrices?: boolean;
 }
@@ -23,12 +24,11 @@ export abstract class Fetcher {
   // But for e.g. streamr fetchers it can subscribe to a stream
   init(): void {}
 
-  abstract getLatestData(providerId: string): Promise<SignedDataPackageResponse>;
+  abstract getLatestData(): Promise<SignedDataPackageResponse>;
 
   async getLatestDataWithTimeout(
-    providerId: string,
     timeoutMs: number,
   ): Promise<SignedDataPackageResponse> {
-    return await timeout(this.getLatestData(providerId), timeoutMs);
+    return await timeout(this.getLatestData(), timeoutMs);
   }
 }

@@ -2,15 +2,18 @@
   "sources": [
     {
       "type": "cache-layer",
-      "url": "https://api.redstone.finance"
+      "url": "https://api.redstone.finance",
+      "providerId": "zYqPZuALSPa_f5Agvf8g2JHv94cqMn9aBtnH7GFHbuA"
     },
     {
       "type": "cache-layer",
-      "url": "https://vwx3eni8c7.eu-west-1.awsapprunner.com"
+      "url": "https://vwx3eni8c7.eu-west-1.awsapprunner.com",
+      "providerId": "zYqPZuALSPa_f5Agvf8g2JHv94cqMn9aBtnH7GFHbuA"
     },
     {
       "type": "cache-layer",
-      "url": "https://container-service-1.dv9sai71f4rsq.eu-central-1.cs.amazonlightsail.com"
+      "url": "https://container-service-1.dv9sai71f4rsq.eu-central-1.cs.amazonlightsail.com",
+      "providerId": "zYqPZuALSPa_f5Agvf8g2JHv94cqMn9aBtnH7GFHbuA"
     }
   ],
   "valueSelectionAlgorithm": "first-valid",

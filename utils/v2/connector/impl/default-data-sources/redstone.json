@@ -2,7 +2,8 @@
   "sources": [
     {
       "type": "cache-layer",
-      "url": "https://api.redstone.finance"
+      "url": "https://api.redstone.finance",
+      "providerId": "I-5rWUehEv-MjdK9gFw09RxfSLQX9DIHxG614Wf8qo0"
     }
   ],
   "valueSelectionAlgorithm": "first-valid",

@@ -12,11 +12,13 @@
     },
     {
       "type": "cache-layer",
-      "url": "https://api.redstone.finance"
+      "url": "https://api.redstone.finance",
+      "providerId": "Yba8IVc_01bFxutKNJAZ7CmTD5AVi2GcWXf1NajPAsc"
     },
     {
       "type": "cache-layer",
-      "url": "https://vwx3eni8c7.eu-west-1.awsapprunner.com"
+      "url": "https://vwx3eni8c7.eu-west-1.awsapprunner.com",
+      "providerId": "Yba8IVc_01bFxutKNJAZ7CmTD5AVi2GcWXf1NajPAsc"
     }
   ],
   "valueSelectionAlgorithm": "first-valid",

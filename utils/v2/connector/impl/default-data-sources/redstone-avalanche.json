@@ -12,19 +12,37 @@
     },
     {
       "type": "cache-layer",
-      "url": "https://api.redstone.finance"
+      "url": "https://api.redstone.finance",
+      "providerId": "f1Ipos2fVPbxPVO65GBygkMyW0tkAhp2hdprRPPBBN8"
     },
     {
       "type": "cache-layer",
-      "url": "https://vwx3eni8c7.eu-west-1.awsapprunner.com"
+      "url": "https://api.redstone.finance",
+      "providerId": "6bZ3yxPYy0LHPqo7MNqw0PHTeIM2PR-RmfTPYLltsfw"
     },
     {
       "type": "cache-layer",
-      "url": "https://container-service-1.dv9sai71f4rsq.eu-central-1.cs.amazonlightsail.com"
+      "url": "https://vwx3eni8c7.eu-west-1.awsapprunner.com",
+      "providerId": "f1Ipos2fVPbxPVO65GBygkMyW0tkAhp2hdprRPPBBN8"
+    },
+    {
+      "type": "cache-layer",
+      "url": "https://vwx3eni8c7.eu-west-1.awsapprunner.com",
+      "providerId": "6bZ3yxPYy0LHPqo7MNqw0PHTeIM2PR-RmfTPYLltsfw"
+    },
+    {
+      "type": "cache-layer",
+      "url": "https://container-service-1.dv9sai71f4rsq.eu-central-1.cs.amazonlightsail.com",
+      "providerId": "f1Ipos2fVPbxPVO65GBygkMyW0tkAhp2hdprRPPBBN8"
+    },
+    {
+      "type": "cache-layer",
+      "url": "https://container-service-1.dv9sai71f4rsq.eu-central-1.cs.amazonlightsail.com",
+      "providerId": "6bZ3yxPYy0LHPqo7MNqw0PHTeIM2PR-RmfTPYLltsfw"
     }
   ],
   "valueSelectionAlgorithm": "first-valid",
   "timeoutMilliseconds": 10000,
   "maxTimestampDiffMilliseconds": 150000,
-  "preVerifySignatureOffchain": true
+  "preVerifySignatureOffchain": false
 }
