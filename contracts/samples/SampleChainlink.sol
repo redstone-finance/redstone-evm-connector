@@ -10,7 +10,6 @@ import "../mocks/AggregatorV3Interface.sol";
  * It is used for benchmarking gas costs
  */
 contract SampleChainlink {
-
   AggregatorV3Interface internal priceFeed;
 
   /**
@@ -19,15 +18,16 @@ contract SampleChainlink {
    * Address: 0x9326BFA02ADD2366b30bacB125260Af641031331
    */
   constructor() public {
-    priceFeed = AggregatorV3Interface(0x9326BFA02ADD2366b30bacB125260Af641031331);
+    priceFeed = AggregatorV3Interface(
+      0x9326BFA02ADD2366b30bacB125260Af641031331
+    );
   }
 
   /**
    * Returns the latest price
    */
-  function executeWithPrice(uint val) public returns(uint256) {
-    (, int price, , ,) = priceFeed.latestRoundData();
+  function executeWithPrice(uint256 val) public returns (uint256) {
+    (, int256 price, , , ) = priceFeed.latestRoundData();
     return uint256(price);
   }
-  
 }
