@@ -3,7 +3,6 @@ import {Wallet} from "ethers";
 import chai, {expect} from "chai";
 import {solidity} from "ethereum-waffle";
 import {SamplePriceAware} from "../../typechain/SamplePriceAware";
-import {SampleInlinedMockPriceAware} from "../../typechain/SampleInlinedMockPriceAware";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 import {syncTime, toBytes32} from "../_helpers";
 import {MockPriceFeed} from "../../utils/v2/connector/impl/MockPriceFeed";
@@ -17,7 +16,7 @@ describe("Price Aware - inlined assembly version", function () {
     let owner: SignerWithAddress;
     let signer: Wallet;
 
-    let sample: SampleInlinedMockPriceAware;
+    let sample: SamplePriceAware;
 
     const PRIV = "0xae2b81c1fe9e3b01f060362f03abd0c80a6447cfe00ff7fc7fcf000000000000";
 
@@ -26,8 +25,8 @@ describe("Price Aware - inlined assembly version", function () {
 
         signer = new ethers.Wallet(PRIV, owner.provider);
 
-        const SampleInlinedPriceAware = await ethers.getContractFactory("SampleInlinedMockPriceAware");
-        sample = (await SampleInlinedPriceAware.deploy()) as SampleInlinedMockPriceAware;
+        const SamplePriceAware = await ethers.getContractFactory("SamplePriceAware");
+        sample = (await SamplePriceAware.deploy()) as SamplePriceAware;
     });
 
     it("should benchmark costs", async function () {
@@ -35,6 +34,8 @@ describe("Price Aware - inlined assembly version", function () {
         sample = WrapperBuilder
           .mockLite(sample)
           .using(DEFAULT_PRICE);
+        
+        await sample.authorizeProvider();
 
         await syncTime(); // recommended for hardhat test
         await sample.executeWithPrice(toBytes32("ETH"));
@@ -44,9 +45,11 @@ describe("Price Aware - inlined assembly version", function () {
         sample = WrapperBuilder
           .mockLite(sample)
           .using(DEFAULT_PRICE);
+        
+        await sample.authorizeProvider();
 
         await syncTime(); // recommended for hardhat test
-        let price = await sample.getPriceFromMsgPublic(toBytes32("ETH"));
+        let price = await sample.getPrice(toBytes32("ETH"));
         expect(price).to.equal(BigNumber.from("1000000000"));
     });
 
@@ -56,8 +59,10 @@ describe("Price Aware - inlined assembly version", function () {
           .mockLite(sample)
           .using(DEFAULT_PRICE);
 
+        await sample.authorizeProvider();
+
         await syncTime(); // recommended for hardhat test
-        let price = await sample.getPriceFromMsgPublic(toBytes32("AVAX"));
+        let price = await sample.getPrice(toBytes32("AVAX"));
         expect(price).to.equal(BigNumber.from("500000000"));
     });
 
@@ -66,8 +71,10 @@ describe("Price Aware - inlined assembly version", function () {
           .mockLite(sample)
           .using(DEFAULT_PRICE);
 
+        await sample.authorizeProvider();
+
         await syncTime(); // recommended for hardhat test
-        let price = await sample.getPriceFromMsgPublic(toBytes32("LOL"));
+        let price = await sample.getPrice(toBytes32("LOL"));
         expect(price).to.equal(BigNumber.from("0"));
     });
 });
