@@ -41,7 +41,6 @@ export class MockPriceFeed implements MockablePriceFeedConnector {
 
     return {
       priceData: serializedPackage,
-      signer: signedPackage.signer,
       signature: signedPackage.signature,
       liteSignature: signedPackage.liteSignature
     };
@@ -59,9 +58,9 @@ export class MockPriceFeed implements MockablePriceFeedConnector {
     };
   }
   
-  getSigner(): Promise<string> {
+  getDefaultSigner(): string {
     const wallet = new Wallet(MockPriceFeed.P_KEY);
-    return Promise.resolve(wallet.address);
+    return wallet.address;
   }
 
   mock(value: MockPricePackage): void {

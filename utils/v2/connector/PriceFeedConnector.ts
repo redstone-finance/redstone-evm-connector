@@ -9,14 +9,13 @@ export interface PriceDataType {
 
 export interface SignedPriceDataType {
   priceData: PriceDataType;
-  signer: string;
   signature: string;
   liteSignature: string;
 }
 
 export interface PriceFeedConnector {
   getSignedPrice(): Promise<SignedPriceDataType>;
-  getSigner(): Promise<string>;
+  getDefaultSigner(): string;
 }
 
 export interface MockablePriceFeedConnector extends PriceFeedConnector {

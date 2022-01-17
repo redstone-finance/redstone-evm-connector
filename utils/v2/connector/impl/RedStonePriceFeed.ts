@@ -1,5 +1,4 @@
 import { PriceFeedConnector, SignedPriceDataType } from "../PriceFeedConnector";
-import axios from "axios";
 import bluebird from "bluebird";
 import _ from "lodash";
 import { Fetcher, SignedDataPackageResponse, SourceConfig } from "./fetchers/Fetcher";
@@ -16,7 +15,7 @@ export interface DataSourcesConfig {
   timeoutMilliseconds: number;
   maxTimestampDiffMilliseconds: number;
   preVerifySignatureOffchain: boolean;
-  signers?: string[], // Will be used in future (after multi-nodes creation)
+  defaultSignerEvmAddress: string;
   sources: SourceConfig[],
 };
 
@@ -25,26 +24,24 @@ export interface PriceFeedOptions {
   asset?: string;
 };
 
-export type RedStoneProvider =
+export type PriceFeedId =
   | "redstone"
   | "redstone-stocks"
   | "redstone-rapid"
-  | "redstone-avalanche";
+  | "redstone-avalanche"
+  | "custom";
 
 export class RedStonePriceFeed implements PriceFeedConnector {
 
-  // TODO: remove
-  // private readonly priceSigner = new EvmPriceSigner();
-  private cachedSigner?: string;
   private fetchers: Fetcher[] = [];
 
   constructor(
-    private providerId: RedStoneProvider,
+    private priceFeedId: PriceFeedId,
     private priceFeedOptions: PriceFeedOptions = {}) {
 
       // Getting default data sources config for provider if not specified
       if (!this.priceFeedOptions.dataSources) {
-        this.priceFeedOptions.dataSources = getDefaultDataSourceConfig(providerId);
+        this.priceFeedOptions.dataSources = getDefaultDataSourceConfig(priceFeedId);
       }
 
       // Init fetchers
@@ -56,17 +53,10 @@ export class RedStonePriceFeed implements PriceFeedConnector {
           this.fetchers.push(fetcherForSource);
         }
       }
-
-      // TODO: get rid of it, it's a potential single point of failure
-      this.getSigner(); // we are loading signer public key in advance
   }
 
   // This is the entrypoint function of this module
   async getSignedPrice(): Promise<SignedPriceDataType> {
-    // We need to get signer public key firstly
-    // It will be used to pre-verify signatures off-chain
-    await this.getSigner();
-
     const timeoutMilliseconds =
       this.priceFeedOptions.dataSources?.timeoutMilliseconds
       || DEFAULT_TIMEOUT_MILLISECONDS;
@@ -77,7 +67,11 @@ export class RedStonePriceFeed implements PriceFeedConnector {
       ? await this.fetchFirstValid(timeoutMilliseconds)
       : await this.fetchAllAndSelectValid(timeoutMilliseconds);
 
-    return convertResponseToPricePackage(selectedResponse, this.cachedSigner!);
+    return convertResponseToPricePackage(selectedResponse);
+  }
+
+  getDefaultSigner(): string {
+    return this.priceFeedOptions.dataSources!.defaultSignerEvmAddress;
   }
 
   private async fetchFirstValid(timeoutMilliseconds: number): Promise<SignedDataPackageResponse> {
@@ -86,7 +80,8 @@ export class RedStonePriceFeed implements PriceFeedConnector {
       fetcherIndex++;
       return (async () => {
         const response = await fetcher.getLatestDataWithTimeout(timeoutMilliseconds);
-        const isValid = validateDataPackage(response, this.priceFeedOptions, this.cachedSigner!);
+        const expectedSigner = fetcher.getEvmSignerAddress();
+        const isValid = validateDataPackage(response, this.priceFeedOptions, expectedSigner);
         if (isValid) {
           return response;
         } else {
@@ -108,17 +103,28 @@ export class RedStonePriceFeed implements PriceFeedConnector {
     const results = await Promise.allSettled(promises);
 
     // Validating fetched data
-    const fulfilledPromisesResults = results.filter(r => r.status === "fulfilled") as
-      PromiseFulfilledResult<SignedDataPackageResponse>[];
-    const dataPackages = fulfilledPromisesResults.map(r => r.value);
-    const validDataPackages = dataPackages.filter(p =>
-      validateDataPackage(
-        p,
-        this.priceFeedOptions,
-        this.cachedSigner!,
-      )
-    );
+    const validDataPackages = [];
+    for (let fetcherIndex = 0; fetcherIndex < this.fetchers.length; fetcherIndex++) {
+      const fetcher = this.fetchers[fetcherIndex];
+      const fetcherResult = results[fetcherIndex];
+      const expectedSigner = fetcher.getEvmSignerAddress();
 
+      if (fetcherResult.status === "fulfilled" ) {
+        const dataPackage = fetcherResult.value;
+        const isValid = validateDataPackage(
+          dataPackage,
+          this.priceFeedOptions,
+          expectedSigner
+        );
+
+        if (isValid) {
+          validDataPackages.push(dataPackage);
+        }
+      }
+
+    }
+
+    // Checking if there are any valid data packages
     if (validDataPackages.length === 0) {
       console.error(results);
       throw new Error(`Failed to load valid data packages`);
@@ -131,19 +137,14 @@ export class RedStonePriceFeed implements PriceFeedConnector {
 
     return selectedResponse;
   }
-
-  // TODO: get rid of it later
-  // It is a potential single point of failure
-  async getSigner(): Promise<string> {
-    if (!this.cachedSigner) {
-      const response = await axios.get("https://api.redstone.finance/providers");
-      this.cachedSigner = response.data[this.providerId].evmAddress;
-    }
-    return this.cachedSigner as string;
-  }
-
 }
 
-function getDefaultDataSourceConfig(providerId: RedStoneProvider): DataSourcesConfig {
-  return require(`./default-data-sources/${providerId}.json`);
+function getDefaultDataSourceConfig(priceFeedId: PriceFeedId): DataSourcesConfig {
+  try {
+    return require(`./default-data-sources/${priceFeedId}.json`);
+  } catch {
+    throw new Error(
+      `Selected price feed doesn't have default data sources config. `
+      + `You should proide it for "${priceFeedId}" price feed`);
+  }
 }

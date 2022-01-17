@@ -1,14 +1,12 @@
 import {ethers} from "hardhat";
 import {Wallet} from "ethers";
-import chai, {expect} from "chai";
+import chai from "chai";
 import {solidity} from "ethereum-waffle";
 import {SamplePriceAwareWithManySigners} from "../../typechain/SamplePriceAwareWithManySigners";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 import {syncTime, toBytes32} from "../_helpers";
 import {MockPriceFeed} from "../../utils/v2/connector/impl/MockPriceFeed";
 import {WrapperBuilder} from "../../index";
-import {DEFAULT_PRICE} from "../../utils/v2/impl/builder/MockableEthersContractWrapperBuilder";
-import {BigNumber} from "@ethersproject/bignumber";
 
 chai.use(solidity);
 
@@ -59,21 +57,25 @@ describe("Price Aware - redstone realtime feed", function () {
                         {
                             "type": "cache-layer",
                             "url": "https://api.redstone.finance/zxcxzcxzcxz-bad-path",
-                            "providerId": "6bZ3yxPYy0LHPqo7MNqw0PHTeIM2PR-RmfTPYLltsfw"
+                            "providerId": "6bZ3yxPYy0LHPqo7MNqw0PHTeIM2PR-RmfTPYLltsfw",
+                            "evmSignerAddress": "0x41ed5321B76C045f5439eCf9e73F96c6c25B1D75",
                         },
                         // This source should work fine
                         {
                             "type": "cache-layer",
                             "url": "https://api.redstone.finance",
-                            "providerId": "f1Ipos2fVPbxPVO65GBygkMyW0tkAhp2hdprRPPBBN8"
+                            "providerId": "f1Ipos2fVPbxPVO65GBygkMyW0tkAhp2hdprRPPBBN8",
+                            "evmSignerAddress": "0x3a7d971De367FE15D164CDD952F64205F2D9f10c"
                         },
                         // This source should also fail
                         {
                             "type": "cache-layer",
                             "url": "https://api.redstone.finance/zxcxzcxzcxz-bad-path-2",
-                            "providerId": "6bZ3yxPYy0LHPqo7MNqw0PHTeIM2PR-RmfTPYLltsfw"
+                            "providerId": "6bZ3yxPYy0LHPqo7MNqw0PHTeIM2PR-RmfTPYLltsfw",
+                            "evmSignerAddress": "0x41ed5321B76C045f5439eCf9e73F96c6c25B1D75",
                         },
                     ],
+                    defaultSignerEvmAddress: "0x3a7d971de367fe15d164cdd952f64205f2d9f10c",
                     valueSelectionAlgorithm: "first-valid",
                     timeoutMilliseconds: 10000,
                     maxTimestampDiffMilliseconds: 150000,
@@ -81,7 +83,7 @@ describe("Price Aware - redstone realtime feed", function () {
                 },
             });
     
-        await sample.authorizeProvider();
+        // await sample.authorizeProvider(); <- note, it's not reuired in this test
         await syncTime(); // recommended for hardhat test
         await sample.executeWithPrice(toBytes32("AVAX"));
     });
@@ -96,15 +98,18 @@ describe("Price Aware - redstone realtime feed", function () {
                         {
                             "type": "cache-layer",
                             "url": "https://api.redstone.finance/zxcxzcxzcxz-bad-path",
-                            "providerId": "6bZ3yxPYy0LHPqo7MNqw0PHTeIM2PR-RmfTPYLltsfw"
+                            "providerId": "6bZ3yxPYy0LHPqo7MNqw0PHTeIM2PR-RmfTPYLltsfw",
+                            "evmSignerAddress": "0x41ed5321B76C045f5439eCf9e73F96c6c25B1D75",
                         },
                         // This source should work fine 
                         {
                             "type": "cache-layer",
                             "url": "https://api.redstone.finance",
-                            "providerId": "6bZ3yxPYy0LHPqo7MNqw0PHTeIM2PR-RmfTPYLltsfw"
+                            "providerId": "6bZ3yxPYy0LHPqo7MNqw0PHTeIM2PR-RmfTPYLltsfw",
+                            "evmSignerAddress": "0x41ed5321B76C045f5439eCf9e73F96c6c25B1D75",
                         },
                     ],
+                    defaultSignerEvmAddress: "0x41ed5321B76C045f5439eCf9e73F96c6c25B1D75",
                     valueSelectionAlgorithm: "first-valid",
                     timeoutMilliseconds: 10000,
                     maxTimestampDiffMilliseconds: 150000,
@@ -112,7 +117,7 @@ describe("Price Aware - redstone realtime feed", function () {
                 },
             });
     
-        await sample.authorizeProvider();
+        // await sample.authorizeProvider(); <- note, it's not reuired in this test
         await syncTime(); // recommended for hardhat test
         await sample.executeWithPrice(toBytes32("AVAX"));
     });

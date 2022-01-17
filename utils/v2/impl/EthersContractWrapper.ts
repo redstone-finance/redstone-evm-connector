@@ -24,10 +24,10 @@ export class EthersContractWrapper<T extends Contract> implements ContractWrappe
         const isCall = contract.interface.getFunction(functionName).constant;
         if (functionName == "authorizeSigner") {
             (wrappedContract["authorizeProvider"] as any) = async function () {
-            const signer = await self.getSigner();
+            const signer = self.apiConnector.getDefaultSigner();
             console.log("Authorizing provider: " + signer);
             return await wrappedContract.authorizeSigner(signer);
-          }
+            }
         } else {
           (wrappedContract[functionName] as any) = async function (...args: any[]) {
 
@@ -51,10 +51,6 @@ export class EthersContractWrapper<T extends Contract> implements ContractWrappe
     });
 
     return wrappedContract;
-  }
-  
-  protected getSigner(): Promise<string> {
-    return this.apiConnector.getSigner();
   }
 
   protected getMarkerData(): string {

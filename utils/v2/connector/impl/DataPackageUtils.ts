@@ -69,7 +69,7 @@ export function validateDataPackage(
   return true;
 }
 
-export function convertResponseToPricePackage(data: SignedDataPackageResponse, signer: string): SignedPriceDataType {
+export function convertResponseToPricePackage(data: SignedDataPackageResponse): SignedPriceDataType {
   const pricePackage = _.pick(data, ["prices", "timestamp"]);
   const serialized = priceSigner.serializeToMessage(pricePackage);
   const priceData: PriceDataType = serialized as PriceDataType;
@@ -77,7 +77,6 @@ export function convertResponseToPricePackage(data: SignedDataPackageResponse, s
     priceData,
     signature: data.signature,
     liteSignature: data.liteSignature,
-    signer,
   };
 }
 

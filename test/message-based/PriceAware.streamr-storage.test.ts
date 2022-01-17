@@ -36,9 +36,11 @@ describe("Price Aware - streamr", function () {
                       {
                           type: "streamr-storage",
                           streamrEndpointPrefix: "0x3a7d971de367fe15d164cdd952f64205f2d9f10c/redstone-oracle",
-                          disabledForSinglePrices: false
+                          disabledForSinglePrices: false,
+                          evmSignerAddress: "0x3a7d971de367fe15d164cdd952f64205f2d9f10c",
                       },
                   ],
+                  defaultSignerEvmAddress: "0x3a7d971de367fe15d164cdd952f64205f2d9f10c",
                   valueSelectionAlgorithm: "newest-valid",
                   timeoutMilliseconds: 10000,
                   maxTimestampDiffMilliseconds: 150000,
@@ -61,9 +63,11 @@ describe("Price Aware - streamr", function () {
                       {
                           type: "streamr-storage",
                           streamrEndpointPrefix: "0x3a7d971de367fe15d164cdd952f64205f2d9f10c/redstone-oracle",
-                          disabledForSinglePrices: false
+                          disabledForSinglePrices: false,
+                          evmSignerAddress: "0x3a7d971de367fe15d164cdd952f64205f2d9f10c",
                       },
                   ],
+                  defaultSignerEvmAddress: "0x3a7d971de367fe15d164cdd952f64205f2d9f10c",
                   valueSelectionAlgorithm: "newest-valid",
                   timeoutMilliseconds: 10000,
                   maxTimestampDiffMilliseconds: 150000,
@@ -86,9 +90,11 @@ describe("Price Aware - streamr", function () {
                     {
                         type: "streamr-storage",
                         streamrEndpointPrefix: "0x3a7d971de367fe15d164cdd952f64205f2d9f10c/redstone-oracle",
-                        disabledForSinglePrices: false
+                        disabledForSinglePrices: false,
+                        evmSignerAddress: "0x3a7d971de367fe15d164cdd952f64205f2d9f10c",
                     },
                 ],
+                defaultSignerEvmAddress: "0x3a7d971de367fe15d164cdd952f64205f2d9f10c",
                 valueSelectionAlgorithm: "first-valid",
                 timeoutMilliseconds: 10000,
                 maxTimestampDiffMilliseconds: 150000,
@@ -111,9 +117,11 @@ describe("Price Aware - streamr", function () {
                     {
                         type: "streamr-storage",
                         streamrEndpointPrefix: "0x3a7d971de367fe15d164cdd952f64205f2d9f10c/redstone-oracle",
-                        disabledForSinglePrices: false
+                        disabledForSinglePrices: false,
+                        evmSignerAddress: "0x3a7d971de367fe15d164cdd952f64205f2d9f10c",
                     },
                 ],
+                defaultSignerEvmAddress: "0x3a7d971de367fe15d164cdd952f64205f2d9f10c",
                 valueSelectionAlgorithm: "first-valid",
                 timeoutMilliseconds: 10000,
                 maxTimestampDiffMilliseconds: 150000,
