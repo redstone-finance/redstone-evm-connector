@@ -1,10 +1,10 @@
 import {ethers} from "hardhat";
-import chai from "chai";
+import chai, {assert} from "chai";
 import {solidity} from "ethereum-waffle";
 import {SampleStorageBased} from "../../typechain/SampleStorageBased";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
-import {PriceVerifier} from "../../typechain/PriceVerifier";
-import redstone from 'redstone-api';
+import redstone from "redstone-api";
+import {pricesAreSimilar} from "../_helpers";
 
 import {PriceFeedWithClearing} from "../../typechain/PriceFeedWithClearing";
 import WrapperBuilder from "../../utils/v2/impl/builder/WrapperBuilder";
@@ -17,11 +17,6 @@ const toBytes32 = ethers.utils.formatBytes32String;
 const serialized = function (x: number): number {
   return x * 10 ** 8;
 };
-
-function checkPricesDeviation(value1: number, value2: number, maxPercentageDiff: number = 5) {
-  const percentDiff = 100 * Math.abs(1 - value1 / value2);
-  expect(percentDiff).to.be.lessThan(maxPercentageDiff);
-}
 
 describe("MockDefi with Proxy contract and real pricing Data from Redstone (with clearing)", function () {
 
@@ -76,12 +71,12 @@ describe("MockDefi with Proxy contract and real pricing Data from Redstone (with
     await loadApiPrices();
     const smartContractValueGoog = (await defi.currentValueOf(owner.address, toBytes32("GOOG"))).toNumber();
     const httpApiValueGoog = serialized(apiPrices['GOOG'].value);
-    checkPricesDeviation(smartContractValueGoog, httpApiValueGoog);
+    assert(pricesAreSimilar(smartContractValueGoog, httpApiValueGoog));
 
     await loadApiPrices();
     const smartContractValueIBM = (await defi.currentValueOf(owner.address, toBytes32("IBM"))).toNumber();
     const httpApiValueIBM = serialized(apiPrices['IBM'].value);
-    checkPricesDeviation(smartContractValueIBM, httpApiValueIBM);
+    assert(pricesAreSimilar(smartContractValueIBM, httpApiValueIBM));
   });
 
 
@@ -98,8 +93,7 @@ describe("MockDefi with Proxy contract and real pricing Data from Redstone (with
     await loadApiPrices();
     const smartContractValueFB = (await defi.currentValueOf(owner.address, toBytes32("FB"))).toNumber();
     const httpApiValueFB = serialized(apiPrices['FB'].value);
-    checkPricesDeviation(smartContractValueFB, httpApiValueFB);
+    assert(pricesAreSimilar(smartContractValueFB, httpApiValueFB));
   });
-
 
 });

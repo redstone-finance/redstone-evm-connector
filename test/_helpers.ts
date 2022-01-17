@@ -34,6 +34,17 @@ export const time = {
   }
 }
 
+export const pricesAreSimilar = function (
+  value1: number,
+  value2: number,
+  maxPercentageDiff: number = 5,
+): boolean {
+  const diffAbs = Math.abs(value1 - value2);
+  const percentDiff1 = (diffAbs / value1) * 100;
+  const percentDiff2 = (diffAbs / value2) * 100;
+  return percentDiff1 < maxPercentageDiff && percentDiff2 < maxPercentageDiff;
+}
+
 export const getFixedGasSigners = async function (gasLimit: number) {
   const signers: SignerWithAddress[] = await ethers.getSigners();
   signers.forEach(signer => {

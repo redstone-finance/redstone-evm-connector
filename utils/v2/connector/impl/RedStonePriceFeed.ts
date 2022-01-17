@@ -85,7 +85,7 @@ export class RedStonePriceFeed implements PriceFeedConnector {
         if (isValid) {
           return response;
         } else {
-          console.warn("Invalid response: " + JSON.stringify(response));
+          console.warn(`Invalid response for fetcher ${fetcherIndex}: ` + JSON.stringify(response));
           throw new Error(
             `Received invalid response from fetcher: ${fetcherIndex}/${this.fetchers.length}`);
         }
