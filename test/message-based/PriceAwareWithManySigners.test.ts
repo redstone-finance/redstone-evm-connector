@@ -48,4 +48,72 @@ describe("Price Aware - redstone realtime feed", function () {
         await syncTime(); // recommended for hardhat test
         await sample.executeWithPrice(toBytes32("AVAX"));
     });
+
+    it("should get price with multiple assets redstone-avalanche 1st provider", async function () {
+        sample = WrapperBuilder
+            .wrapLite(sample)
+            .usingPriceFeed("redstone-avalanche", {
+                dataSources: {
+                    sources: [
+                        // This source should fail
+                        {
+                            "type": "cache-layer",
+                            "url": "https://api.redstone.finance/zxcxzcxzcxz-bad-path",
+                            "providerId": "6bZ3yxPYy0LHPqo7MNqw0PHTeIM2PR-RmfTPYLltsfw"
+                        },
+                        // This source should work fine
+                        {
+                            "type": "cache-layer",
+                            "url": "https://api.redstone.finance",
+                            "providerId": "f1Ipos2fVPbxPVO65GBygkMyW0tkAhp2hdprRPPBBN8"
+                        },
+                        // This source should also fail
+                        {
+                            "type": "cache-layer",
+                            "url": "https://api.redstone.finance/zxcxzcxzcxz-bad-path-2",
+                            "providerId": "6bZ3yxPYy0LHPqo7MNqw0PHTeIM2PR-RmfTPYLltsfw"
+                        },
+                    ],
+                    valueSelectionAlgorithm: "first-valid",
+                    timeoutMilliseconds: 10000,
+                    maxTimestampDiffMilliseconds: 150000,
+                    preVerifySignatureOffchain: true,
+                },
+            });
+    
+        await sample.authorizeProvider();
+        await syncTime(); // recommended for hardhat test
+        await sample.executeWithPrice(toBytes32("AVAX"));
+    });
+
+    it("should get price with multiple assets redstone-avalanche 2nd provider", async function () {
+        sample = WrapperBuilder
+            .wrapLite(sample)
+            .usingPriceFeed("redstone-avalanche", {
+                dataSources: {
+                    sources: [
+                        // This source should fail
+                        {
+                            "type": "cache-layer",
+                            "url": "https://api.redstone.finance/zxcxzcxzcxz-bad-path",
+                            "providerId": "6bZ3yxPYy0LHPqo7MNqw0PHTeIM2PR-RmfTPYLltsfw"
+                        },
+                        // This source should work fine 
+                        {
+                            "type": "cache-layer",
+                            "url": "https://api.redstone.finance",
+                            "providerId": "6bZ3yxPYy0LHPqo7MNqw0PHTeIM2PR-RmfTPYLltsfw"
+                        },
+                    ],
+                    valueSelectionAlgorithm: "first-valid",
+                    timeoutMilliseconds: 10000,
+                    maxTimestampDiffMilliseconds: 150000,
+                    preVerifySignatureOffchain: false,
+                },
+            });
+    
+        await sample.authorizeProvider();
+        await syncTime(); // recommended for hardhat test
+        await sample.executeWithPrice(toBytes32("AVAX"));
+    });
 });

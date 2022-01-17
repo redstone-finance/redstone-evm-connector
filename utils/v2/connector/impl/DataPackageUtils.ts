@@ -61,6 +61,7 @@ export function validateDataPackage(
     });
     
     if (!isValidSignature) {
+      console.warn(`Signature is invalid: ${fetchedPackage.liteSignature}`);
       return false;
     }
   }
