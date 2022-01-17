@@ -3,6 +3,7 @@ import {Wallet} from "ethers";
 import chai, {expect} from "chai";
 import {solidity} from "ethereum-waffle";
 import {SamplePriceAware} from "../../typechain/SamplePriceAware";
+import {SamplePriceAwareWithManySigners} from "../../typechain/SamplePriceAwareWithManySigners";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 import {syncTime, toBytes32} from "../_helpers";
 import {MockPriceFeed} from "../../utils/v2/connector/impl/MockPriceFeed";
@@ -160,15 +161,15 @@ describe("Price Aware - redstone realtime feed", function () {
     let owner: SignerWithAddress;
     let signer: Wallet;
 
-    let sample: SamplePriceAware;
+    let sample: SamplePriceAwareWithManySigners;
 
     it("should deploy contracts", async function () {
         [owner] = await ethers.getSigners();
 
         signer = new ethers.Wallet(MockPriceFeed.P_KEY, owner.provider);
 
-        const SamplePriceAware = await ethers.getContractFactory("SamplePriceAware");
-        sample = (await SamplePriceAware.deploy()) as SamplePriceAware;
+        const SamplePriceAwareWithManySigners = await ethers.getContractFactory("SamplePriceAwareWithManySigners");
+        sample = (await SamplePriceAwareWithManySigners.deploy()) as SamplePriceAwareWithManySigners;
     });
 
     it("should get price with single asset", async function () {

@@ -19,7 +19,7 @@ import {MockableContract} from "../../../utils/v2/impl/builder/MockableEthersCon
 
 chai.use(solidity);
 
-describe("Benchmark- price aware contracts", function () {
+describe("Benchmark - price aware contracts", function () {
     let owner:SignerWithAddress;
     let signer:Wallet;
 
