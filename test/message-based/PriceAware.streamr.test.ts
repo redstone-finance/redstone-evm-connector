@@ -9,6 +9,8 @@ import { syncTime, toBytes32 } from "../_helpers";
 import { MockPriceFeed } from "../../utils/v2/connector/impl/MockPriceFeed";
 import { WrapperBuilder } from "../../index";
 
+const WAIT_FOR_STREAMR_MS = 9000;
+
 chai.use(solidity);
 
 describe("Price Aware - streamr", function () {
@@ -51,7 +53,7 @@ describe("Price Aware - streamr", function () {
       await sample.authorizeProvider();
 
       // To wait for package from streamr
-      await sleep(5000);
+      await sleep(WAIT_FOR_STREAMR_MS);
 
       await syncTime(); // recommended for hardhat test
       await sample.executeWithPrice(toBytes32("AVAX"));
@@ -81,7 +83,7 @@ describe("Price Aware - streamr", function () {
       await sample.authorizeProvider();
 
       // To wait for package from streamr
-      await sleep(5000);
+      await sleep(WAIT_FOR_STREAMR_MS);
 
       await syncTime(); // recommended for hardhat test
       await sample.executeWithPrice(toBytes32("AVAX"));
@@ -111,7 +113,7 @@ describe("Price Aware - streamr", function () {
     await sample.authorizeProvider();
 
     // To wait for package from streamr
-    await sleep(5000);
+    await sleep(WAIT_FOR_STREAMR_MS);
 
     await syncTime(); // recommended for hardhat test
     await sample.executeWithPrice(toBytes32("AVAX"));

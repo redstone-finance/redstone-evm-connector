@@ -11,7 +11,7 @@ import { WrapperBuilder } from "../../index";
 
 chai.use(solidity);
 
-describe("Price Aware - streamr", function () {
+describe("Price Aware - streamr storage", function () {
   let owner: SignerWithAddress;
   let signer: Wallet;
 
