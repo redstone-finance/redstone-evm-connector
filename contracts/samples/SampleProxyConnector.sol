@@ -30,7 +30,7 @@ contract SampleProxyConnector {
   }
 
   function getPriceShortEncodedFunction (bytes32 asset, uint256 price) external {
-    asset; // It's added to avoid warning about nused function argument
+    asset; // It's added to avoid warning about unused function argument
 
     bytes memory encodedFunction = abi.encodeWithSelector(
       SamplePriceAware.a.selector
