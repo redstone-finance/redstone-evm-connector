@@ -8,7 +8,7 @@ const signer = new Wallet(secrets.testPrivKey, getDefaultProvider("kovan"));
 let sampleContract = new Contract( deployedPriceAware.address , deployedPriceAware.abi , signer);
 sampleContract = WrapperBuilder
     .wrapLite(sampleContract)
-    .usingPriceFeed("redstone-stocks", "IBM");
+    .usingPriceFeed("redstone-stocks", { asset: "IBM" });
 
 
 async function check() {

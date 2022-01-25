@@ -1,9 +1,10 @@
 import {ethers} from "hardhat";
-import chai from "chai";
+import chai, {assert} from "chai";
 import {solidity} from "ethereum-waffle";
 import {SampleStorageBased} from "../../typechain/SampleStorageBased";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 import redstone from 'redstone-api';
+import {pricesAreSimilar} from "../_helpers";
 import {PriceFeed} from "../../typechain/index";
 import WrapperBuilder from "../../utils/v2/impl/builder/WrapperBuilder";
 
@@ -65,14 +66,15 @@ describe("MockDefi with Proxy contract and real pricing Data", function () {
 
 
   it("Should inject correct prices from API multi", async function () {
+    await loadApiPrices();
+    const smartContractValueGoog = (await defi.currentValueOf(owner.address, toBytes32("GOOG"))).toNumber();
+    const httpApiValueGoog = serialized(apiPrices['GOOG'].value);
+    assert(pricesAreSimilar(smartContractValueGoog, httpApiValueGoog));
 
     await loadApiPrices();
-
-    expect(await defi.currentValueOf(owner.address, toBytes32("GOOG")))
-      .to.be.equal(serialized(apiPrices['GOOG'].value).toFixed(0));
-    expect(await defi.currentValueOf(owner.address, toBytes32("IBM")))
-      .to.be.equal(serialized(apiPrices['IBM'].value).toFixed(0));
-
+    const smartContractValueIBM = (await defi.currentValueOf(owner.address, toBytes32("IBM"))).toNumber();
+    const httpApiValueIBM = serialized(apiPrices['IBM'].value);
+    assert(pricesAreSimilar(smartContractValueIBM, httpApiValueIBM));
   });
 
 
@@ -80,7 +82,7 @@ describe("MockDefi with Proxy contract and real pricing Data", function () {
 
     defi = WrapperBuilder
       .wrap(defi)
-      .usingPriceFeed("redstone-stocks", "FB");
+      .usingPriceFeed("redstone-stocks", { asset: "FB" });
 
     await Promise.all([
       defi.deposit(toBytes32("FB"), 1),
@@ -91,8 +93,9 @@ describe("MockDefi with Proxy contract and real pricing Data", function () {
 
 
   it("Should inject correct prices from API single", async function () {
-    expect(await defi.currentValueOf(owner.address, toBytes32("FB")))
-      .to.be.equal(serialized(apiPrices['FB'].value).toFixed(0));
+    const pricesFromSmartContract = (await defi.currentValueOf(owner.address, toBytes32("FB"))).toNumber();
+    const httpApiPricesSerialised = serialized(apiPrices['FB'].value);
+    assert(pricesAreSimilar(pricesFromSmartContract, httpApiPricesSerialised));
   });
 
 

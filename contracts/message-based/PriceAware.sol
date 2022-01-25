@@ -26,6 +26,10 @@ contract PriceAware is Ownable {
     emit TrustedSignerChanged(trustedSigner);
   }
 
+  function isSignerAuthorized(address _receviedSigner) internal virtual view returns (bool) {
+    return _receviedSigner == getTrustedSigner();
+  }
+
   function getPriceFromMsg(bytes32 symbol) internal view returns (uint256) {bytes32[] memory symbols = new bytes32[](1); symbols[0] = symbol;
     return getPricesFromMsg(symbols)[0];
   }
@@ -89,7 +93,7 @@ contract PriceAware is Ownable {
     // 6. We verify the off-chain signature against on-chain hashed data
 
     address signer = hashWithPrefix.recover(signature);
-    require(signer == getTrustedSigner(), "Signer not authorized");
+    require(isSignerAuthorized(signer), "Signer not authorized");
 
     //7. We extract timestamp from callData
 

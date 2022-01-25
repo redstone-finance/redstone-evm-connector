@@ -1,10 +1,10 @@
 import {ethers} from "hardhat";
-import chai from "chai";
+import chai, {assert} from "chai";
 import {solidity} from "ethereum-waffle";
 import {SampleStorageBased} from "../../typechain/SampleStorageBased";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
-import {PriceVerifier} from "../../typechain/PriceVerifier";
-import redstone from 'redstone-api';
+import redstone from "redstone-api";
+import {pricesAreSimilar} from "../_helpers";
 
 import {PriceFeedWithClearing} from "../../typechain/PriceFeedWithClearing";
 import WrapperBuilder from "../../utils/v2/impl/builder/WrapperBuilder";
@@ -68,22 +68,22 @@ describe("MockDefi with Proxy contract and real pricing Data from Redstone (with
 
 
   it("Should inject correct prices from API multi", async function () {
+    await loadApiPrices();
+    const smartContractValueGoog = (await defi.currentValueOf(owner.address, toBytes32("GOOG"))).toNumber();
+    const httpApiValueGoog = serialized(apiPrices['GOOG'].value);
+    assert(pricesAreSimilar(smartContractValueGoog, httpApiValueGoog));
 
     await loadApiPrices();
-    expect(await defi.currentValueOf(owner.address, toBytes32("GOOG")))
-      .to.be.equal(serialized(apiPrices['GOOG'].value).toFixed(0));
-
-    await loadApiPrices();
-    expect(await defi.currentValueOf(owner.address, toBytes32("IBM")))
-      .to.be.equal(serialized(apiPrices['IBM'].value).toFixed(0));
-
+    const smartContractValueIBM = (await defi.currentValueOf(owner.address, toBytes32("IBM"))).toNumber();
+    const httpApiValueIBM = serialized(apiPrices['IBM'].value);
+    assert(pricesAreSimilar(smartContractValueIBM, httpApiValueIBM));
   });
 
 
   it("Should deposit - write no pricing info single", async function () {
     defi = WrapperBuilder
       .wrap(defi)
-      .usingPriceFeed("redstone-stocks", "FB");
+      .usingPriceFeed("redstone-stocks", { asset: "FB" });
 
     await defi.deposit(toBytes32("FB"), 1);
   });
@@ -91,9 +91,9 @@ describe("MockDefi with Proxy contract and real pricing Data from Redstone (with
 
   it("Should inject correct prices from API single", async function () {
     await loadApiPrices();
-    expect(await defi.currentValueOf(owner.address, toBytes32("FB")))
-      .to.be.equal(serialized(apiPrices['FB'].value).toFixed(0));
+    const smartContractValueFB = (await defi.currentValueOf(owner.address, toBytes32("FB"))).toNumber();
+    const httpApiValueFB = serialized(apiPrices['FB'].value);
+    assert(pricesAreSimilar(smartContractValueFB, httpApiValueFB));
   });
-
 
 });

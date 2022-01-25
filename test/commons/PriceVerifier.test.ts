@@ -77,7 +77,7 @@ describe("Price Verifier", function() {
           timestamp: 1111
       };
 
-      const differentPricePackage:PricePackage = {
+      const differentPricePackage: PricePackage = {
           prices: [
               {symbol: "ETH2", value: 1799}
           ],

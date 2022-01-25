@@ -4,7 +4,6 @@ import chai from "chai";
 import {solidity} from "ethereum-waffle";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 import {
-    PriceFeedWithClearing,
     SampleNonAssemblySinglePriceAware,
     SampleSinglePriceAware,
     SamplePriceAware,
@@ -22,7 +21,7 @@ import EvmPriceSigner from "redstone-node/dist/src/signers/EvmPriceSigner";
 
 chai.use(solidity);
 
-describe("Benchmark- price aware contracts", function () {
+describe("Benchmark - price aware contracts", function () {
     let owner: SignerWithAddress;
     let signer: Wallet;
 
@@ -52,7 +51,7 @@ describe("Benchmark- price aware contracts", function () {
         singlePriceAware = (await SampleSinglePriceAware.deploy()) as MockableContract<SampleSinglePriceAware>;
         singlePriceAware = authorizeAndWrapContract(singlePriceAware);
 
-        //current version
+        // current version
         const SamplePriceAware = await ethers.getContractFactory("SamplePriceAware");
         priceAware = (await SamplePriceAware.deploy()) as MockableContract<SamplePriceAware>;
         priceAware = authorizeAndWrapContract(priceAware);
@@ -61,7 +60,7 @@ describe("Benchmark- price aware contracts", function () {
         inlinedSinglePriceAware = (await SampleInlinedSinglePriceAware.deploy()) as MockableContract<SampleInlinedSinglePriceAware>;
         inlinedSinglePriceAware = wrapContract(inlinedSinglePriceAware);
 
-        //current version
+        // current version
         const SampleInlinedPriceAware = await ethers.getContractFactory("SampleInlinedPriceAware");
         inlinedPriceAware = (await SampleInlinedPriceAware.deploy()) as MockableContract<SampleInlinedPriceAware>;
         inlinedPriceAware = wrapContract(inlinedPriceAware);
@@ -71,7 +70,7 @@ describe("Benchmark- price aware contracts", function () {
         singlePriceAwareUpgradeable = authorizeAndWrapContract(singlePriceAwareUpgradeable);
         await singlePriceAwareUpgradeable.initialize();
 
-        //current version
+        // current version
         const SamplePriceAwareUpgradeable = await ethers.getContractFactory("SamplePriceAwareUpgradeable");
         priceAwareUpgradeable = (await SamplePriceAwareUpgradeable.deploy()) as MockableContract<SamplePriceAwareUpgradeable>;
         priceAwareUpgradeable = authorizeAndWrapContract(priceAwareUpgradeable);
