@@ -19,6 +19,7 @@ contract MockStatePriceProvider is IPriceFeed {
    * @param symbol of the price - kept for interface compatibility
    **/
   function getPrice(bytes32 symbol) public view override returns (uint256) {
+    symbol; // It's added to avoid warnings about an unused function argument
     return price;
   }
 

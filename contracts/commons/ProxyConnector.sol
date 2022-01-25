@@ -2,9 +2,9 @@
 
 pragma solidity ^0.8.2;
 
-abstract contract ProxyConnector {
+library ProxyConnector {
 
-  function prepareMessage(bytes memory encodedFunction) internal pure returns (bytes memory) {
+  function prepareMessage(bytes memory encodedFunction) private pure returns (bytes memory) {
     uint8 dataSymbolsCount;
 
     // calldatasize - whole calldata size

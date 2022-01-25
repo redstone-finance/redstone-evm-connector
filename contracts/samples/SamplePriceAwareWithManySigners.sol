@@ -20,31 +20,18 @@ contract SamplePriceAwareWithManySigners is PriceAware {
     return getPriceFromMsg(asset);
   }
 
-  function executeWithPrice(bytes32 asset) public returns (uint256) {
+  function executeWithPrice(bytes32 asset) public view returns (uint256) {
     return getPriceFromMsg(asset);
   }
 
-  function executeWithPrices(bytes32[] memory assets) public returns (uint256[] memory)
+  function executeWithPrices(bytes32[] memory assets) public view returns (uint256[] memory)
   {
     return getPricesFromMsg(assets);
   }
 
 
-  function isSignerAuthorized(address _receviedSigner) internal override view returns (bool) {
+  function isSignerAuthorized(address _receviedSigner) internal override pure returns (bool) {
     return (_receviedSigner == AUTHORIZED_SIGNER_1) || (_receviedSigner == AUTHORIZED_SIGNER_2);
-  }
-
-  //for tests of ProxyConnector
-  function getPriceManyParameters (
-    bytes32 asset,
-    uint256 mockArg1,
-    string memory mockArg2,
-    string memory mockArg3,
-    string memory mockArg4,
-    string memory mockArg5,
-    string memory mockArg6
-  ) external view returns (uint256) {
-    return getPriceFromMsg(asset);
   }
 
   function a() external view returns (uint256) {

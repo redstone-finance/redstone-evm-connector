@@ -18,12 +18,13 @@ contract SampleInlinedPriceAware is InlinedPriceAware {
     return getPriceFromMsg(asset);
   }
 
-  function executeWithPrice(bytes32 asset) public returns (uint256) {
+  function executeWithPrice(bytes32 asset) public view returns (uint256) {
     return getPriceFromMsg(asset);
   }
 
   function executeWithPrices(bytes32[] memory assets)
     public
+    view
     returns (uint256[] memory)
   {
     return getPricesFromMsg(assets);

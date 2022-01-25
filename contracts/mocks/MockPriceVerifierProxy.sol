@@ -8,7 +8,7 @@ contract MockPriceVerifierProxy is PriceVerifier {
   function recoverDataSignerPublic(
     PriceData memory priceData,
     bytes memory signature
-  ) public view returns (address) {
+  ) public pure returns (address) {
     return recoverDataSigner(priceData, signature);
   }
 }
