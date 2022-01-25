@@ -78,18 +78,18 @@ export class RedStonePriceFeed implements PriceFeedConnector {
     let fetcherIndex = 0;
     const promises = this.fetchers.map(fetcher => {
       fetcherIndex++;
-      return (async () => {
+      return (async (fIndex: number) => {
         const response = await fetcher.getLatestDataWithTimeout(timeoutMilliseconds);
         const expectedSigner = fetcher.getEvmSignerAddress();
         const isValid = validateDataPackage(response, this.priceFeedOptions, expectedSigner);
         if (isValid) {
           return response;
         } else {
-          console.warn(`Invalid response for fetcher ${fetcherIndex}: ` + JSON.stringify(response));
+          console.warn(`Invalid response for fetcher ${fIndex}/${this.fetchers.length}: ` + JSON.stringify(response));
           throw new Error(
-            `Received invalid response from fetcher: ${fetcherIndex}/${this.fetchers.length}`);
+            `Received invalid response from fetcher: ${fIndex}/${this.fetchers.length}`);
         }
-      })();
+      })(fetcherIndex);
     });
 
     // Returning the reponse from the first resolved promise
