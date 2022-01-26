@@ -6,7 +6,7 @@ export class CacheLayerFetcher extends Fetcher {
   async getLatestData(): Promise<SignedDataPackageResponse> {
     const response = await axios.get(`${this.config.url!}/packages/latest`, {
       params: {
-        asset: this.asset,
+        symbol: this.asset,
         provider: this.config.providerId!,
       },
     });
