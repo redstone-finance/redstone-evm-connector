@@ -6,10 +6,10 @@ import "../mocks/MockStatePriceProvider.sol";
 import "../message-based/PriceAware.sol";
 
 /**
- * @title SamplePriceAware
+ * @title SamplePriceAwareWithManySigners
  * @dev An example of a contract using a message-based way of fetching data from RedStone
  * It has only a few methods used to benchmark gas consumption
- * It extends PriceAware and allows changing trusted signer and message delay
+ * It extends PriceAware and allows changing trusted signers and message delay
  */
 contract SamplePriceAwareWithManySigners is PriceAware {
 

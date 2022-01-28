@@ -157,6 +157,30 @@ describe("Proxy Connector", function () {
         await expect(sample.getPriceLongEncodedFunction(toBytes32("ETH"), 1000000000)).not.to.be.reverted;
         await expect(sample.getPriceLongEncodedFunction(toBytes32("ETH"), 9999)).to.be.revertedWith("Wrong price!");
     });
+
+    it("should fail with correct message", async function () {
+        const mockPrices = [
+            {symbol: "ETH", value: 10}
+        ];
+
+        sample = WrapperBuilder
+            .mockLite(sample)
+            .using(
+                () => {
+                    return {
+                        prices: mockPrices,
+                        timestamp: Date.now() - 24 * 3600 * 1000, // 24 hours ago (too old)
+                    }
+                });
+
+        await sample.initializePriceAware();
+
+        await syncTime(); // recommended for hardhat test
+        await expect(sample.getPriceLongEncodedFunction(
+            toBytes32("ETH"),
+            1000000000
+        )).to.be.revertedWith("Data is too old");
+    });
 });
 
 

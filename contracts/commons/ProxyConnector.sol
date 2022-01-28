@@ -4,6 +4,18 @@ pragma solidity ^0.8.2;
 
 library ProxyConnector {
 
+  function proxyCalldata(address contractAddress, bytes memory encodedFunction) internal returns (bytes memory) {
+    bytes memory message = prepareMessage(encodedFunction);
+    (bool success, bytes memory result) = contractAddress.call(message);
+    return prepareReturnValue(success, result);
+  }
+
+  function proxyCalldataView(address contractAddress, bytes memory encodedFunction) internal view returns (bytes memory) {
+    bytes memory message = prepareMessage(encodedFunction);
+    (bool success, bytes memory result) = contractAddress.staticcall(message);
+    return prepareReturnValue(success, result);
+  }
+
   function prepareMessage(bytes memory encodedFunction) private pure returns (bytes memory) {
     uint8 dataSymbolsCount;
 
@@ -58,22 +70,17 @@ library ProxyConnector {
     return message;
   }
 
-  function proxyCalldata(address contractAddress, bytes memory encodedFunction) internal returns (bytes memory) {
-    bytes memory message = prepareMessage(encodedFunction);
-
-    (bool success, bytes memory result) = contractAddress.call(message);
-
-    require(success, 'Proxy connector call failed');
-
-    return result;
-  }
-
-  function proxyCalldataView(address contractAddress, bytes memory encodedFunction) internal view returns (bytes memory) {
-    bytes memory message = prepareMessage(encodedFunction);
-
-    (bool success, bytes memory result) = contractAddress.staticcall(message);
-
-    require(success, 'Proxy connector call failed (proxyCalldataView)');
+  function prepareReturnValue(bool success, bytes memory result) internal pure returns (bytes memory) {
+    if (!success) {
+      if (result.length > 0) {
+        assembly {
+          let result_size := mload(result)
+          revert(add(32, result), result_size)
+        }
+      } else {
+        revert("Proxy connector call failed");
+      }
+    }
 
     return result;
   }
