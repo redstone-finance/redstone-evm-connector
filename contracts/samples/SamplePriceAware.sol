@@ -17,16 +17,15 @@ contract SamplePriceAware is PriceAware {
     return getPriceFromMsg(asset);
   }
 
-  function executeWithPrice(bytes32 asset) public returns (uint256) {
+  function executeWithPrice(bytes32 asset) public view returns (uint256) {
     return getPriceFromMsg(asset);
   }
 
-  function executeWithPrices(bytes32[] memory assets) public returns (uint256[] memory)
-  {
+  function executeWithPrices(bytes32[] memory assets) public view returns (uint256[] memory) {
     return getPricesFromMsg(assets);
   }
 
-  //for tests of ProxyConnector
+  // For ProxyConnector tests
   function getPriceManyParameters (
     bytes32 asset,
     uint256 mockArg1,
@@ -36,6 +35,8 @@ contract SamplePriceAware is PriceAware {
     string memory mockArg5,
     string memory mockArg6
   ) external view returns (uint256) {
+    // This is added to avoid warnings about unused arguments
+    mockArg1; mockArg2; mockArg3; mockArg4; mockArg5; mockArg6;
     return getPriceFromMsg(asset);
   }
 

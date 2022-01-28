@@ -17,7 +17,7 @@ contract SampleChainlink {
    * Aggregator: ETH/USD
    * Address: 0x9326BFA02ADD2366b30bacB125260Af641031331
    */
-  constructor() public {
+  constructor() {
     priceFeed = AggregatorV3Interface(
       0x9326BFA02ADD2366b30bacB125260Af641031331
     );
@@ -26,7 +26,8 @@ contract SampleChainlink {
   /**
    * Returns the latest price
    */
-  function executeWithPrice(uint256 val) public returns (uint256) {
+  function executeWithPrice(uint256 val) public view returns (uint256) {
+    val; // It's added to avoid warning about an unused argument
     (, int256 price, , , ) = priceFeed.latestRoundData();
     return uint256(price);
   }

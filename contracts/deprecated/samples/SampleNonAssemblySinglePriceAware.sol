@@ -8,7 +8,7 @@ import "../../mocks/MockStatePriceProvider.sol";
 contract SampleNonAssemblySinglePriceAware is NonAssemblySinglePriceAware {
   MockStatePriceProvider mockStatePriceProvider = new MockStatePriceProvider();
 
-  function executeWithPrice(bytes32 symbol) public returns (uint256) {
+  function executeWithPrice(bytes32 symbol) public view returns (uint256) {
     return getPriceFromMsg(symbol);
   }
 

@@ -21,7 +21,7 @@ contract PriceVerifier is PriceModel {
 
   function recoverDataSigner(PriceData memory priceData, bytes memory signature)
     internal
-    view
+    pure
     returns (address)
   {
     bytes32 hash = hashPriceData(priceData);
@@ -32,7 +32,7 @@ contract PriceVerifier is PriceModel {
   // Learn more: https://eips.ethereum.org/EIPS/eip-712
   function hashPriceData(PriceData memory priceData)
     internal
-    view
+    pure
     returns (bytes32)
   {
     return

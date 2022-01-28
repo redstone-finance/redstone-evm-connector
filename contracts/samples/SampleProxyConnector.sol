@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.2;
 
-import "../message-based/ProxyConnector.sol";
+import "../commons/ProxyConnector.sol";
 import "./SamplePriceAware.sol";
 import "hardhat/console.sol";
 
@@ -10,7 +10,7 @@ import "hardhat/console.sol";
  * @title ProxyConnector
  * @dev An example of a contract that makes a call to a PriceAware type contract
  */
-contract SampleProxyConnector is ProxyConnector {
+contract SampleProxyConnector {
 
   SamplePriceAware samplePriceAware;
 
@@ -22,20 +22,21 @@ contract SampleProxyConnector is ProxyConnector {
   function checkPrice(bytes32 asset, uint256 price) external {
     bytes memory encodedFunction = abi.encodeWithSelector(SamplePriceAware.getPrice.selector, asset);
 
-    bytes memory encodedResult = proxyCalldata(address(samplePriceAware), encodedFunction);
+    bytes memory encodedResult = ProxyConnector.proxyCalldata(address(samplePriceAware), encodedFunction);
 
     uint256 oraclePrice = abi.decode(encodedResult, (uint256));
 
     require(oraclePrice == price, 'Wrong price!');
   }
 
-  function getPriceShortEncodedFunction
-  (bytes32 asset, uint256 price) external {
+  function getPriceShortEncodedFunction (bytes32 asset, uint256 price) external {
+    asset; // It's added to avoid warning about unused function argument
+
     bytes memory encodedFunction = abi.encodeWithSelector(
       SamplePriceAware.a.selector
     );
 
-    bytes memory encodedResult = proxyCalldata(address(samplePriceAware), encodedFunction);
+    bytes memory encodedResult = ProxyConnector.proxyCalldata(address(samplePriceAware), encodedFunction);
 
     uint256 oraclePrice = abi.decode(encodedResult, (uint256));
 
@@ -54,7 +55,7 @@ contract SampleProxyConnector is ProxyConnector {
       'long_string_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
       );
 
-    bytes memory encodedResult = proxyCalldata(address(samplePriceAware), encodedFunction);
+    bytes memory encodedResult = ProxyConnector.proxyCalldata(address(samplePriceAware), encodedFunction);
 
     uint256 oraclePrice = abi.decode(encodedResult, (uint256));
 

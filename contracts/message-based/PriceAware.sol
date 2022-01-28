@@ -110,7 +110,7 @@ contract PriceAware is Ownable {
     return _readFromCallData(symbols, uint256(dataSize), messageLength);
   }
 
-  function _readFromCallData(bytes32[] memory symbols, uint256 dataSize, uint16 messageLength) private view returns (uint256[] memory) {
+  function _readFromCallData(bytes32[] memory symbols, uint256 dataSize, uint16 messageLength) private pure returns (uint256[] memory) {
     uint256[] memory values;
     uint256 i;
     uint256 j;

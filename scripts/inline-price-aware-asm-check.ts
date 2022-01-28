@@ -1,9 +1,10 @@
 const deployedPriceAware = require("../deployments/kovan/SampleInlinedPriceAware.json");
 const secrets = require("../.secret.json");
+import { Provider } from "@ethersproject/providers";
 import {Wallet, Contract, getDefaultProvider} from "ethers";
 import WrapperBuilder from "../utils/v2/impl/builder/WrapperBuilder";
 
-const signer = new Wallet(secrets.testPrivKey, getDefaultProvider("kovan"));
+const signer = new Wallet(secrets.testPrivKey, getDefaultProvider("kovan") as Provider);
 
 let sampleContract = new Contract( deployedPriceAware.address , deployedPriceAware.abi , signer);
 sampleContract = WrapperBuilder
