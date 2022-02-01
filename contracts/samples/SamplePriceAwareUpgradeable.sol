@@ -17,6 +17,9 @@ contract SamplePriceAwareUpgradeable is
   PriceAwareUpgradeable
 {
 
+  uint256[] prices;
+  uint256 price;
+
   function initialize() external initializer {
     __Ownable_init();
     __PriceAware_init();
@@ -35,13 +38,12 @@ contract SamplePriceAwareUpgradeable is
   }
 
   function executeWithPrice(bytes32 asset) public returns (uint256) {
-    return getPriceFromMsg(asset);
+    price = getPriceFromMsg(asset);
+    return price;
   }
 
-  function executeWithPrices(bytes32[] memory assets)
-    public
-    returns (uint256[] memory)
-  {
-    return getPricesFromMsg(assets);
+  function executeWithPrices(bytes32[] memory assets) public returns (uint256[] memory) {
+    prices = getPricesFromMsg(assets);
+    return prices;
   }
 }

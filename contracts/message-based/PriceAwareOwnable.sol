@@ -2,10 +2,10 @@
 
 pragma solidity ^0.8.2;
 
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "./PriceAwareOwnable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "./PriceAware.sol";
 
-contract PriceAwareUpgradeable is PriceAware, OwnableUpgradeable {
+contract PriceAwareOwnable is PriceAware, Ownable {
 
   address private trustedSigner;
 
@@ -13,8 +13,8 @@ contract PriceAwareUpgradeable is PriceAware, OwnableUpgradeable {
     return trustedSigner;
   }
 
-  function __PriceAware_init() internal initializer {
-    maxDelay = 3 * 60;
+  function setMaxDelay(uint256 _maxDelay) external override onlyOwner {
+    maxDelay = _maxDelay;
   }
 
   function authorizeSigner(address _trustedSigner) external onlyOwner {
@@ -22,12 +22,6 @@ contract PriceAwareUpgradeable is PriceAware, OwnableUpgradeable {
     trustedSigner = _trustedSigner;
 
     emit TrustedSignerChanged(trustedSigner);
-  }
-
-  /* ========== OVERRIDEN FUNCTIONS ========== */
-
-  function setMaxDelay(uint256 _maxDelay) external override onlyOwner {
-    maxDelay = _maxDelay;
   }
 
   function isSignerAuthorized(address _receviedSigner) internal override view returns (bool) {

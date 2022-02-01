@@ -3,7 +3,7 @@
 pragma solidity ^0.8.2;
 
 import "../mocks/MockStatePriceProvider.sol";
-import "../message-based/PriceAware.sol";
+import "../message-based/PriceAwareOwnable.sol";
 
 /**
  * @title SamplePriceAware
@@ -11,14 +11,17 @@ import "../message-based/PriceAware.sol";
  * It has only a few methods used to benchmark gas consumption
  * It extends PriceAware and allows changing trusted signer and message delay
  */
-contract SamplePriceAware is PriceAware {
+contract SamplePriceAware is PriceAwareOwnable {
+
+  uint256 lastPrice;
 
   function getPrice(bytes32 asset) external view returns (uint256) {
     return getPriceFromMsg(asset);
   }
 
-  function executeWithPrice(bytes32 asset) public view returns (uint256) {
-    return getPriceFromMsg(asset);
+  function executeWithPrice(bytes32 asset) public returns (uint256) {
+    lastPrice = getPriceFromMsg(asset);
+    return lastPrice;
   }
 
   function executeWithPrices(bytes32[] memory assets) public view returns (uint256[] memory) {

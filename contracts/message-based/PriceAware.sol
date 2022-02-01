@@ -3,49 +3,40 @@
 pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract PriceAware is Ownable {
+abstract contract PriceAware {
   using ECDSA for bytes32;
 
-  uint256 public maxDelay = 3 * 60;
-  address private trustedSigner;
+  uint256 public maxDelay = 3 * 60; // seconds
 
-  function getTrustedSigner() public view virtual returns (address) {
-    return trustedSigner;
-  }
+  /* ========== VIRTUAL FUNCTIONS (CAN BE OVERRIDEN) ========== */
 
-  function setMaxDelay(uint256 _maxDelay) external onlyOwner {
-    maxDelay = _maxDelay;
-  }
+  // This function must be implemented in child contract
+  function isSignerAuthorized(address _receviedSigner) internal virtual view returns (bool);
 
-  function authorizeSigner(address _trustedSigner) external onlyOwner {
-    require(_trustedSigner != address(0));
-    trustedSigner = _trustedSigner;
-
-    emit TrustedSignerChanged(trustedSigner);
-  }
-
-  function isSignerAuthorized(address _receviedSigner) internal virtual view returns (bool) {
-    return _receviedSigner == getTrustedSigner();
+  // This function can be overriden (e.g. in Ownable contracts)
+  function setMaxDelay(uint256 _maxDelay) external virtual {
+    _maxDelay;
+    revert("setMaxDelay is not implemented");
   }
 
   function getPriceFromMsg(bytes32 symbol) internal view returns (uint256) {bytes32[] memory symbols = new bytes32[](1); symbols[0] = symbol;
     return getPricesFromMsg(symbols)[0];
   }
 
-  function getPricesFromMsg(bytes32[] memory symbols) internal view returns (uint256[] memory)
-  {
-    //The structure of calldata witn n - data items:
-    //The data that is signed (symbols, values, timestamp) are inside the {} brackets
-    //[origina_call_data| ?]{[[symbol | 32][value | 32] | n times][timestamp | 32]}[size | 1][signature | 65]
+  /* ========== FUNCTIONS WITH IMPLEMENTATION (CAN NOT BE OVERRIDEN) ========== */
 
-    //1. First we extract dataSize - the number of data items (symbol,value pairs) in the message
+  function getPricesFromMsg(bytes32[] memory symbols) internal view returns (uint256[] memory) {
+    // The structure of calldata witn n - data items:
+    // The data that is signed (symbols, values, timestamp) are inside the {} brackets
+    // [origina_call_data| ?]{[[symbol | 32][value | 32] | n times][timestamp | 32]}[size | 1][signature | 65]
+
+    // 1. First we extract dataSize - the number of data items (symbol,value pairs) in the message
     uint8 dataSize; //Number of data entries
     assembly {
-      //Calldataload loads slots of 32 bytes
-      //The last 65 bytes are for signature
-      //We load the previous 32 bytes and automatically take the 2 least significant ones (casting to uint16)
+      // Calldataload loads slots of 32 bytes
+      // The last 65 bytes are for signature
+      // We load the previous 32 bytes and automatically take the 2 least significant ones (casting to uint16)
       dataSize := calldataload(sub(calldatasize(), 97))
     }
 
@@ -55,14 +46,14 @@ contract PriceAware is Ownable {
 
     // 3. We extract the signableMessage
 
-    //(That's the high level equivalent 2k gas more expensive)
-    //bytes memory rawData = msg.data.slice(msg.data.length - messageLength - 65, messageLength);
+    // (That's the high level equivalent 2k gas more expensive)
+    // bytes memory rawData = msg.data.slice(msg.data.length - messageLength - 65, messageLength);
 
     bytes memory signableMessage;
     assembly {
       signableMessage := mload(0x40)
       mstore(signableMessage, messageLength)
-      //The starting point is callDataSize minus length of data(messageLength), signature(65) and size(1) = 66
+      // The starting point is callDataSize minus length of data(messageLength), signature(65) and size(1) = 66
       calldatacopy(
         add(signableMessage, 0x20),
         sub(calldatasize(), add(messageLength, 66)),
@@ -80,8 +71,8 @@ contract PriceAware is Ownable {
 
     // 5. We extract the off-chain signature from calldata
 
-    //(That's the high level equivalent 2k gas more expensive)
-    //bytes memory signature = msg.data.slice(msg.data.length - 65, 65);
+    // (That's the high level equivalent 2k gas more expensive)
+    // bytes memory signature = msg.data.slice(msg.data.length - 65, 65);
     bytes memory signature;
     assembly {
       signature := mload(0x40)
@@ -95,16 +86,18 @@ contract PriceAware is Ownable {
     address signer = hashWithPrefix.recover(signature);
     require(isSignerAuthorized(signer), "Signer not authorized");
 
-    //7. We extract timestamp from callData
+    // 7. We extract timestamp from callData
 
     uint256 dataTimestamp;
     assembly {
-      //Calldataload loads slots of 32 bytes
-      //The last 65 bytes are for signature + 1 for data size
-      //We load the previous 32 bytes
+      // Calldataload loads slots of 32 bytes
+      // The last 65 bytes are for signature + 1 for data size
+      // We load the previous 32 bytes
       dataTimestamp := calldataload(sub(calldatasize(), 98))
     }
 
+    // Data timestamp validation
+    require(block.timestamp > dataTimestamp, "Data with future timestamps is not allowed");
     require(block.timestamp - dataTimestamp < maxDelay, "Data is too old");
 
     return _readFromCallData(symbols, uint256(dataSize), messageLength);
@@ -146,12 +139,4 @@ contract PriceAware is Ownable {
 
     return (values);
   }
-
-  /* ========== EVENTS ========== */
-
-  /**
-   * @dev emitted after the owner updates trusted signer
-   * @param newSigner the address of the new signer
-   **/
-  event TrustedSignerChanged(address indexed newSigner);
 }
