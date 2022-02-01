@@ -9,7 +9,7 @@ import { syncTime, toBytes32 } from "../_helpers";
 import { MockPriceFeed } from "../../utils/v2/connector/impl/MockPriceFeed";
 import { WrapperBuilder } from "../../index";
 
-const WAIT_FOR_STREAMR_MS = 9000;
+const WAIT_FOR_STREAMR_MS = 7000;
 
 chai.use(solidity);
 

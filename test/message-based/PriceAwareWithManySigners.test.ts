@@ -31,8 +31,6 @@ describe("Price Aware - redstone realtime feed", function () {
             .wrapLite(sample)
             .usingPriceFeed("redstone-avalanche", { asset: "AVAX" });
 
-        await sample.authorizeProvider();
-
         await syncTime(); // recommended for hardhat test
         await sample.executeWithPrice(toBytes32("IBM"));
     });
@@ -41,8 +39,6 @@ describe("Price Aware - redstone realtime feed", function () {
         sample = WrapperBuilder
             .wrapLite(sample)
             .usingPriceFeed("redstone-avalanche");
-
-        await sample.authorizeProvider();
 
         await syncTime(); // recommended for hardhat test
         await sample.executeWithPrice(toBytes32("AVAX"));
@@ -84,7 +80,6 @@ describe("Price Aware - redstone realtime feed", function () {
                 },
             });
     
-        // await sample.authorizeProvider(); <- note, it's not reuired in this test
         await syncTime(); // recommended for hardhat test
         await sample.executeWithPrice(toBytes32("AVAX"));
     });
@@ -118,7 +113,6 @@ describe("Price Aware - redstone realtime feed", function () {
                 },
             });
     
-        // await sample.authorizeProvider(); <- note, it's not reuired in this test
         await syncTime(); // recommended for hardhat test
         await sample.executeWithPrice(toBytes32("AVAX"));
     });
@@ -155,7 +149,6 @@ describe("Price Aware - redstone realtime feed", function () {
                 dataSources: baseDataSources,
             });
     
-        // await sample.authorizeProvider(); <- note, it's not reuired in this test
         await syncTime(); // recommended for hardhat test
 
         // Should fail
