@@ -11,3 +11,5 @@ lib
 typechain
 
 .secret.*json
+
+.DS_Store

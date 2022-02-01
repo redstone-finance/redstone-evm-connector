@@ -13,7 +13,7 @@ contract PriceAwareOwnable is PriceAware, Ownable {
     return trustedSigner;
   }
 
-  function setMaxDelay(uint256 _maxDelay) external override onlyOwner {
+  function setMaxDelay(uint256 _maxDelay) external override virtual onlyOwner {
     maxDelay = _maxDelay;
   }
 
@@ -24,7 +24,7 @@ contract PriceAwareOwnable is PriceAware, Ownable {
     emit TrustedSignerChanged(trustedSigner);
   }
 
-  function isSignerAuthorized(address _receviedSigner) internal override view returns (bool) {
+  function isSignerAuthorized(address _receviedSigner) internal override virtual view returns (bool) {
     return _receviedSigner == getTrustedSigner();
   }
 
