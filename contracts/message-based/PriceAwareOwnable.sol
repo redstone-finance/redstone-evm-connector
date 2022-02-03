@@ -16,7 +16,7 @@ contract PriceAwareOwnable is PriceAware, Ownable {
     emit TrustedSignerChanged(trustedSigner);
   }
 
-  function isSignerAuthorized(address _receviedSigner) internal override virtual view returns (bool) {
+  function isSignerAuthorized(address _receviedSigner) public override virtual view returns (bool) {
     return _receviedSigner == trustedSigner;
   }
 

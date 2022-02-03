@@ -171,6 +171,6 @@ describe("Price Aware - redstone realtime feed", function () {
 
         await syncTime(); // recommended for hardhat test
 
-        await expect(sample.executeWithPrice(toBytes32("AVAX"))).to.be.revertedWith("Data is too old");
+        await expect(sample.executeWithPrice(toBytes32("AVAX"))).to.be.revertedWith("Data timestamp is invalid");
     });
 });

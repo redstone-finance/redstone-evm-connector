@@ -4,6 +4,8 @@ pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
+
+// TODO: Kuba, shouldn't we remove this file
 contract InlinedPriceAware {
   using ECDSA for bytes32;
 
@@ -90,7 +92,7 @@ contract InlinedPriceAware {
       //We load the previous 32 bytes
       dataTimestamp := calldataload(sub(calldatasize(), 98))
     }
-    require(block.timestamp - dataTimestamp < MAX_DELAY, "Data is too old");
+    require(block.timestamp - dataTimestamp < MAX_DELAY, "Data timestamp is invalid");
 
     return _readFromCallData(symbols, uint256(dataSize), messageLength);
   }

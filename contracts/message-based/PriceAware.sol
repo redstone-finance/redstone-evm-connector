@@ -7,19 +7,25 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 abstract contract PriceAware {
   using ECDSA for bytes32;
 
-  uint256 constant MAX_DELAY = 3 * 60; // 3 minutes
+  uint256 constant MAX_DATA_TIMESTAMP_DELAY = 3 * 60; // 3 minutes
+  uint256 constant public MAX_BLOCK_TIMESTAMP_DELAY = 50; // 50 seconds
 
   /* ========== VIRTUAL FUNCTIONS (MAY BE OVERRIDEN IN CHILD CONTRACTS) ========== */
 
-  function isSignerAuthorized(address _receviedSigner) internal virtual view returns (bool);
+  function isSignerAuthorized(address _receviedSigner) public virtual view returns (bool);
 
-  function validateTimestamp(uint256 _receivedTimestamp) internal virtual view {
+  function isTimestampValid(uint256 _receivedTimestamp) public virtual view returns (bool) {
+    // Getting data timestamp from future seems quite unlikely
+    // But we've already spent too much time with different cases
+    // Where block.timestamp was less than data timestamp.
+    // Some blockchains may case this problem as well.
+    // That's why we add MAX_BLOCK_TIMESTAMP_DELAY
     require(
-      block.timestamp > _receivedTimestamp,
+      (block.timestamp + MAX_BLOCK_TIMESTAMP_DELAY) > _receivedTimestamp,
       "Data with future timestamps is not allowed");
-    require(
-      block.timestamp - _receivedTimestamp < MAX_DELAY,
-      "Data is too old");
+
+    return block.timestamp < _receivedTimestamp
+      || block.timestamp - _receivedTimestamp < MAX_DATA_TIMESTAMP_DELAY;
   }
 
   /* ========== FUNCTIONS WITH IMPLEMENTATION (CAN NOT BE OVERRIDEN) ========== */
@@ -99,7 +105,7 @@ abstract contract PriceAware {
     }
 
     // 8. We validate timestamp
-    validateTimestamp(dataTimestamp);
+    require(isTimestampValid(dataTimestamp), "Data timestamp is invalid");
 
     return _readFromCallData(symbols, uint256(dataSize), messageLength);
   }

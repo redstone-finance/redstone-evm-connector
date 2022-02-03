@@ -29,7 +29,7 @@ contract SamplePriceAwareWithManySigners is PriceAware {
     return getPricesFromMsg(assets);
   }
 
-  function isSignerAuthorized(address _receviedSigner) internal override pure returns (bool) {
+  function isSignerAuthorized(address _receviedSigner) public override pure returns (bool) {
     return (_receviedSigner == AUTHORIZED_SIGNER_1) || (_receviedSigner == AUTHORIZED_SIGNER_2);
   }
 
