@@ -7,24 +7,26 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 abstract contract PriceAware {
   using ECDSA for bytes32;
 
-  uint256 public maxDelay = 3 * 60; // seconds
+  uint256 constant MAX_DELAY = 3 * 60; // 3 minutes
 
-  /* ========== VIRTUAL FUNCTIONS (CAN BE OVERRIDEN) ========== */
+  /* ========== VIRTUAL FUNCTIONS (MAY BE OVERRIDEN IN CHILD CONTRACTS) ========== */
 
-  // This function must be implemented in child contract
   function isSignerAuthorized(address _receviedSigner) internal virtual view returns (bool);
 
-  // This function can be overriden (e.g. in Ownable contracts)
-  function setMaxDelay(uint256 _maxDelay) external virtual {
-    _maxDelay;
-    revert("setMaxDelay is not implemented");
+  function validateTimestamp(uint256 _receivedTimestamp) internal virtual view {
+    require(
+      block.timestamp > _receivedTimestamp,
+      "Data with future timestamps is not allowed");
+    require(
+      block.timestamp - _receivedTimestamp < MAX_DELAY,
+      "Data is too old");
   }
+
+  /* ========== FUNCTIONS WITH IMPLEMENTATION (CAN NOT BE OVERRIDEN) ========== */
 
   function getPriceFromMsg(bytes32 symbol) internal view returns (uint256) {bytes32[] memory symbols = new bytes32[](1); symbols[0] = symbol;
     return getPricesFromMsg(symbols)[0];
   }
-
-  /* ========== FUNCTIONS WITH IMPLEMENTATION (CAN NOT BE OVERRIDEN) ========== */
 
   function getPricesFromMsg(bytes32[] memory symbols) internal view returns (uint256[] memory) {
     // The structure of calldata witn n - data items:
@@ -96,9 +98,8 @@ abstract contract PriceAware {
       dataTimestamp := calldataload(sub(calldatasize(), 98))
     }
 
-    // Data timestamp validation
-    require(block.timestamp > dataTimestamp, "Data with future timestamps is not allowed");
-    require(block.timestamp - dataTimestamp < maxDelay, "Data is too old");
+    // 8. We validate timestamp
+    validateTimestamp(dataTimestamp);
 
     return _readFromCallData(symbols, uint256(dataSize), messageLength);
   }
@@ -110,7 +111,7 @@ abstract contract PriceAware {
     uint256 readyAssets;
     bytes32 currentSymbol;
 
-    //We iterate directly through call data to extract the values for symbols
+    // We iterate directly through call data to extract the values for symbols
     assembly {
       let start := sub(calldatasize(), add(messageLength, 66))
 

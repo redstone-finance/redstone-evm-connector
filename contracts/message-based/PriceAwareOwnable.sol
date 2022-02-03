@@ -9,14 +9,6 @@ contract PriceAwareOwnable is PriceAware, Ownable {
 
   address private trustedSigner;
 
-  function getTrustedSigner() public view virtual returns (address) {
-    return trustedSigner;
-  }
-
-  function setMaxDelay(uint256 _maxDelay) external override virtual onlyOwner {
-    maxDelay = _maxDelay;
-  }
-
   function authorizeSigner(address _trustedSigner) external onlyOwner {
     require(_trustedSigner != address(0));
     trustedSigner = _trustedSigner;
@@ -25,7 +17,7 @@ contract PriceAwareOwnable is PriceAware, Ownable {
   }
 
   function isSignerAuthorized(address _receviedSigner) internal override virtual view returns (bool) {
-    return _receviedSigner == getTrustedSigner();
+    return _receviedSigner == trustedSigner;
   }
 
   /* ========== EVENTS ========== */
