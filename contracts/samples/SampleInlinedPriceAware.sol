@@ -16,7 +16,7 @@ contract SampleInlinedPriceAware is PriceAware {
 
   address private constant TRUSTED_SIGNER = 0xFE71e9691B9524BC932C23d0EeD5c9CE41161884;
 
-    function isSignerAuthorized(address _receviedSigner) public override virtual view returns (bool) {
+  function isSignerAuthorized(address _receviedSigner) public override virtual view returns (bool) {
     return _receviedSigner == TRUSTED_SIGNER;
   }
 

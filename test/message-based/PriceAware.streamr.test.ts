@@ -59,7 +59,7 @@ describe("Price Aware - streamr", function () {
       await sample.executeWithPrice(toBytes32("AVAX"));
   });
 
-  it("should get price with multiple assets from streamr (newest-valid)", async function () {
+  it("should get price with multiple assets from streamr (first-valid)", async function () {
       sample = WrapperBuilder
           .wrapLite(sample)
           .usingPriceFeed("redstone-avalanche", {
@@ -73,7 +73,7 @@ describe("Price Aware - streamr", function () {
                       },
                   ],
                   defaultSignerEvmAddress: "0x3a7d971de367fe15d164cdd952f64205f2d9f10c",
-                  valueSelectionAlgorithm: "newest-valid",
+                  valueSelectionAlgorithm: "first-valid",
                   timeoutMilliseconds: 10000,
                   maxTimestampDiffMilliseconds: 150000,
                   preVerifySignatureOffchain: true,
@@ -89,7 +89,7 @@ describe("Price Aware - streamr", function () {
       await sample.executeWithPrice(toBytes32("AVAX"));
   });
 
-  it("should get price with multiple assets from streamr (newest-valid)", async function () {
+  it("should get price with multiple assets from streamr (first-valid)", async function () {
     sample = WrapperBuilder
         .wrapLite(sample)
         .usingPriceFeed("redstone-avalanche", {
@@ -103,7 +103,7 @@ describe("Price Aware - streamr", function () {
                     },
                 ],
                 defaultSignerEvmAddress: "0x3a7d971de367fe15d164cdd952f64205f2d9f10c",
-                valueSelectionAlgorithm: "newest-valid",
+                valueSelectionAlgorithm: "first-valid",
                 timeoutMilliseconds: 10000,
                 maxTimestampDiffMilliseconds: 150000,
                 preVerifySignatureOffchain: true,
