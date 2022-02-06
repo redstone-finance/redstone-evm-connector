@@ -8,7 +8,7 @@ abstract contract PriceAware {
   using ECDSA for bytes32;
 
   uint256 constant MAX_DATA_TIMESTAMP_DELAY = 3 * 60; // 3 minutes
-  uint256 constant public MAX_BLOCK_TIMESTAMP_DELAY = 50; // 50 seconds
+  uint256 constant public MAX_BLOCK_TIMESTAMP_DELAY = 15; // 15 seconds
 
   /* ========== VIRTUAL FUNCTIONS (MAY BE OVERRIDEN IN CHILD CONTRACTS) ========== */
 
@@ -17,9 +17,10 @@ abstract contract PriceAware {
   function isTimestampValid(uint256 _receivedTimestamp) public virtual view returns (bool) {
     // Getting data timestamp from future seems quite unlikely
     // But we've already spent too much time with different cases
-    // Where block.timestamp was less than data timestamp.
+    // Where block.timestamp was less than dataPackage.timestamp.
     // Some blockchains may case this problem as well.
     // That's why we add MAX_BLOCK_TIMESTAMP_DELAY
+    // and allow data "from future" but with a small delay
     require(
       (block.timestamp + MAX_BLOCK_TIMESTAMP_DELAY) > _receivedTimestamp,
       "Data with future timestamps is not allowed");

@@ -15,9 +15,7 @@ import {
 import {syncTime, toBytes32} from "../../_helpers";
 import {MockPriceFeed} from "../../../utils/v2/connector/impl/MockPriceFeed";
 import {WrapperBuilder} from "../../../index";
-import {DEFAULT_PRICE, MockableContract} from "../../../utils/v2/impl/builder/MockableEthersContractWrapperBuilder";
-import {PriceDataType} from "../../../utils/v2/connector/PriceFeedConnector";
-import EvmPriceSigner from "redstone-node/dist/src/signers/EvmPriceSigner";
+import {MockableContract} from "../../../utils/v2/impl/builder/MockableEthersContractWrapperBuilder";
 
 chai.use(solidity);
 

@@ -3,7 +3,7 @@
 pragma solidity ^0.8.2;
 
 import "../mocks/MockStatePriceProvider.sol";
-import "../message-based/InlinedPriceAware.sol";
+import "../message-based/PriceAware.sol";
 
 /**
  * @title SampleInlinedPriceAware
@@ -12,7 +12,13 @@ import "../message-based/InlinedPriceAware.sol";
  * It extends InlinedPriceAware which in-lines signer address and maximum delay of price feed
  * to reduce the gas of every invocation (saving is ~4k gas)
  */
-contract SampleInlinedPriceAware is InlinedPriceAware {
+contract SampleInlinedPriceAware is PriceAware {
+
+  address private constant TRUSTED_SIGNER = 0xFE71e9691B9524BC932C23d0EeD5c9CE41161884;
+
+    function isSignerAuthorized(address _receviedSigner) public override virtual view returns (bool) {
+    return _receviedSigner == TRUSTED_SIGNER;
+  }
 
   function getPrice(bytes32 asset) external view returns (uint256) {
     return getPriceFromMsg(asset);
