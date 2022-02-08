@@ -217,10 +217,6 @@ describe("Price Aware - upgradeable version", function () {
         proxy = await (new TransparentUpgradeableProxy__factory(owner).deploy(sample.address, admin.address, []));
         sample = await (new SamplePriceAwareUpgradeable__factory(owner).attach(proxy.address));
 
-        expect(await sample.maxDelay()).equals(0);
-
         await sample.initialize();
-
-        expect(await sample.maxDelay()).equals(180);
     });
 });

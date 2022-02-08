@@ -1,4 +1,3 @@
-// TODO: aren't those type available in the redstone-node lib?
 import {MockPricePackage} from "./impl/MockPriceFeed";
 
 export interface PriceDataType {

@@ -60,9 +60,9 @@ export const getFixedGasSigners = async function (gasLimit: number) {
 export const syncTime = async function () {
   const now = Math.ceil(new Date().getTime() / 1000);
   try {
-    await ethers.provider.send('evm_setNextBlockTimestamp', [now]);
+    await ethers.provider.send("evm_setNextBlockTimestamp", [now]);
   } catch (error) {
-    //Skipping time sync - block is ahead of current time
+    console.log("Skipping time sync - block is ahead of current time");
   }
 };
 

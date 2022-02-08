@@ -13,7 +13,7 @@ export const DEFAULT_PRICE = (forTime: number) => ({
     {symbol: "ETH", value: 10},
     {symbol: "AVAX", value: 5}
   ],
-  timestamp: forTime - 1000
+  timestamp: forTime - 3000
 });
 
 export class MockableEthersContractWrapperBuilder<T extends Contract> {

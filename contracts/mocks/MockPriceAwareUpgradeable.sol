@@ -10,7 +10,7 @@ contract MockPriceAwareUpgradeable is
   OwnableUpgradeable,
   PriceAwareUpgradeable
 {
-  function executeWithPrice(uint256 val) public returns (uint256) {
+  function executeWithPrice() public view returns (uint256) {
     return getPriceFromMsg(bytes32("TSLA"));
   }
 }

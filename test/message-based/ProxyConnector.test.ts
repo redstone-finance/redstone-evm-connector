@@ -179,7 +179,7 @@ describe("Proxy Connector", function () {
         await expect(sample.getPriceLongEncodedFunction(
             toBytes32("ETH"),
             1000000000
-        )).to.be.revertedWith("Data is too old");
+        )).to.be.revertedWith("Data timestamp is invalid");
     });
 });
 
