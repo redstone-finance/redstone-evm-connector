@@ -13,7 +13,7 @@ RedStone EVM connector implements an alternative design of providing data to sma
   - [1. Modifying your contracts](#1-modifying-your-contracts)
   - [2. Updating the interface](#2-updating-the-interface)
     - [Contract object wrapping](#contract-object-wrapping)
-    - [Provider authorization](#provider-authorization)
+    <!-- - [Provider authorization](#provider-authorization) -->
     - [Mock provider](#mock-provider)
   - [Alternative solutions](#alternative-solutions)
 - [Working demo](#-working-demo)
@@ -68,12 +68,28 @@ npm install redstone-evm-connector
 
 ### 1. Modifying your contracts
 
-You need to apply a minium change to the source code to enable smart contract to access data. Your contract needs to extend the [PriceAware](https://github.com/redstone-finance/redstone-evm-connector/blob/price-aware/contracts/message-based/PriceAware.sol) contract :
+You need to apply a minium change to the source code to enable smart contract to access data. Your contract needs to extend the [PriceAware](https://github.com/redstone-finance/redstone-evm-connector/blob/price-aware/contracts/message-based/PriceAware.sol) contract and override the implementation of `isSignerAuthorized` function.
 
 ```js
 import "redstone-evm-connector/lib/contracts/message-based/PriceAware.sol";
 
 contract YourContractName is PriceAware {
+
+  function isSignerAuthorized(address _receviedSigner) public override virtual view returns (bool) {
+    // Put your logic of signers authorisation here
+    // You can check check evm addresses for providers at: https://api.redstone.finance/providers
+    return _receviedSigner == 0x0C39486f770B26F5527BBBf942726537986Cd7eb; // redstone main demo provider
+
+    // Uncomment for redstone-stocks demo provider
+    // return _receviedSigner == 0x926E370fD53c23f8B71ad2B3217b227E41A92b12;
+
+    // Uncomment for redstone-rapid demo provider
+    // return _receviedSigner == 0xf786a909D559F5Dee2dc6706d8e5A81728a39aE9;
+
+    // Uncomment for redstone-avalanche price feed (it has 2 authorised signers)
+    // return _receviedSigner == 0x3a7d971De367FE15D164CDD952F64205F2D9f10c
+    //   || _receviedSigner == 0x41ed5321B76C045f5439eCf9e73F96c6c25B1D75;
+  }
 ```
 
 After applying the mentioned change you will be able to access the data calling the local [getPriceFromMsg](https://github.com/redstone-finance/redstone-evm-connector/blob/price-aware/contracts/message-based/PriceAware.sol#L29) function. You should pass the symbol of the asset converted to `bytes32`:
@@ -103,15 +119,32 @@ Then you can wrap your ethers contract pointing to the selected [Redstone data p
 ```js
 const yourEthersContract = new ethers.Contract(address, abi, provider);
 
-// connecting all provider's prices (consumes more GAS)
+// Connecting all provider's prices (consumes more GAS)
 const wrappedContract = WrapperBuilder
                           .wrapLite(yourEthersContract)
                           .usingPriceFeed("redstone");
 
-// connecting a single price from selected provider
+// Connecting a single price from selected provider
 const wrappedContract = WrapperBuilder
                           .wrapLite(yourEthersContract)
-                          .usingPriceFeed("redstone-stocks", "AAPL");
+                          .usingPriceFeed("redstone-stocks", { asset: "AAPL" });
+
+// Connecting a custom provider (with a custom price feed configuration)
+// You can check example price feed configurations here: https://github.com/redstone-finance/redstone-evm-connector/tree/master/utils/v2/connector/impl/default-data-sources
+const wrappedContract = WrapperBuilder
+                          .wrapLite(yourEthersContract)
+                          .usingPriceFeed("custom", {
+                            asset: "AAPL",
+                            dataSources: {
+                              sources: [...],
+                              defaultSignerEvmAddress: "0x...",
+                              valueSelectionAlgorithm: "first-valid",
+                              timeoutMilliseconds: 10000,
+                              maxTimestampDiffMilliseconds: 150000,
+                              preVerifySignatureOffchain: true,
+                            }
+                          });
+
 ```
 
 Now you can access any of the contract's methods in exactly the same way as interacting with the ethers-js code:
@@ -120,7 +153,8 @@ Now you can access any of the contract's methods in exactly the same way as inte
 wrappedContract.executeYourMethod();
 ```
 
-#### Provider authorization
+<!-- Hidden since we moved the logic of provider authorisation to the smart contract function -->
+<!-- #### Provider authorization
 If you're the owner of the contract, you should authorize a data provider after the contract deployment. You should do it before users will interact with your contract. Because the provider authenticity will be checked via signature verification whenever a user submits a transaction accessing the data. There are 2 ways of provider authorization:
 ##### 1. Simple authorization
 We recommend to use this option. It will automatically authorize the correct public address based on your configured price feed.
@@ -131,7 +165,7 @@ await wrappedContract.authorizeProvider();
 This option requires the provider's ethereum address. You can check the redstone providers' details using [RedStone API.](https://api.redstone.finance/providers)
 ```js
 await yourEthersContract.authorizeSigner("REPLACE_WITH_DATA_PROVIDER_ETHEREUM_ADDRESS")
-```
+``` -->
 
 #### Mock provider
 
