@@ -89,6 +89,10 @@ contract YourContractName is PriceAware {
     // Uncomment for redstone-avalanche price feed (it has 2 authorised signers)
     // return _receviedSigner == 0x3a7d971De367FE15D164CDD952F64205F2D9f10c
     //   || _receviedSigner == 0x41ed5321B76C045f5439eCf9e73F96c6c25B1D75;
+
+    // Uncomment for redstone-avalanche-prod price feed (it has 2 authorised signers)
+    // return _receviedSigner == 0x981bdA8276ae93F567922497153de7A5683708d3
+    //   || _receviedSigner == 0x3BEFDd935b50F172e696A5187DBaCfEf0D208e48
   }
 ```
 

@@ -29,6 +29,7 @@ export type PriceFeedId =
   | "redstone-stocks"
   | "redstone-rapid"
   | "redstone-avalanche"
+  | "redstone-avalanche-prod"
   | "custom";
 
 export class RedStonePriceFeed implements PriceFeedConnector {
@@ -36,7 +37,7 @@ export class RedStonePriceFeed implements PriceFeedConnector {
   private fetchers: Fetcher[] = [];
 
   constructor(
-    private priceFeedId: PriceFeedId,
+    priceFeedId: PriceFeedId,
     private priceFeedOptions: PriceFeedOptions = {}) {
 
       // Getting default data sources config for provider if not specified
