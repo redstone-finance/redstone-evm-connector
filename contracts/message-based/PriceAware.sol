@@ -7,10 +7,18 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 abstract contract PriceAware {
   using ECDSA for bytes32;
 
-  uint256 constant MAX_DATA_TIMESTAMP_DELAY = 3 * 60; // 3 minutes
-  uint256 constant public MAX_BLOCK_TIMESTAMP_DELAY = 15; // 15 seconds
+  uint256 constant _MAX_DATA_TIMESTAMP_DELAY = 3 * 60; // 3 minutes
+  uint256 constant _MAX_BLOCK_TIMESTAMP_DELAY = 15; // 15 seconds
 
   /* ========== VIRTUAL FUNCTIONS (MAY BE OVERRIDEN IN CHILD CONTRACTS) ========== */
+
+  function getMaxDataTimestampDelay() public virtual view returns (uint256) {
+    return _MAX_DATA_TIMESTAMP_DELAY;
+  }
+
+  function getMaxBlockTimestampDelay() public virtual view returns (uint256) {
+    return _MAX_BLOCK_TIMESTAMP_DELAY;
+  }
 
   function isSignerAuthorized(address _receviedSigner) public virtual view returns (bool);
 
@@ -22,11 +30,11 @@ abstract contract PriceAware {
     // That's why we add MAX_BLOCK_TIMESTAMP_DELAY
     // and allow data "from future" but with a small delay
     require(
-      (block.timestamp + MAX_BLOCK_TIMESTAMP_DELAY) > _receivedTimestamp,
+      (block.timestamp + getMaxBlockTimestampDelay()) > _receivedTimestamp,
       "Data with future timestamps is not allowed");
 
     return block.timestamp < _receivedTimestamp
-      || block.timestamp - _receivedTimestamp < MAX_DATA_TIMESTAMP_DELAY;
+      || block.timestamp - _receivedTimestamp < getMaxDataTimestampDelay();
   }
 
   /* ========== FUNCTIONS WITH IMPLEMENTATION (CAN NOT BE OVERRIDEN) ========== */
