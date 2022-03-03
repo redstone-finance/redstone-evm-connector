@@ -141,7 +141,6 @@ const wrappedContract = WrapperBuilder
                             asset: "AAPL",
                             dataSources: {
                               sources: [...],
-                              defaultSignerEvmAddress: "0x...",
                               valueSelectionAlgorithm: "first-valid",
                               timeoutMilliseconds: 10000,
                               maxTimestampDiffMilliseconds: 150000,

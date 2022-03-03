@@ -7,7 +7,7 @@ import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 import {syncTime, toBytes32} from "../_helpers";
 import {MockPriceFeed} from "../../utils/v2/connector/impl/MockPriceFeed";
 import {WrapperBuilder} from "../../index";
-import { DataSourcesConfig } from "../../utils/v2/connector/impl/RedStonePriceFeed";
+import { DataSourcesConfig } from "redstone-api-extended/lib/oracle/redstone-data-feed";
 
 chai.use(solidity);
 
@@ -72,7 +72,6 @@ describe("Price Aware - redstone realtime feed", function () {
                             "evmSignerAddress": "0x41ed5321B76C045f5439eCf9e73F96c6c25B1D75",
                         },
                     ],
-                    defaultSignerEvmAddress: "0x3a7d971de367fe15d164cdd952f64205f2d9f10c",
                     valueSelectionAlgorithm: "first-valid",
                     timeoutMilliseconds: 10000,
                     maxTimestampDiffMilliseconds: 150000,
@@ -105,7 +104,6 @@ describe("Price Aware - redstone realtime feed", function () {
                             "evmSignerAddress": "0x41ed5321B76C045f5439eCf9e73F96c6c25B1D75",
                         },
                     ],
-                    defaultSignerEvmAddress: "0x41ed5321B76C045f5439eCf9e73F96c6c25B1D75",
                     valueSelectionAlgorithm: "first-valid",
                     timeoutMilliseconds: 10000,
                     maxTimestampDiffMilliseconds: 150000,
@@ -136,7 +134,6 @@ describe("Price Aware - redstone realtime feed", function () {
                     "evmSignerAddress": "0x41ed5321B76C045f5439eCf9e73F96c6c25B1D75",
                 },
             ],
-            defaultSignerEvmAddress: "0x41ed5321B76C045f5439eCf9e73F96c6c25B1D75",
             valueSelectionAlgorithm: "first-valid",
             timeoutMilliseconds: 10000,
             maxTimestampDiffMilliseconds: 150000,

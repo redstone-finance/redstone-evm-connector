@@ -1,16 +1,7 @@
 import {MockPricePackage} from "./impl/MockPriceFeed";
-
-export interface PriceDataType {
-  symbols: string[];
-  values: number[];
-  timestamp: number;
-}
-
-export interface SignedPriceDataType {
-  priceData: PriceDataType;
-  signature: string;
-  liteSignature: string;
-}
+import {
+  SignedPriceDataType,
+} from "redstone-api-extended/lib/oracle/redstone-data-feed";
 
 export interface PriceFeedConnector {
   getSignedPrice(): Promise<SignedPriceDataType>;

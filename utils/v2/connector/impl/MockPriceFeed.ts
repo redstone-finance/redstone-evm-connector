@@ -1,4 +1,8 @@
-import {MockablePriceFeedConnector, PriceDataType, SignedPriceDataType} from "../PriceFeedConnector";
+import {MockablePriceFeedConnector} from "../PriceFeedConnector";
+import {
+  PriceDataType,
+  SignedPriceDataType,
+} from "redstone-api-extended/lib/oracle/redstone-data-feed";
 import {Wallet} from "ethers";
 import {PricePackage, SignedPricePackage} from "redstone-node/dist/src/types";
 import EvmPriceSigner from "redstone-node/dist/src/signers/EvmPriceSigner";

@@ -1,5 +1,5 @@
 import {Contract} from "ethers";
-import {RedStonePriceFeed, PriceFeedId, PriceFeedOptions} from "../../connector/impl/RedStonePriceFeed";
+import {RedStonePriceFeed, PriceFeedOptions} from "../../connector/impl/RedStonePriceFeed";
 import {EthersContractWrapper} from "../EthersContractWrapper";
 import {EthersContractWrapperLite} from "../EthersContractWrapperLite";
 
@@ -11,8 +11,8 @@ export class EthersContractWrapperBuilder<T extends Contract> {
     private readonly wrapperType: WrapperType,
   ) {}
 
-  usingPriceFeed(providerId: PriceFeedId, opts: PriceFeedOptions = {}): T {
-    const priceFeedConnector = new RedStonePriceFeed(providerId, opts);
+  usingPriceFeed(dataFeedId: string, opts: PriceFeedOptions = {}): T {
+    const priceFeedConnector = new RedStonePriceFeed(dataFeedId, opts);
     return this.wrapperType === "full"
       ? new EthersContractWrapper(this.baseContract, priceFeedConnector).finish()
       : new EthersContractWrapperLite(this.baseContract, priceFeedConnector).finish();
