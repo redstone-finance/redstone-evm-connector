@@ -174,6 +174,19 @@ await yourEthersContract.authorizeSigner("REPLACE_WITH_DATA_PROVIDER_ETHEREUM_AD
 
 If you'd like to use the wrapper in a test context, we recommend using a mock provider when you can easily override the price to test different scenarios:
 
+To test contracts with mock provider please be sure to authorize the following signer address: `0xFE71e9691B9524BC932C23d0EeD5c9CE41161884`. But **don't use this address in production**, because its private key s publicly known.
+
+##### Example authorization in contract
+```js
+import "redstone-evm-connector/lib/contracts/message-based/PriceAware.sol";
+
+contract YourContractName is PriceAware {
+
+  function isSignerAuthorized(address _receviedSigner) public override virtual view returns (bool) {
+    return _receviedSigner == 0xFE71e9691B9524BC932C23d0EeD5c9CE41161884; // mock provider address
+  }
+```
+
 ##### Option 1. Object with prices
 ```js
 const wrappedContract = WrapperBuilder
