@@ -17,6 +17,7 @@
     "./utils/**/*.json",
     "./contracts",
     "./hardhat.config.ts",
+    "./test",
     "index.ts"
-  ],
+  ]
 }
