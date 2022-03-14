@@ -33,10 +33,14 @@ export class EthersContractWrapper<T extends Contract> implements ContractWrappe
 
             const tx = await contract.populateTransaction[functionName](...args);
 
-          // Here we append price data (currently with function signatures) to transaction data
-          tx.data = tx.data
-            + (await self.getPriceData(contract.signer))
-            + self.getMarkerData();
+            // Here we append price data (currently with function signatures) to transaction data
+            const packagesCount = 2;
+            const singlePackageBytes = await self.getPriceData(contract.signer);
+            const allPackagesBytes = singlePackageBytes.repeat(packagesCount); // It's just for solidity implementation help
+            tx.data = tx.data
+              + allPackagesBytes
+              + toUint16(packagesCount)
+              + self.getMarkerData();
 
             if (isCall) {
               const result = await contract.signer.call(tx);
@@ -104,4 +108,9 @@ export class EthersContractWrapper<T extends Contract> implements ContractWrappe
     return hexString.substr(2);
   }
 
+}
+
+// TODO: implement i much better, cause now it won't work for numbers greater than 9
+function toUint16(n: number): string {
+  return `000${n}`;
 }

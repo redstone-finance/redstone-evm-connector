@@ -1,9 +1,6 @@
 import {Contract, Signer} from "ethers";
 import {EthersContractWrapper} from "./EthersContractWrapper";
 import EvmPriceSigner from "redstone-node/dist/src/signers/EvmPriceSigner";
-import {bufferToHex, keccak256, toBuffer} from "ethereumjs-util";
-import {personalSign} from "eth-sig-util";
-import {MockPriceFeed} from "../connector/impl/MockPriceFeed";
 
 export class EthersContractWrapperLite<T extends Contract> extends EthersContractWrapper<T> {
 

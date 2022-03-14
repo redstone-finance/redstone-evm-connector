@@ -6,7 +6,7 @@ import {
 } from "redstone-api-extended/lib/oracle/redstone-data-feed";
 import { PriceFeedConnector } from "../PriceFeedConnector";
 
-export interface PriceFeedOptions {
+export interface DataFeedOptions {
   dataSources?: DataSourcesConfig;
   asset?: string;
 };
@@ -15,10 +15,10 @@ export class RedStonePriceFeed implements PriceFeedConnector {
 
   constructor(
     dataFeedId: string,
-    private priceFeedOptions: PriceFeedOptions = {}) {
+    private dataFeedOptions: DataFeedOptions = {}) {
       // Getting default data sources config for provider if not specified
-      if (!this.priceFeedOptions.dataSources) {
-        this.priceFeedOptions.dataSources =
+      if (!this.dataFeedOptions.dataSources) {
+        this.dataFeedOptions.dataSources =
           redstone.oracle.getDefaultDataSourcesConfig(dataFeedId as DataFeedId);
       }
   }
@@ -26,11 +26,11 @@ export class RedStonePriceFeed implements PriceFeedConnector {
   // This is the entrypoint function of this module
   async getSignedPrice(): Promise<SignedPriceDataType> {
     return await redstone.oracle.get(
-      this.priceFeedOptions.dataSources!,
-      this.priceFeedOptions.asset);
+      this.dataFeedOptions.dataSources!,
+      this.dataFeedOptions.asset);
   }
 
   getDefaultSigner(): string {
-    return this.priceFeedOptions.dataSources!.sources[0].evmSignerAddress;
+    return this.dataFeedOptions.dataSources!.sources[0].evmSignerAddress;
   }
 }
