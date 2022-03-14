@@ -40,33 +40,40 @@ abstract contract PriceAware {
 
   /* ========== FUNCTIONS WITH IMPLEMENTATION (CAN NOT BE OVERRIDEN) ========== */
 
-  function getPriceFromMsg(bytes32 symbol) internal view returns (uint256) {bytes32[] memory symbols = new bytes32[](1); symbols[0] = symbol;
+  function getPriceFromMsg(bytes32 symbol) internal view returns (uint256) {
+    bytes32[] memory symbols = new bytes32[](1);
+    symbols[0] = symbol;
     return getPricesFromMsg(symbols)[0];
   }
 
   function getPricesFromMsg(bytes32[] memory symbols) internal view returns (uint256[] memory) {
     // The structure of calldata witn n - data items:
     // The data that is signed (symbols, values, timestamp) are inside the {} brackets
-    // [origina_call_data| ?]{[[symbol | 32][value | 32] | n times][timestamp | 32]}[size | 1][signature | 65]
+    // [original_call_data| ?]{[[symbol | 32][value | 32] | n times][timestamp | 32]}[size | 1][signature | 65]
 
     // 1. First we extract dataSize - the number of data items (symbol,value pairs) in the message
-    uint8 dataSize; //Number of data entries
+    uint8 dataSize; // Number of data entries
     assembly {
       // Calldataload loads slots of 32 bytes
       // The last 65 bytes are for signature
       // We load the previous 32 bytes and automatically take the 2 least significant ones (casting to uint16)
+
       dataSize := calldataload(sub(calldatasize(), 97))
+
+      // v2 exp alex
+      // dataSize := calldataload(sub(calldatasize(), 99)) // we ignore data packages count (exp)
     }
 
     // 2. We calculate the size of signable message expressed in bytes
     // ((symbolLen(32) + valueLen(32)) * dataSize + timeStamp length
-    uint16 messageLength = uint16(dataSize) * 64 + 32; //Length of data message in bytes
+    uint16 messageLength = uint16(dataSize) * 64 + 32; // Length of data message in bytes
 
     // 3. We extract the signableMessage
 
-    // (That's the high level equivalent 2k gas more expensive)
-    // bytes memory rawData = msg.data.slice(msg.data.length - messageLength - 65, messageLength);
+    // That's the high level equivalent (2k gas more expensive)
+    // bytes memory signableMessage = msg.data.slice(msg.data.length - messageLength - 65, messageLength);
 
+    // v1
     bytes memory signableMessage;
     assembly {
       signableMessage := mload(0x40)
@@ -80,6 +87,21 @@ abstract contract PriceAware {
       mstore(0x40, add(signableMessage, 0x20))
     }
 
+    // v2 exp alex
+    // bytes memory signableMessage;
+    // assembly {
+    //   signableMessage := mload(0x40)
+    //   mstore(signableMessage, messageLength)
+    //   // The starting point is callDataSize minus length of data(messageLength), signature(65) and size(1) = 66
+    //   calldatacopy(
+    //     add(signableMessage, 0x20),
+    //     sub(calldatasize(), add(messageLength, 68)), // todo alex exp changed 66 -> 68
+    //     messageLength
+    //   )
+    //   mstore(0x40, add(signableMessage, 0x20))
+    // }
+
+    // TODO: Alex we probably will remove this custom header (as Marvin recommended)
     // 4. We first hash the raw message and then hash it again with the prefix
     // Following the https://github.com/ethereum/eips/issues/191 standard
     bytes32 hash = keccak256(signableMessage);
@@ -99,7 +121,6 @@ abstract contract PriceAware {
       mstore(0x40, add(signature, 0x20))
     }
 
-        // Debug output
     console.log("Singature");
     console.logBytes(signature);
 
@@ -108,8 +129,8 @@ abstract contract PriceAware {
 
     // 6. We verify the off-chain signature against on-chain hashed data
 
-    // address signer = hashWithPrefix.recover(signature);
-    // require(isSignerAuthorized(signer), "Signer not authorized");
+    address signer = hashWithPrefix.recover(signature);
+    require(isSignerAuthorized(signer), "Signer not authorized");
 
     // 7. We extract timestamp from callData
 

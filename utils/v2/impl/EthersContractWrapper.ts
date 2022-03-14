@@ -34,13 +34,21 @@ export class EthersContractWrapper<T extends Contract> implements ContractWrappe
             const tx = await contract.populateTransaction[functionName](...args);
 
             // Here we append price data (currently with function signatures) to transaction data
-            const packagesCount = 2;
+
+            // v1
             const singlePackageBytes = await self.getPriceData(contract.signer);
-            const allPackagesBytes = singlePackageBytes.repeat(packagesCount); // It's just for solidity implementation help
             tx.data = tx.data
-              + allPackagesBytes
-              + toUint16(packagesCount)
+              + singlePackageBytes
               + self.getMarkerData();
+
+            // v2 (several packages with several signatures)
+            // const packagesCount = 2;
+            // const singlePackageBytes = await self.getPriceData(contract.signer);
+            // const allPackagesBytes = singlePackageBytes.repeat(packagesCount); // It's just for solidity implementation help
+            // tx.data = tx.data
+            //   + allPackagesBytes
+            //   + toUint16(packagesCount)
+            //   + self.getMarkerData();
 
             if (isCall) {
               const result = await contract.signer.call(tx);
