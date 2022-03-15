@@ -8,7 +8,11 @@ import "hardhat/console.sol";
 abstract contract PriceAware {
   using ECDSA for bytes32;
 
-  uint256 constant _MAX_DATA_TIMESTAMP_DELAY = 3 * 60; // 3 minutes
+  // uint256 constant _MAX_DATA_TIMESTAMP_DELAY = 3 * 60; // 3 minutes
+
+  // For debugging
+  uint256 constant _MAX_DATA_TIMESTAMP_DELAY = 365 * 24 * 3600 * 60; // 1 year
+
   uint256 constant _MAX_BLOCK_TIMESTAMP_DELAY = 15; // 15 seconds
 
   /* ========== VIRTUAL FUNCTIONS (MAY BE OVERRIDEN IN CHILD CONTRACTS) ========== */
@@ -40,16 +44,25 @@ abstract contract PriceAware {
 
   /* ========== FUNCTIONS WITH IMPLEMENTATION (CAN NOT BE OVERRIDEN) ========== */
 
-  function getPriceFromMsg(bytes32 symbol) internal view returns (uint256) {
-    bytes32[] memory symbols = new bytes32[](1);
-    symbols[0] = symbol;
+  function getPriceFromMsg(bytes32 symbol) internal view returns (uint256) {bytes32[] memory symbols = new bytes32[](1); symbols[0] = symbol;
     return getPricesFromMsg(symbols)[0];
   }
 
   function getPricesFromMsg(bytes32[] memory symbols) internal view returns (uint256[] memory) {
     // The structure of calldata witn n - data items:
     // The data that is signed (symbols, values, timestamp) are inside the {} brackets
-    // [original_call_data| ?]{[[symbol | 32][value | 32] | n times][timestamp | 32]}[size | 1][signature | 65]
+    // [origina_call_data| ?]{[[symbol | 32][value | 32] | n times][timestamp | 32]}[size | 1][signature | 65]
+
+    // Debugging - Alex
+    console.log("Calldata");
+    console.logBytes(msg.data);
+
+    // Exp - Alex
+    uint8 dataPackagesCount;
+    assembly {
+      dataPackagesCount := calldataload(sub(calldatasize(), 32))
+    }
+    console.log("dataPackagesCount", dataPackagesCount);
 
     // 1. First we extract dataSize - the number of data items (symbol,value pairs) in the message
     uint8 dataSize; // Number of data entries
@@ -58,50 +71,54 @@ abstract contract PriceAware {
       // The last 65 bytes are for signature
       // We load the previous 32 bytes and automatically take the 2 least significant ones (casting to uint16)
 
-      dataSize := calldataload(sub(calldatasize(), 97))
+      // v1
+      // dataSize := calldataload(sub(calldatasize(), 97))
 
-      // v2 exp alex
-      // dataSize := calldataload(sub(calldatasize(), 99)) // we ignore data packages count (exp)
+      // v2
+      dataSize := calldataload(sub(calldatasize(), 99))
     }
+
+    // Debugging - Alex
+    console.log("dataSize", dataSize);
 
     // 2. We calculate the size of signable message expressed in bytes
     // ((symbolLen(32) + valueLen(32)) * dataSize + timeStamp length
     uint16 messageLength = uint16(dataSize) * 64 + 32; // Length of data message in bytes
 
+    // Debugging - Alex
+    console.log("messageLength", messageLength);
+
     // 3. We extract the signableMessage
+    // (That's the high level equivalent 2k gas more expensive)
+    // bytes memory rawData = msg.data.slice(msg.data.length - messageLength - 65, messageLength);
 
-    // That's the high level equivalent (2k gas more expensive)
-    // bytes memory signableMessage = msg.data.slice(msg.data.length - messageLength - 65, messageLength);
-
-    // v1
     bytes memory signableMessage;
-    assembly {
-      signableMessage := mload(0x40)
-      mstore(signableMessage, messageLength)
-      // The starting point is callDataSize minus length of data(messageLength), signature(65) and size(1) = 66
-      calldatacopy(
-        add(signableMessage, 0x20),
-        sub(calldatasize(), add(messageLength, 66)),
-        messageLength
-      )
-      mstore(0x40, add(signableMessage, 0x20))
-    }
-
-    // v2 exp alex
-    // bytes memory signableMessage;
+    // v1
     // assembly {
     //   signableMessage := mload(0x40)
     //   mstore(signableMessage, messageLength)
     //   // The starting point is callDataSize minus length of data(messageLength), signature(65) and size(1) = 66
     //   calldatacopy(
     //     add(signableMessage, 0x20),
-    //     sub(calldatasize(), add(messageLength, 68)), // todo alex exp changed 66 -> 68
+    //     sub(calldatasize(), add(messageLength, 66)),
     //     messageLength
     //   )
     //   mstore(0x40, add(signableMessage, 0x20))
     // }
 
-    // TODO: Alex we probably will remove this custom header (as Marvin recommended)
+    // v2
+    assembly {
+      signableMessage := mload(0x40)
+      mstore(signableMessage, messageLength)
+      // The starting point is callDataSize minus length of data(messageLength), signature(65) and size(1) = 66
+      calldatacopy(
+        add(signableMessage, 0x20),
+        sub(calldatasize(), add(messageLength, 68)),
+        messageLength
+      )
+      mstore(0x40, add(signableMessage, 0x20))
+    }
+
     // 4. We first hash the raw message and then hash it again with the prefix
     // Following the https://github.com/ethereum/eips/issues/191 standard
     bytes32 hash = keccak256(signableMessage);
@@ -110,36 +127,51 @@ abstract contract PriceAware {
     );
 
     // 5. We extract the off-chain signature from calldata
-
     // (That's the high level equivalent 2k gas more expensive)
+
+    // v1
+    // bytes memory signature = msg.data.slice(msg.data.length - 65, 65);
+    // bytes memory signature;
+    // assembly {
+    //   signature := mload(0x40)
+    //   mstore(signature, 65)
+    //   calldatacopy(add(signature, 0x20), sub(calldatasize(), 65), 65)
+    //   mstore(0x40, add(signature, 0x20))
+    // }
+
+    // v2
     // bytes memory signature = msg.data.slice(msg.data.length - 65, 65);
     bytes memory signature;
     assembly {
       signature := mload(0x40)
       mstore(signature, 65)
-      calldatacopy(add(signature, 0x20), sub(calldatasize(), 65), 65)
+      calldatacopy(add(signature, 0x20), sub(calldatasize(), 67), 65)
       mstore(0x40, add(signature, 0x20))
     }
 
-    console.log("Singature");
-    console.logBytes(signature);
-
-    console.log("HashWithPrefix");
-    console.logBytes(abi.encodePacked(hashWithPrefix));
-
     // 6. We verify the off-chain signature against on-chain hashed data
-
     address signer = hashWithPrefix.recover(signature);
     require(isSignerAuthorized(signer), "Signer not authorized");
 
-    // 7. We extract timestamp from callData
+    // Debug output
+    // console.log("Singature");
+    // console.logBytes(signature);
 
+    // console.log("HashWithPrefix");
+    // console.logBytes(abi.encodePacked(hashWithPrefix));
+
+    // 7. We extract timestamp from callData
     uint256 dataTimestamp;
     assembly {
       // Calldataload loads slots of 32 bytes
       // The last 65 bytes are for signature + 1 for data size
       // We load the previous 32 bytes
-      dataTimestamp := calldataload(sub(calldatasize(), 98))
+
+      // v1
+      // dataTimestamp := calldataload(sub(calldatasize(), 98))
+
+      // v2
+      dataTimestamp := calldataload(sub(calldatasize(), 100))
     }
 
     // 8. We validate timestamp
@@ -157,7 +189,7 @@ abstract contract PriceAware {
 
     // We iterate directly through call data to extract the values for symbols
     assembly {
-      let start := sub(calldatasize(), add(messageLength, 66))
+      let start := sub(calldatasize(), add(messageLength, 68))
 
       values := msize()
       mstore(values, mload(symbols))

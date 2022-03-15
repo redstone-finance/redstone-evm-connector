@@ -32,14 +32,30 @@ describe("Price Aware - inlined assembly version", function () {
 
     it("should benchmark costs", async function () {
 
+        // sample = WrapperBuilder
+        //   .mockLite(sample)
+        //   .using(DEFAULT_PRICE);
+
+        const priceMocker = (forTime: number) => ({
+            prices: [
+                {symbol: "ETH", value: 10},
+                {symbol: "AVAX", value: 5}
+            ],
+            // timestamp: forTime - 3000
+            timestamp: 1647377989,
+        });
+
         sample = WrapperBuilder
-          .mockLite(sample)
-          .using(DEFAULT_PRICE);
-        
+            .mockLite(sample)
+            .using(priceMocker);
+
         await sample.authorizeProvider();
 
         await syncTime(); // recommended for hardhat test
-        await sample.executeWithPrice(toBytes32("ETH"));
+        await sample.executeWithPrice(toBytes32("AVAX"));
+
+        let price = await sample.getPrice(toBytes32("AVAX"));
+        console.log({price: price.toNumber() / 10**8});
     });
 
 //     it("should return the correct 1st price", async function () {
