@@ -134,14 +134,13 @@ abstract contract PriceAware {
       mstore(values, mload(symbols))
       mstore(0x40, add(add(values, 0x20), mul(mload(symbols), 0x20)))
 
-      for { i := 0 } lt(i, dataSize) { i := add(i, 1) } {
-        currentSymbol := calldataload(add(start, mul(i, 64)))
-
-        for { j := 0 } lt(j, mload(symbols)) { j := add(j, 1) } {
-          if eq(mload(add(add(symbols, 32), mul(j, 32))), currentSymbol) {
+      for { i := 0 } lt(i, mload(symbols)) { i := add(i, 1) } {
+        currentSymbol := mload(add(add(symbols, 32), mul(i, 32)))
+        for { j := 0 } lt(j, dataSize) { j := add(j, 1) } {
+          if eq(calldataload(add(start, mul(j, 64))), currentSymbol) {
             mstore(
-              add(add(values, 32), mul(j, 32)),
-              calldataload(add(add(start, mul(i, 64)), 32))
+              add(add(values, 32), mul(i, 32)),
+              calldataload(add(add(start, mul(j, 64)), 32))
             )
             readyAssets := add(readyAssets, 1)
           }
@@ -151,6 +150,7 @@ abstract contract PriceAware {
           }
         }
       }
+
     }
 
     return (values);
