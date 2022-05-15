@@ -4,7 +4,6 @@ import chai from "chai";
 import {solidity} from "ethereum-waffle";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
 import {
-    SampleNonAssemblySinglePriceAware,
     SampleSinglePriceAware,
     SamplePriceAware,
     SampleInlinedSinglePriceAware,
@@ -23,7 +22,6 @@ describe("Benchmark - price aware contracts", function () {
     let owner: SignerWithAddress;
     let signer: Wallet;
 
-    let nonAssemblySinglePriceAware: MockableContract<SampleNonAssemblySinglePriceAware>;
     let singlePriceAware: MockableContract<SampleSinglePriceAware>;
     let priceAware: MockableContract<SamplePriceAware>;
     let inlinedSinglePriceAware: MockableContract<SampleInlinedSinglePriceAware>;
@@ -37,13 +35,6 @@ describe("Benchmark - price aware contracts", function () {
         signer = new ethers.Wallet(MockPriceFeed.P_KEY, owner.provider);
 
         await syncTime(); // recommended for hardhat test
-
-        const SampleNonAssemblySinglePriceAware = await ethers.getContractFactory("SampleNonAssemblySinglePriceAware");
-        nonAssemblySinglePriceAware = (await SampleNonAssemblySinglePriceAware.deploy()) as MockableContract<SampleNonAssemblySinglePriceAware>;
-        nonAssemblySinglePriceAware = WrapperBuilder
-            .mock(nonAssemblySinglePriceAware)
-            .using(assetPrices);
-        await nonAssemblySinglePriceAware.authorizeSigner(signer.address);
 
         const SampleSinglePriceAware = await ethers.getContractFactory("SampleSinglePriceAware");
         singlePriceAware = (await SampleSinglePriceAware.deploy()) as MockableContract<SampleSinglePriceAware>;
@@ -91,7 +82,6 @@ describe("Benchmark - price aware contracts", function () {
     }
 
     it("should benchmark costs for 3rd asset", async function () {
-        await nonAssemblySinglePriceAware.executeWithPrice(toBytes32("BTC"));
         await singlePriceAware.executeWithPrice(toBytes32("BTC"));
         await priceAware.executeWithPrice(toBytes32("BTC"));
         await inlinedSinglePriceAware.executeWithPrice(toBytes32("BTC"));

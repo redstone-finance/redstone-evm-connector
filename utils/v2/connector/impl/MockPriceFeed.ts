@@ -45,7 +45,7 @@ export class MockPriceFeed implements MockablePriceFeedConnector {
 
     return {
       priceData: serializedPackage,
-      signature: signedPackage.signature,
+      signature: "", // TODO: get rid of this completely in future
       liteSignature: signedPackage.liteSignature
     };
   }
