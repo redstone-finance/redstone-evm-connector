@@ -1,4 +1,5 @@
 import {Contract} from "ethers";
+import { CustomRequestOnDemand, CustomRequestOnDemandOptions } from "../../connector/impl/CustomRequestOnDemand";
 import {RedStonePriceFeed, PriceFeedOptions} from "../../connector/impl/RedStonePriceFeed";
 import {EthersContractWrapper} from "../EthersContractWrapper";
 import {EthersContractWrapperLite} from "../EthersContractWrapperLite";
@@ -16,5 +17,12 @@ export class EthersContractWrapperBuilder<T extends Contract> {
     return this.wrapperType === "full"
       ? new EthersContractWrapper(this.baseContract, priceFeedConnector).finish()
       : new EthersContractWrapperLite(this.baseContract, priceFeedConnector).finish();
+  }
+
+  usingCustomRequestsOnDemand(opts: CustomRequestOnDemandOptions): T {
+    // We don't even handle case with non-lite wrapper, because we don't support
+    // non-lite signatures anymore
+    const dataConnector = new CustomRequestOnDemand(opts);
+    return new EthersContractWrapperLite(this.baseContract, dataConnector).finish();
   }
 }
