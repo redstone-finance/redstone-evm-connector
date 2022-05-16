@@ -47,3 +47,4 @@ contract SamplePriceAware is PriceAwareOwnable {
     return getPriceFromMsg(bytes32("ETH"));
   }
 }
+
