@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf lib && tsc",
     "postbuild": "cp -r contracts ./lib",
     "test": "yarn compile && npx hardhat test",
     "test:quick": "npx hardhat test",
