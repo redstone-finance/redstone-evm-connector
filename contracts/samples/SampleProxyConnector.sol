@@ -4,7 +4,6 @@ pragma solidity ^0.8.2;
 
 import "../commons/ProxyConnector.sol";
 import "./SamplePriceAware.sol";
-import "hardhat/console.sol";
 
 /**
  * @title ProxyConnector
@@ -22,7 +21,7 @@ contract SampleProxyConnector {
   function checkPrice(bytes32 asset, uint256 price) external {
     bytes memory encodedFunction = abi.encodeWithSelector(SamplePriceAware.getPrice.selector, asset);
 
-    bytes memory encodedResult = ProxyConnector.proxyCalldata(address(samplePriceAware), encodedFunction);
+    bytes memory encodedResult = ProxyConnector.proxyCalldata(address(samplePriceAware), encodedFunction, false);
 
     uint256 oraclePrice = abi.decode(encodedResult, (uint256));
 
@@ -36,11 +35,26 @@ contract SampleProxyConnector {
       SamplePriceAware.a.selector
     );
 
-    bytes memory encodedResult = ProxyConnector.proxyCalldata(address(samplePriceAware), encodedFunction);
+    bytes memory encodedResult = ProxyConnector.proxyCalldata(address(samplePriceAware), encodedFunction, false);
 
     uint256 oraclePrice = abi.decode(encodedResult, (uint256));
 
     require(oraclePrice == price, 'Wrong price!');
+  }
+
+  function requireValueForward() external payable {
+    bytes memory encodedFunction = abi.encodeWithSelector(
+      SamplePriceAware.returnMsgValue.selector
+    );
+    bytes memory encodedResult = ProxyConnector.proxyCalldata(address(samplePriceAware), encodedFunction, false);
+    uint256 msgValue = abi.decode(encodedResult, (uint256));
+
+    require(msgValue == 0, 'Expected msg.value not to be passed');
+
+    encodedResult = ProxyConnector.proxyCalldata(address(samplePriceAware), encodedFunction, true);
+    msgValue = abi.decode(encodedResult, (uint256));
+
+    require(msgValue == msg.value, 'Expected msg.value to be passed');
   }
 
   function getPriceLongEncodedFunction(bytes32 asset, uint256 price) external {
@@ -55,7 +69,7 @@ contract SampleProxyConnector {
       'long_string_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
       );
 
-    bytes memory encodedResult = ProxyConnector.proxyCalldata(address(samplePriceAware), encodedFunction);
+    bytes memory encodedResult = ProxyConnector.proxyCalldata(address(samplePriceAware), encodedFunction, false);
 
     uint256 oraclePrice = abi.decode(encodedResult, (uint256));
 

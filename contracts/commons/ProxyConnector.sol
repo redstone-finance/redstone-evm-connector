@@ -4,9 +4,16 @@ pragma solidity ^0.8.2;
 
 library ProxyConnector {
 
-  function proxyCalldata(address contractAddress, bytes memory encodedFunction) internal returns (bytes memory) {
+  function proxyCalldata(address contractAddress, bytes memory encodedFunction, bool forwardValue) internal returns (bytes memory) {
+    bool success;
+    bytes memory result;
     bytes memory message = prepareMessage(encodedFunction);
-    (bool success, bytes memory result) = contractAddress.call(message);
+
+    if (forwardValue == true) {
+      (success, result) = contractAddress.call{value: msg.value}(message);
+    } else {
+      (success, result) = contractAddress.call(message);
+    }
     return prepareReturnValue(success, result);
   }
 
