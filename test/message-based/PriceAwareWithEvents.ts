@@ -26,6 +26,6 @@ describe("Sample with events", function () {
     // Receipt should have parsed events
     expect(receipt.events!.length).to.be.equal(1);
     expect(event.args!._ethPrice!.toNumber()).to.be.gt(0);
-    expect(event.event).to.be.equal("priceUpdated");
+    expect(event.event).to.be.equal("PriceUpdated");
   });
 });

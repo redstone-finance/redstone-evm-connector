@@ -6,7 +6,7 @@ import "../message-based/PriceAware.sol";
 
 contract SampleWithEvents is PriceAware {
 
-  event priceUpdated(uint256 _ethPrice);
+  event PriceUpdated(uint256 _ethPrice);
 
   function isSignerAuthorized(address _receviedSigner) public override virtual view returns (bool) {
     // For redstone-avalanche-prod price feed (it has 2 authorised signers)
@@ -16,6 +16,6 @@ contract SampleWithEvents is PriceAware {
 
   function emitEventWithLatestEthPrice() public {
     uint256 ethPrice = getPriceFromMsg(bytes32("ETH"));
-    emit priceUpdated(ethPrice);
+    emit PriceUpdated(ethPrice);
   }
 }
