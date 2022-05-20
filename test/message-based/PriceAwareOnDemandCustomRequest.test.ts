@@ -21,15 +21,15 @@ describe("Price Aware - on demand custom request", function () {
         sampleContract = WrapperBuilder.wrapLite(sampleContract).usingCustomRequestsOnDemand({
             nodes: ["https://requests-proxy-node-1.redstone.finance"],
             customRequestDetails: {
-                url: "https://min-api.cryptocompare.com/data/pricemultifull?fsyms=ETH&tsyms=USD",
-                jsonpath: "$.RAW.ETH.USD.PRICE",
-                expectedSymbol: "0x031f7bcd73d9f5ed",
+                url: "https://httpbin.org/anything?hehe=123.25",
+                jsonpath: "$.args.hehe",
+                expectedSymbol: "0xd315c01cedca9a54",
             },
         });
 
         await syncTime(); // recommended for hardhat test
         const value = await sampleContract.getValue();
-        console.log(`Value from contract: ${value.toNumber()}`);
+        expect(value).to.be.equal(123.25 * 10 ** 8);
     });
 
 });

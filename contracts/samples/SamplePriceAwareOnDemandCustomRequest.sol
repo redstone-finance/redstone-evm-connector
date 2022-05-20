@@ -15,6 +15,6 @@ contract SamplePriceAwareOnDemandCustomRequest is PriceAware {
   }
 
   function getValue() public view returns(uint256) {
-    return getPriceFromMsg(bytes32("0x031f7bcd73d9f5ed"));
+    return getPriceFromMsg(bytes32("0xd315c01cedca9a54"));
   }
 }
