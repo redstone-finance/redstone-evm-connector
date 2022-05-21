@@ -71,7 +71,8 @@
     "redstone-node": "^0.4.35",
     "solidity-bytes-utils": "^0.1.2",
     "ts-generator": "^0.1.1",
-    "typechain": "^4.0.3"
+    "typechain": "^4.0.3",
+    "web3-eth-abi": "^1.7.3"
   },
   "files": [
     "lib/**/*"

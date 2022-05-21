@@ -1,6 +1,7 @@
 import {Contract} from "ethers";
 import {EthersContractWrapperBuilder} from "./EthersContractWrapperBuilder";
 import {MockableEthersContractWrapperBuilder} from "./MockableEthersContractWrapperBuilder";
+import {VRFEthersContractWrapperBuilder} from "./VRFEthersContractWrapperBuilder";
 
 /**
  * Putting "wrap" and "mock" methods directly in EthersContractWrapper or EtherContractWrapperList
@@ -21,5 +22,9 @@ export default class WrapperBuilder {
 
   static mockLite<T extends Contract>(contract: T): MockableEthersContractWrapperBuilder<T> {
     return new MockableEthersContractWrapperBuilder(contract, "lite");
+  }
+
+  static wrapWithVRF<T extends Contract>(contract: T): VRFEthersContractWrapperBuilder<T> {
+    return new VRFEthersContractWrapperBuilder(contract);
   }
 }
