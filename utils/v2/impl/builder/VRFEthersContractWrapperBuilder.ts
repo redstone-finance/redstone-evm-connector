@@ -1,8 +1,7 @@
 import { Contract } from "ethers";
-import { addContractWait } from "../add-contract-wait";
 import { prepareMetaTx } from "../MetaTxService";
 import _ from "lodash";
-// import axios from "axios";
+import axios from "axios";
 
 interface VRFNodeOpts {
   url: string;
@@ -69,9 +68,11 @@ export class VRFEthersContractWrapperBuilder<T extends Contract> {
             //   metaTxDetails.v
             // );
 
+            const { proofHex, hashHex } = await requestRandomnessForMetaTx(metaTxDetails);
+
             // TODO: switch to this way
             return await contract.provideRandomnessAndExecuteMetaTransaction(
-              "0x01234567", // TODO: add randomness here
+              hashHex,
               address,
               metaTxDetails.functionSignature,
               metaTxDetails.r,
@@ -92,6 +93,20 @@ export class VRFEthersContractWrapperBuilder<T extends Contract> {
 
     return wrappedContract;
   }
+}
+
+async function requestRandomnessForMetaTx(metaTxDetails: any) {
+  const vrfNodeUrl = "https://redstone-vrf-oracle-node-1.redstone.finance/vrf-requests";
+  const dataHex = metaTxDetails.functionSignature; // TODO: add all contract details merged
+  const response = await axios.post(vrfNodeUrl, {
+    message_hex: dataHex.replace("0x", ""),
+  });
+  console.log("Received response from RedStone VRF node:", response.data);
+
+  const proofHex = response.data.pi_hex;
+  const hashHex = response.data.hash_hex;
+
+  return { proofHex, hashHex };
 }
 
 function getAbiForFunction(contractAbi: any, functionName: string) {

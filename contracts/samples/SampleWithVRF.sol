@@ -15,6 +15,11 @@ contract SampleWithVRF is RedStoneVRFConsumerBase, ERC721 {
     contractPublicName = name_;
   }
 
+  // TODO: add logic for VRF verification on-chain
+  // function isPubKeyAuthorised(bytes memory publicKey) override public view returns(bool) {
+  //   return publicKey == bytes(0x038c458504ce263294a0a458a6e730e8c2e637d3bbf5ecb3c89b3c66f9cb2023bf);
+  // }
+
   function getContractPublicName() external view override returns(string memory) {
     // You can put any logic here
     // return "SampleWithVRF";

@@ -26,7 +26,7 @@ export async function prepareMetaTx(signer: ethers.Signer, contract: ethers.Cont
     args,
   );
 
-  return { r, s, v, functionSignature };
+  return { r, s, v, functionSignature, nonce };
 }
 
 // TODO: add types later

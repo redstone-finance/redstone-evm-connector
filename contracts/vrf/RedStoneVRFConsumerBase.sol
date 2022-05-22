@@ -13,6 +13,9 @@ abstract contract RedStoneVRFConsumerBase is ContextMixin, NativeMetaTransaction
 
   function getContractPublicName() virtual external view returns(string memory);
 
+  // TODO: add logic for VRF verification on-chain
+  // function isPubKeyAuthorised(bytes memory publicKey) virtual public view returns(bool);
+
   function provideRandomnessAndExecuteMetaTransaction(
     bytes memory randomness,
     address userAddress,
