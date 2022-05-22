@@ -1,8 +1,5 @@
 import { ethers } from "ethers";
 import web3Abi from "web3-eth-abi";
-// import sigUtil from "eth-sig-util";
-const ethUtils = require("ethereumjs-util");
-const sigUtil = require("eth-sig-util");
 
 export async function prepareMetaTx(signer: ethers.Signer, contract: ethers.Contract, funAbi: any, args: any) {
   // let name = await contract.name(); // TODO: check
@@ -58,26 +55,26 @@ const getTransactionData = async (
 
 
   // Option 1. With ethers.js
-  // const types = getTypes();
-  // const signature = await signer._signTypedData(domainData, types, message);
+  const types = getTypes();
+  const signature = await signer._signTypedData(domainData, types, message);
   // End of option 1
 
   // Option 2. With eth-sig-util
-  const dataToSign = {
-    types: {
-      EIP712Domain: getDomainType(),
-      MetaTransaction: getMetaTransactionType(),
-    },
-    domain: domainData,
-    primaryType: "MetaTransaction",
-    message: message,
-  };
-  console.log("Data to sign: ", dataToSign);
-  const HARDHAT_USER_1_PRIV = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
-  // const HARDHAT_USER_2_PRIV = "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d";
-  const signature = sigUtil.signTypedData(ethUtils.toBuffer(HARDHAT_USER_1_PRIV), {
-    data: dataToSign,
-  } as any);
+  // const dataToSign = {
+  //   types: {
+  //     EIP712Domain: getDomainType(),
+  //     MetaTransaction: getMetaTransactionType(),
+  //   },
+  //   domain: domainData,
+  //   primaryType: "MetaTransaction",
+  //   message: message,
+  // };
+  // console.log("Data to sign: ", dataToSign);
+  // const HARDHAT_USER_1_PRIV = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+  // // const HARDHAT_USER_2_PRIV = "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d";
+  // const signature = sigUtil.signTypedData(ethUtils.toBuffer(HARDHAT_USER_1_PRIV), {
+  //   data: dataToSign,
+  // } as any);
   // End of option 2
 
 
