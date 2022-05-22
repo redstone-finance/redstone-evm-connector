@@ -22,7 +22,7 @@ export class VRFEthersContractWrapperBuilder<T extends Contract> {
       if (functionName.indexOf("(") == -1) {
         const isCall = contract.interface.getFunction(functionName).constant;
 
-        if (!isCall) {
+        if (!isCall && functionName !== "executeMetaTransaction") {
           (wrappedContract[functionName] as any) = async function (...args: any[]) {
 
             const tx = await contract.populateTransaction[functionName](...args);
@@ -35,13 +35,24 @@ export class VRFEthersContractWrapperBuilder<T extends Contract> {
             console.log({metaTxDetails});
 
             console.log("Function ABI:", functionAbi);
+
+
+            // Execute meta transaction
+            const address = await contract.signer.getAddress();
+            return await contract.executeMetaTransaction(
+              address,
+              metaTxDetails.functionSignature,
+              metaTxDetails.r,
+              metaTxDetails.s,
+              metaTxDetails.v
+            );
   
-            const sentTx = await contract.signer.sendTransaction(tx);
+            // const sentTx = await contract.signer.sendTransaction(tx);
   
-            // Tweak the tx.wait so the receipt has extra properties
-            addContractWait(contract, sentTx);
+            // // Tweak the tx.wait so the receipt has extra properties
+            // addContractWait(contract, sentTx);
   
-            return sentTx;
+            // return sentTx;
           }; 
         }
       }

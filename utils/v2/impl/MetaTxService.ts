@@ -15,6 +15,8 @@ export async function prepareMetaTx(signer: ethers.Signer, contract: ethers.Cont
     salt: '0x' + chainId.toHexString().substring(2).padStart(64, '0'),
   };
 
+  console.log({ signerAddress: address });
+
   // Here we preare the actual tx data to sign
   let { r, s, v, functionSignature } = await getTransactionData(
     signer,
