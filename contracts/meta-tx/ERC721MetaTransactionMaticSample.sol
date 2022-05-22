@@ -5,15 +5,21 @@
 pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "./ContextMixin.sol";
-import "./NativeMetaTransaction.sol";
+// import "./ContextMixin.sol";
+// import "./NativeMetaTransaction.sol";
+import "../vrf/RedStoneVRFConsumerBase.sol";
 
-// TODO: remove
+contract ERC721MetaTransactionMaticSample is ERC721, RedStoneVRFConsumerBase {
 
-contract ERC721MetaTransactionMaticSample is ERC721, ContextMixin, NativeMetaTransaction {
+    string contractPublicName;
 
     constructor (string memory name_, string memory symbol_) ERC721(name_, symbol_) {
         _initializeEIP712(name_);
+        contractPublicName = name_;
+    }
+
+    function getContractPublicName() override external view returns(string memory) {
+        return contractPublicName;
     }
 
     /**

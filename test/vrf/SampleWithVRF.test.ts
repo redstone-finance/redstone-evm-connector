@@ -8,7 +8,8 @@ describe("Sample with VRF", function () {
 
   beforeEach(async () => {
     const SampleWithVRFFactory = await ethers.getContractFactory("SampleWithVRF");
-    sampleContract = await SampleWithVRFFactory.deploy() as SampleWithVRF;
+    const sampleContractDeployment = await SampleWithVRFFactory.deploy("hehe", "haha") as SampleWithVRF;
+    sampleContract = await sampleContractDeployment.deployed();
   });
 
   it("Test VRF", async function () {

@@ -11,16 +11,17 @@ const secrets = fs.existsSync(pathToSecrets)
 
 export default {
     solidity: "0.8.4",
-    networks: {
-        hardhat: {
-            chainId: 7
-        },
-        kovan: {
-            url: `https://eth-kovan.alchemyapi.io/v2/ET4VByJfAKxqeIn6Trsw-lcWEsA1yzB1`,
-            //0xDd662cDCCdcfBA01519d6f5c9882e28EB3412745
-            accounts: [secrets.testPrivKey],
-        },
-    },
+    // networks: {
+    //     hardhat: {
+    //         chainId: 7
+    //     },
+    //     kovan: {
+    //         url: `https://eth-kovan.alchemyapi.io/v2/ET4VByJfAKxqeIn6Trsw-lcWEsA1yzB1`,
+    //         //0xDd662cDCCdcfBA01519d6f5c9882e28EB3412745
+    //         accounts: [secrets.testPrivKey],
+    //     },
+    // },
+    allowUnlimitedContractSize: true,
     paths: {
         tests: "./test/"
     },

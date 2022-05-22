@@ -1,0 +1,88 @@
+{
+  "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "val",
+          "type": "uint256"
+        }
+      ],
+      "name": "executeWithPrice",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x3003c062534b4aeb8e89a759f764d1deb43e8801757454b1628cd154f728f0fd",
+  "receipt": {
+    "to": null,
+    "from": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "contractAddress": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+    "transactionIndex": 0,
+    "gasUsed": "233033",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x31c2e57d1307ce2103006bbb6011b17b7c89d686bf22ecc3728e28722109f822",
+    "transactionHash": "0x3003c062534b4aeb8e89a759f764d1deb43e8801757454b1628cd154f728f0fd",
+    "logs": [],
+    "blockNumber": 1,
+    "cumulativeGasUsed": "233033",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "solcInputHash": "5495dbeafcc29db5e241cf8806886b66",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.4+commit.c7e474f2\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"val\",\"type\":\"uint256\"}],\"name\":\"executeWithPrice\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"details\":\"An example of a contract that uses the most popular Chainlink Reference Data It is used for benchmarking gas costs\",\"kind\":\"dev\",\"methods\":{},\"title\":\"SampleChainlink\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"constructor\":{\"notice\":\"Network: Kovan Aggregator: ETH/USD Address: 0x9326BFA02ADD2366b30bacB125260Af641031331\"},\"executeWithPrice(uint256)\":{\"notice\":\"Returns the latest price\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/samples/SampleChainlink.sol\":\"SampleChainlink\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"contracts/mocks/AggregatorV3Interface.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.2;\\n\\n/**\\n * @title AggregatorV3Interface\\n * @dev Taken from https://www.npmjs.com/package/@chainlink/contracts to benchmark gas costs\\n * The solidity version was bumped up to match our codebases\\n */\\ninterface AggregatorV3Interface {\\n  function decimals() external view returns (uint8);\\n\\n  function description() external view returns (string memory);\\n\\n  function version() external view returns (uint256);\\n\\n  // getRoundData and latestRoundData should both raise \\\"No data present\\\"\\n  // if they do not have data to report, instead of returning unset values\\n  // which could be misinterpreted as actual reported values.\\n  function getRoundData(uint80 _roundId)\\n    external\\n    view\\n    returns (\\n      uint80 roundId,\\n      int256 answer,\\n      uint256 startedAt,\\n      uint256 updatedAt,\\n      uint80 answeredInRound\\n    );\\n\\n  function latestRoundData()\\n    external\\n    view\\n    returns (\\n      uint80 roundId,\\n      int256 answer,\\n      uint256 startedAt,\\n      uint256 updatedAt,\\n      uint80 answeredInRound\\n    );\\n}\\n\",\"keccak256\":\"0x0ea11e038c4c337ba1efbcb12a0f0088bc2efc79adb8764101fcdd9bbc024404\",\"license\":\"MIT\"},\"contracts/samples/SampleChainlink.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.2;\\n\\nimport \\\"../mocks/AggregatorV3Interface.sol\\\";\\n\\n/**\\n * @title SampleChainlink\\n * @dev An example of a contract that uses the most popular Chainlink Reference Data\\n * It is used for benchmarking gas costs\\n */\\ncontract SampleChainlink {\\n  AggregatorV3Interface internal priceFeed;\\n\\n  /**\\n   * Network: Kovan\\n   * Aggregator: ETH/USD\\n   * Address: 0x9326BFA02ADD2366b30bacB125260Af641031331\\n   */\\n  constructor() {\\n    priceFeed = AggregatorV3Interface(\\n      0x9326BFA02ADD2366b30bacB125260Af641031331\\n    );\\n  }\\n\\n  /**\\n   * Returns the latest price\\n   */\\n  function executeWithPrice(uint256 val) public view returns (uint256) {\\n    val; // It's added to avoid warning about an unused argument\\n    (, int256 price, , , ) = priceFeed.latestRoundData();\\n    return uint256(price);\\n  }\\n}\\n\",\"keccak256\":\"0xbdf1ade6cd11c581a8474357dd0fd1923d6d9d76bbd787944c12de11bbcc2c98\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b50739326bfa02add2366b30bacb125260af6410313316000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055506102d4806100746000396000f3fe608060405234801561001057600080fd5b506004361061002b5760003560e01c8063b2d8c2f514610030575b600080fd5b61004a60048036038101906100459190610165565b610060565b6040516100579190610214565b60405180910390f35b6000808060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1663feaf968c6040518163ffffffff1660e01b815260040160a06040518083038186803b1580156100ca57600080fd5b505afa1580156100de573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610102919061018e565b50505091505080915050919050565b60008151905061012081610259565b92915050565b60008135905061013581610270565b92915050565b60008151905061014a81610270565b92915050565b60008151905061015f81610287565b92915050565b60006020828403121561017757600080fd5b600061018584828501610126565b91505092915050565b600080600080600060a086880312156101a657600080fd5b60006101b488828901610150565b95505060206101c588828901610111565b94505060406101d68882890161013b565b93505060606101e78882890161013b565b92505060806101f888828901610150565b9150509295509295909350565b61020e81610239565b82525050565b60006020820190506102296000830184610205565b92915050565b6000819050919050565b6000819050919050565b600069ffffffffffffffffffff82169050919050565b6102628161022f565b811461026d57600080fd5b50565b61027981610239565b811461028457600080fd5b50565b61029081610243565b811461029b57600080fd5b5056fea2646970667358221220cd8feef2331d4331fc1706941ce7c7f2bda20ccf09d0b87340bc15d0ecd033f664736f6c63430008040033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b506004361061002b5760003560e01c8063b2d8c2f514610030575b600080fd5b61004a60048036038101906100459190610165565b610060565b6040516100579190610214565b60405180910390f35b6000808060009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1663feaf968c6040518163ffffffff1660e01b815260040160a06040518083038186803b1580156100ca57600080fd5b505afa1580156100de573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610102919061018e565b50505091505080915050919050565b60008151905061012081610259565b92915050565b60008135905061013581610270565b92915050565b60008151905061014a81610270565b92915050565b60008151905061015f81610287565b92915050565b60006020828403121561017757600080fd5b600061018584828501610126565b91505092915050565b600080600080600060a086880312156101a657600080fd5b60006101b488828901610150565b95505060206101c588828901610111565b94505060406101d68882890161013b565b93505060606101e78882890161013b565b92505060806101f888828901610150565b9150509295509295909350565b61020e81610239565b82525050565b60006020820190506102296000830184610205565b92915050565b6000819050919050565b6000819050919050565b600069ffffffffffffffffffff82169050919050565b6102628161022f565b811461026d57600080fd5b50565b61027981610239565b811461028457600080fd5b50565b61029081610243565b811461029b57600080fd5b5056fea2646970667358221220cd8feef2331d4331fc1706941ce7c7f2bda20ccf09d0b87340bc15d0ecd033f664736f6c63430008040033",
+  "devdoc": {
+    "details": "An example of a contract that uses the most popular Chainlink Reference Data It is used for benchmarking gas costs",
+    "kind": "dev",
+    "methods": {},
+    "title": "SampleChainlink",
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "constructor": {
+        "notice": "Network: Kovan Aggregator: ETH/USD Address: 0x9326BFA02ADD2366b30bacB125260Af641031331"
+      },
+      "executeWithPrice(uint256)": {
+        "notice": "Returns the latest price"
+      }
+    },
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 2573,
+        "contract": "contracts/samples/SampleChainlink.sol:SampleChainlink",
+        "label": "priceFeed",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_contract(AggregatorV3Interface)2509"
+      }
+    ],
+    "types": {
+      "t_contract(AggregatorV3Interface)2509": {
+        "encoding": "inplace",
+        "label": "contract AggregatorV3Interface",
+        "numberOfBytes": "20"
+      }
+    }
+  }
+}
