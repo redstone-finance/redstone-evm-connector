@@ -15,8 +15,12 @@ chai.use(solidity);
 const ASSET_PRICES = (forTime: number) => ({
     prices: [
         {symbol: "ETH", value: 10},
+        {symbol: "ETH", value: 10},
+        {symbol: "AVAX", value: 5},
         {symbol: "AVAX", value: 5},
         {symbol: "BTC", value: 30},
+        {symbol: "BTC", value: 30},
+        {symbol: "LINK", value: 2},
         {symbol: "LINK", value: 2}
     ],
     timestamp: forTime - 1000

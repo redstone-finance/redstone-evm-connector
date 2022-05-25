@@ -51,7 +51,7 @@ describe("Price Aware - inlined assembly version", function () {
 
         await syncTime(); // recommended for hardhat test
         let price = await sample.getPrice(toBytes32("ETH"));
-        expect(price).to.equal(BigNumber.from("1000000000"));
+        expect(price).to.equal(BigNumber.from("1250000000"));
     });
 
 
@@ -64,7 +64,7 @@ describe("Price Aware - inlined assembly version", function () {
 
         await syncTime(); // recommended for hardhat test
         let price = await sample.getPrice(toBytes32("AVAX"));
-        expect(price).to.equal(BigNumber.from("500000000"));
+        expect(price).to.equal(BigNumber.from("566666666"));
     });
 
     it("should return 0 for non-existing price", async function () {
@@ -116,7 +116,7 @@ describe("Price Aware - editable assembly version", function () {
 
         await syncTime(); // recommended for hardhat test
         let price = await sample.getPrice(toBytes32("ETH"));
-        expect(price).to.equal(BigNumber.from("1000000000"));
+        expect(price).to.equal(BigNumber.from("1250000000"));
     });
 
     it("should return the correct 1st price (passing object with values)", async function () {
@@ -141,7 +141,7 @@ describe("Price Aware - editable assembly version", function () {
 
         await syncTime(); // recommended for hardhat test
         let price = await sample.getPrice(toBytes32("AVAX"));
-        expect(price).to.equal(BigNumber.from("500000000"));
+        expect(price).to.equal(BigNumber.from("566666666"));
     });
 
     it("should return 0 for non-existing price", async function () {

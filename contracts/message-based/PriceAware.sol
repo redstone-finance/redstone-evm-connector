@@ -119,11 +119,15 @@ abstract contract PriceAware {
     return _readFromCallData(symbols, uint256(dataSize), messageLength);
   }
 
-  function _readFromCallData(bytes32[] memory symbols, uint256 dataSize, uint16 messageLength) private pure returns (uint256[] memory) {
+  function _readFromCallData(
+    bytes32[] memory symbols,
+    uint256 dataSize,
+    uint16 messageLength
+  ) private pure returns (uint256[] memory) {
     uint256[] memory values;
     uint256 i;
     uint256 j;
-    uint256 readyAssets;
+    uint256 valuesCount;
     bytes32 currentSymbol;
 
     // We iterate directly through call data to extract the values for symbols
@@ -134,25 +138,25 @@ abstract contract PriceAware {
       mstore(values, mload(symbols))
       mstore(0x40, add(add(values, 0x20), mul(mload(symbols), 0x20)))
 
-      for { i := 0 } lt(i, dataSize) { i := add(i, 1) } {
-        currentSymbol := calldataload(add(start, mul(i, 64)))
+      for { i := 0 } lt(i, mload(symbols)) { i := add(i, 1) } {
+        valuesCount := 0
 
-        for { j := 0 } lt(j, mload(symbols)) { j := add(j, 1) } {
-          if eq(mload(add(add(symbols, 32), mul(j, 32))), currentSymbol) {
+        for { j := 0 } lt(j, dataSize) { j := add(j, 1) } {
+          currentSymbol := calldataload(add(start, mul(j, 64)))
+          if eq(mload(add(add(symbols, 32), mul(i, 32))), currentSymbol) {
             mstore(
-              add(add(values, 32), mul(j, 32)),
-              calldataload(add(add(start, mul(i, 64)), 32))
+              add(add(values, 32), mul(i, 32)),
+              add(mload(add(add(values, 32), mul(i, 32))), calldataload(add(add(start, mul(j, 64)), 32)))
             )
-            readyAssets := add(readyAssets, 1)
-          }
-
-          if eq(readyAssets, mload(symbols)) {
-            i := dataSize
+            valuesCount := add(valuesCount, 1)
           }
         }
+        mstore(
+          add(add(values, 32), mul(i, 32)),
+          div(mload(add(add(values, 32), mul(i, 32))), valuesCount)
+        )
       }
     }
-
     return (values);
   }
 }

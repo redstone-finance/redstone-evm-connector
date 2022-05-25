@@ -10,8 +10,13 @@ export type MockableContract<T extends Contract> = T & {
 
 export const DEFAULT_PRICE = (forTime: number) => ({
   prices: [
-    {symbol: "ETH", value: 10},
-    {symbol: "AVAX", value: 5}
+    {symbol: "ETH", value: 11},
+    {symbol: "ETH", value: 12},
+    {symbol: "ETH", value: 13},
+    {symbol: "ETH", value: 14},
+    {symbol: "AVAX", value: 5},
+    {symbol: "AVAX", value: 6},
+    {symbol: "AVAX", value: 6}
   ],
   timestamp: forTime - 3000
 });
