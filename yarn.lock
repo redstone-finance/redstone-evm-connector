@@ -11791,10 +11791,10 @@ rechoir@0.7.0:
   dependencies:
     resolve "^1.9.0"
 
-redstone-api-extended@^1.0.9:
-  version "1.0.9"
-  resolved "https://registry.yarnpkg.com/redstone-api-extended/-/redstone-api-extended-1.0.9.tgz#673b5f8c9b3c861698eafd0c5639e9af61bd7f0f"
-  integrity sha512-JTErhUFo/YGkkzWQI4Y1095bx0Kq6iwFtRupmKwjPWM09u6ZqBlyDuy8p0INd89lfEmg7r7Evm9e1XpWlrAOQA==
+redstone-api-extended@^1.0.10:
+  version "1.0.10"
+  resolved "https://registry.yarnpkg.com/redstone-api-extended/-/redstone-api-extended-1.0.10.tgz#93588e25ea9011d6186607052e0c2fc45b93a23d"
+  integrity sha512-8VrCkg+TytMoRi3fZHHdTG/g3MmPB6TNdTrpxgL/OjR/2rEclVJk9U1rMc9UsT8G1DKXf58zixBzxBRJUBpuIw==
   dependencies:
     ar-gql "^0.0.6"
     arweave "^1.10.16"
