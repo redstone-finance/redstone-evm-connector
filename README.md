@@ -36,7 +36,7 @@ At a top level, transferring data to an EVM environment requires packing an extr
 
 3. The package is appended to the original transaction message, signed and submitted to the network
 
-*All of the steps are executed automatically by the ContractWrapper and transparent to the end-user*
+_All of the steps are executed automatically by the ContractWrapper and transparent to the end-user_
 
 ### Data unpacking (on-chain data verification)
 
@@ -45,7 +45,7 @@ At a top level, transferring data to an EVM environment requires packing an extr
 3. The timestamp is also verified checking if the information is not obsolete
 4. The value that matches a given symbol is extracted from the data package
 
-*This logic is executed in the on-chain environment and we optimised the execution using a low-level assembly code to reduce gas consumption to the absolute minimum*
+_This logic is executed in the on-chain environment and we optimised the execution using a low-level assembly code to reduce gas consumption to the absolute minimum_
 
 ### Benchmarks
 
@@ -56,6 +56,7 @@ We work hard to optimise the code using solidity assembly and reduce the gas cos
 ## 📦 Installation
 
 Install [redstone-evm-connector](https://www.npmjs.com/package/redstone-evm-connector) from NPM registry
+
 ```bash
 # Using yarn
 yarn add redstone-evm-connector
@@ -68,7 +69,7 @@ npm install redstone-evm-connector
 
 ### 1. Modifying your contracts
 
-You need to apply a minium change to the source code to enable smart contract to access data. Your contract needs to extend the [PriceAware](https://github.com/redstone-finance/redstone-evm-connector/blob/price-aware/contracts/message-based/PriceAware.sol) contract and override the implementation of `isSignerAuthorized` function.
+You need to apply a minium change to the source code to enable smart contract to access data. Your contract needs to extend the [PriceAware](https://github.com/redstone-finance/redstone-evm-connector/blob/master/contracts/message-based/PriceAware.sol) contract and override the implementation of `isSignerAuthorized` function.
 
 ```js
 import "redstone-evm-connector/lib/contracts/message-based/PriceAware.sol";
@@ -119,7 +120,9 @@ You can see all available assets and symbols [in our web app.](https://app.redst
 You should also update the code responsible for submitting transactions. If you're using [ethers.js](https://github.com/ethers-io/ethers.js/), we've prepared a dedicated library to make the transition seamless.
 
 #### Contract object wrapping
+
 First, you need to import the wrapper code to your project
+
 ```ts
 // Typescript
 import { WrapperBuilder } from "redstone-evm-connector";
@@ -187,6 +190,7 @@ If you'd like to use the wrapper in a test context, we recommend using a mock pr
 To test contracts with mock provider please be sure to authorize the following signer address: `0xFE71e9691B9524BC932C23d0EeD5c9CE41161884`. But **don't use this address in production**, because its private key s publicly known.
 
 ##### Example authorization in contract
+
 ```js
 import "redstone-evm-connector/lib/contracts/message-based/PriceAware.sol";
 
@@ -198,48 +202,52 @@ contract YourContractName is PriceAware {
 ```
 
 ##### Option 1. Object with prices
+
 ```js
-const wrappedContract = WrapperBuilder
-                          .mockLite(yourEthersContract)
-                          .using({'ETH': 2005, 'BTC': 45000, 'REDSTONE': 100000});
+const wrappedContract = WrapperBuilder.mockLite(yourEthersContract).using({
+  ETH: 2005,
+  BTC: 45000,
+  REDSTONE: 100000,
+});
 ```
 
 ##### Option 2. Function (timestamp => PricePackage)
+
 ```js
 function mockPriceFun(curTimestamp) {
   return {
     timestamp: curTimestamp - 5000,
     prices: [
-      { symbol: 'ETH', value: 2005 },
-      { symbol: 'BTC', value: 45000 },
-    ]
-  }
+      { symbol: "ETH", value: 2005 },
+      { symbol: "BTC", value: 45000 },
+    ],
+  };
 }
 
-const wrappedContract = WrapperBuilder
-                          .mockLite(yourEthersContract)
-                          .using(mockPriceFun);
+const wrappedContract =
+  WrapperBuilder.mockLite(yourEthersContract).using(mockPriceFun);
 ```
 
-We're also working on a wrapper for the truffle/web3 contracts. Please [let us know](https://redstone.finance/discord) if you need a solution for other frameworks as well. 
+We're also working on a wrapper for the truffle/web3 contracts. Please [let us know](https://redstone.finance/discord) if you need a solution for other frameworks as well.
 
 ### Alternative solutions
 
-If you don't want to modify even a single line of your contract, it's possible to use an alternative solution based on the [Proxy pattern](https://blog.openzeppelin.com/proxy-patterns/). This approach intercepts a transaction at a proxy stage, extracts the price data and delegates the original transaction to your contract. Another advantage of the solution is allowing any contract (including 3rd party ones) to access the data. However, these benefits come at the cost of higher gas consumption. If you're interested in using this approach take a look at the contracts located in the [storage-based](https://github.com/redstone-finance/redstone-evm-connector/tree/price-aware/contracts/storage-based) folder and [reach out to us](https://redstone.finance/discord) if you need help setting up your environment.  
-
+If you don't want to modify even a single line of your contract, it's possible to use an alternative solution based on the [Proxy pattern](https://blog.openzeppelin.com/proxy-patterns/). This approach intercepts a transaction at a proxy stage, extracts the price data and delegates the original transaction to your contract. Another advantage of the solution is allowing any contract (including 3rd party ones) to access the data. However, these benefits come at the cost of higher gas consumption. If you're interested in using this approach take a look at the contracts located in the [storage-based](https://github.com/redstone-finance/redstone-evm-connector/tree/price-aware/contracts/storage-based) folder and [reach out to us](https://redstone.finance/discord) if you need help setting up your environment.
 
 ## ✅ Working demo
+
 You can see examples of `redstone-evm-connector` usage in our [dedicated repo with examples](https://github.com/redstone-finance/redstone-evm-connector-examples).
 
 ## 👨‍💻 Development and contributions
 
-The codebase consists of a wrapper written in typescript which is responsible for packing the data and solidity smart contracts that extract the information. We encourage anyone to build and test the code and we welcome any issues with suggestions and pull requests. 
+The codebase consists of a wrapper written in typescript which is responsible for packing the data and solidity smart contracts that extract the information. We encourage anyone to build and test the code and we welcome any issues with suggestions and pull requests.
 
 ### Installing the dependencies
 
 ```bash
-yarn install 
+yarn install
 ```
+
 ### [Optional] Set up secrets file
 
 If you want to run the scripts located in the [./scripts](scripts) folder from your ethereum wallet you should create a `.secret.json` file based on the [sample.secret.json](sample.secret.json) and update it with your private key. The `.secret.json` file should not be commited when you push your changes to github (it's added to .gitignore).
@@ -247,5 +255,5 @@ If you want to run the scripts located in the [./scripts](scripts) folder from y
 ### Compiling and running the tests
 
 ```bash
-yarn test 
+yarn test
 ```
