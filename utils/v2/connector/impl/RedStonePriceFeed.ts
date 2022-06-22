@@ -4,6 +4,7 @@ import {
   DataSourcesConfig,
   SignedPriceDataType,
 } from "redstone-api-extended/lib/oracle/redstone-data-feed";
+import { DataFeedIdExtended } from "../../types";
 import { PriceFeedConnector } from "../PriceFeedConnector";
 
 export interface PriceFeedOptions {
@@ -14,7 +15,7 @@ export interface PriceFeedOptions {
 export class RedStonePriceFeed implements PriceFeedConnector {
 
   constructor(
-    dataFeedId: string,
+    dataFeedId: DataFeedIdExtended,
     private priceFeedOptions: PriceFeedOptions = {}) {
       // Getting default data sources config for provider if not specified
       if (!this.priceFeedOptions.dataSources) {
