@@ -144,6 +144,47 @@ describe("Price Aware - editable assembly version", function () {
         expect(price).to.equal(BigNumber.from("500000000"));
     });
 
+    it("should return correct prices in the specified order", async function () {
+        let ORACLE_PRICES = (forTime: number) => ({
+            prices: [
+                {symbol: "ETH", value: 10},
+                {symbol: "AVAX", value: 5},
+                {symbol: "LINK", value: 2}
+            ],
+            timestamp: forTime - 3000
+        });
+
+        sample = WrapperBuilder
+            .mockLite(sample)
+            .using(ORACLE_PRICES);
+
+        await sample.authorizeProvider();
+
+        await syncTime(); // recommended for hardhat test
+        let prices = await sample.executeWithPrices([toBytes32("AVAX"), toBytes32("LINK"), toBytes32("ETH")]);
+        let expectedResult = [BigNumber.from("500000000"), BigNumber.from("200000000"), BigNumber.from("1000000000")];
+
+        expect(prices[0].toNumber()).to.eq(expectedResult[0].toNumber());
+        expect(prices[1].toNumber()).to.eq(expectedResult[1].toNumber());
+        expect(prices[2].toNumber()).to.eq(expectedResult[2].toNumber());
+        expect(prices.length).to.be.eq(expectedResult.length);
+
+        prices = await sample.executeWithPrices([toBytes32("ETH"), toBytes32("NONEXISTING"), toBytes32("LINK")]);
+        expectedResult = [BigNumber.from("1000000000"), BigNumber.from("0"), BigNumber.from("200000000")];
+
+        expect(prices[0].toNumber()).to.eq(expectedResult[0].toNumber());
+        expect(prices[1].toNumber()).to.eq(expectedResult[1].toNumber());
+        expect(prices[2].toNumber()).to.eq(expectedResult[2].toNumber());
+        expect(prices.length).to.be.eq(expectedResult.length);
+
+        prices = await sample.executeWithPrices([toBytes32("LINK"), toBytes32("AVAX")]);
+        expectedResult = [BigNumber.from("200000000"), BigNumber.from("500000000")];
+
+        expect(prices[0].toNumber()).to.eq(expectedResult[0].toNumber());
+        expect(prices[1].toNumber()).to.eq(expectedResult[1].toNumber());
+        expect(prices.length).to.be.eq(expectedResult.length);
+    });
+
     it("should return 0 for non-existing price", async function () {
         sample = WrapperBuilder
           .mockLite(sample)
