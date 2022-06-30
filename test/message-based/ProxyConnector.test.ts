@@ -4,7 +4,7 @@ import chai, {expect} from "chai";
 import {solidity} from "ethereum-waffle";
 import {SampleProxyConnector} from "../../typechain/SampleProxyConnector";
 import {SignerWithAddress} from "@nomiclabs/hardhat-ethers/signers";
-import {syncTime, toBytes32} from "../_helpers";
+import {syncTime, toBytes32, toWei} from "../_helpers";
 import {MockPriceFeed} from "../../utils/v2/connector/impl/MockPriceFeed";
 import {WrapperBuilder} from "../../index";
 
@@ -134,6 +134,27 @@ describe("Proxy Connector", function () {
         await syncTime(); // recommended for hardhat test
         await expect(sample.getPriceShortEncodedFunction(toBytes32("ETH"), 1000000000)).not.to.be.reverted;
         await expect(sample.getPriceShortEncodedFunction(toBytes32("ETH"), 9999)).to.be.revertedWith("Wrong price!");
+    });
+
+    it("should forward msg.value", async function () {
+        const mockPrices = [
+            {symbol: "ETH", value: 10}
+        ];
+
+        sample = WrapperBuilder
+            .mockLite(sample)
+            .using(
+                () => {
+                    return {
+                        prices: mockPrices,
+                        timestamp: Date.now()
+                    }
+                });
+
+        await sample.initializePriceAware();
+
+        await syncTime(); // recommended for hardhat test
+        await expect(sample.requireValueForward({value: toWei("2137")})).not.to.be.reverted;
     });
 
     it("should return correct prices for a long encoded function", async function () {

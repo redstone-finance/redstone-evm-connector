@@ -46,4 +46,8 @@ contract SamplePriceAware is PriceAwareOwnable {
   function a() external view returns (uint256) {
     return getPriceFromMsg(bytes32("ETH"));
   }
+
+  function returnMsgValue() external payable returns (uint256) {
+    return msg.value;
+  }
 }

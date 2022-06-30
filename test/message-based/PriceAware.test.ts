@@ -219,7 +219,7 @@ describe("Price Aware - redstone realtime feed", function () {
             .usingPriceFeed("redstone-avalanche", { asset: "AVAX" });
 
         await syncTime(); // recommended for hardhat test
-        await sample.executeWithPrice(toBytes32("IBM"));
+        await sample.executeWithPrice(toBytes32("AVAX"));
     });
 
     it("should get price with multiple assets", async function () {
