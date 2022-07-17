@@ -5,7 +5,7 @@ import { PriceFeedConnector } from "../connector/PriceFeedConnector";
 import { PriceFeedWithClearing__factory } from "../../../typechain";
 import { deepCopy, LogDescription } from "ethers/lib/utils";
 
-const DEFAULT_GAS_MULTIPLIER = 1.2;
+const DEFAULT_GAS_MULTIPLIER = 2.5;
 const DEFAULT_GAS_MULTIPLIER_DECIMALS = 8;
 
 export class EthersContractWrapper<T extends Contract>
@@ -63,7 +63,8 @@ export class EthersContractWrapper<T extends Contract>
               // TODO: remove
               console.log(`Multiplied gas limit: ${tx.gasLimit?.toNumber()}`);
 
-              tx.gasLimit = await contract.signer.estimateGas(tx);
+              // TODO: enable later
+              // tx.gasLimit = await contract.signer.estimateGas(tx);
             } catch (e: any) {
               throw new Error(
                 "Error during gas estimation after appending RedStone payload" +
