@@ -5,9 +5,6 @@ import { PriceFeedConnector } from "../connector/PriceFeedConnector";
 import { PriceFeedWithClearing__factory } from "../../../typechain";
 import { deepCopy, LogDescription } from "ethers/lib/utils";
 
-const DEFAULT_GAS_MULTIPLIER = 1.2;
-const DEFAULT_GAS_MULTIPLIER_DECIMALS = 8;
-
 export class EthersContractWrapper<T extends Contract>
   implements ContractWrapper<T>
 {
@@ -48,23 +45,6 @@ export class EthersContractWrapper<T extends Contract>
               tx.data +
               (await self.getPriceData(contract.signer)) +
               self.getMarkerData();
-
-            // We estimate gas limit again, because the attached data
-            // has changed the estimated gas cost
-            try {
-              tx.gasLimit = tx.gasLimit
-                ?.mul(
-                  DEFAULT_GAS_MULTIPLIER * 10 ** DEFAULT_GAS_MULTIPLIER_DECIMALS
-                )
-                .div(10 ** DEFAULT_GAS_MULTIPLIER_DECIMALS);
-
-              tx.gasLimit = await contract.signer.estimateGas(tx);
-            } catch (e: any) {
-              throw new Error(
-                "Error during gas estimation after appending RedStone payload" +
-                  e.message
-              );
-            }
 
             if (isCall) {
               const result = await contract.signer.call(tx);
