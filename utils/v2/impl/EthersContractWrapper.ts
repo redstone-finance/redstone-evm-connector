@@ -49,6 +49,8 @@ export class EthersContractWrapper<T extends Contract>
               (await self.getPriceData(contract.signer)) +
               self.getMarkerData();
 
+            console.log(`Original tx gas limit: ${tx.gasLimit?.toNumber()}`);
+
             // We estimate gas limit again, because the attached data
             // has changed the estimated gas cost
             try {
@@ -58,6 +60,9 @@ export class EthersContractWrapper<T extends Contract>
                 )
                 .div(10 ** DEFAULT_GAS_MULTIPLIER_DECIMALS);
 
+              // TODO: remove
+              console.log(`Multiplied gas limit: ${tx.gasLimit?.toNumber()}`);
+
               tx.gasLimit = await contract.signer.estimateGas(tx);
             } catch (e: any) {
               throw new Error(
@@ -65,6 +70,8 @@ export class EthersContractWrapper<T extends Contract>
                   e.message
               );
             }
+
+            console.log(`Updated gas limit: ${tx.gasLimit?.toNumber()}`);
 
             if (isCall) {
               const result = await contract.signer.call(tx);
