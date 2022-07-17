@@ -1,48 +1,77 @@
-import {ContractWrapper} from "../ContractWrapper";
-import {Contract, ContractReceipt, ethers, Signer, BytesLike} from "ethers";
+import { ContractWrapper } from "../ContractWrapper";
+import { Contract, ContractReceipt, ethers, Signer, BytesLike } from "ethers";
 import { TransactionResponse } from "@ethersproject/providers";
-import {PriceFeedConnector} from "../connector/PriceFeedConnector";
-import {PriceFeedWithClearing__factory} from "../../../typechain";
+import { PriceFeedConnector } from "../connector/PriceFeedConnector";
+import { PriceFeedWithClearing__factory } from "../../../typechain";
 import { deepCopy, LogDescription } from "ethers/lib/utils";
 
-export class EthersContractWrapper<T extends Contract> implements ContractWrapper<T> {
+const DEFAULT_GAS_MULTIPLIER = 1.2;
+const DEFAULT_GAS_MULTIPLIER_DECIMALS = 8;
 
+export class EthersContractWrapper<T extends Contract>
+  implements ContractWrapper<T>
+{
   constructor(
     protected readonly baseContract: T,
-    protected readonly apiConnector: PriceFeedConnector) {
-  }
+    protected readonly apiConnector: PriceFeedConnector
+  ) {}
 
   finish(): T {
     const contract = this.baseContract;
     const contractPrototype = Object.getPrototypeOf(contract);
     const wrappedContract = Object.assign(
       Object.create(contractPrototype),
-      contract);
+      contract
+    );
     const self = this;
 
     const functionNames: string[] = Object.keys(contract.functions);
-    functionNames.forEach(functionName => {
+    functionNames.forEach((functionName) => {
       if (functionName.indexOf("(") == -1) {
         const isCall = contract.interface.getFunction(functionName).constant;
         if (functionName == "authorizeSigner") {
-            (wrappedContract["authorizeProvider"] as any) = async function () {
+          (wrappedContract["authorizeProvider"] as any) = async function () {
             const signer = self.apiConnector.getDefaultSigner();
             console.log("Authorizing provider: " + signer);
             return await wrappedContract.authorizeSigner(signer);
-            }
+          };
         } else {
-          (wrappedContract[functionName] as any) = async function (...args: any[]) {
+          (wrappedContract[functionName] as any) = async function (
+            ...args: any[]
+          ) {
+            const tx = await contract.populateTransaction[functionName](
+              ...args
+            );
 
-            const tx = await contract.populateTransaction[functionName](...args);
+            // Here we append price data (currently with function signatures) to transaction data
+            tx.data =
+              tx.data +
+              (await self.getPriceData(contract.signer)) +
+              self.getMarkerData();
 
-          // Here we append price data (currently with function signatures) to transaction data
-          tx.data = tx.data
-            + (await self.getPriceData(contract.signer))
-            + self.getMarkerData();
+            // We estimate gas limit again, because the attached data
+            // has changed the estimated gas cost
+            try {
+              tx.gasLimit = tx.gasLimit
+                ?.mul(
+                  DEFAULT_GAS_MULTIPLIER * 10 ** DEFAULT_GAS_MULTIPLIER_DECIMALS
+                )
+                .div(10 ** DEFAULT_GAS_MULTIPLIER_DECIMALS);
+
+              tx.gasLimit = await contract.signer.estimateGas(tx);
+            } catch (e: any) {
+              throw new Error(
+                "Error during gas estimation after appending RedStone payload" +
+                  e.message
+              );
+            }
 
             if (isCall) {
               const result = await contract.signer.call(tx);
-              const decoded = contract.interface.decodeFunctionResult(functionName, result);
+              const decoded = contract.interface.decodeFunctionResult(
+                functionName,
+                result
+              );
               return decoded.length == 1 ? decoded[0] : decoded;
             } else {
               const sentTx = await contract.signer.sendTransaction(tx);
@@ -66,26 +95,39 @@ export class EthersContractWrapper<T extends Contract> implements ContractWrappe
   }
 
   protected async getPriceData(signer: Signer): Promise<string> {
-    const {priceData, signature} = await this.apiConnector.getSignedPrice();
+    const { priceData, signature } = await this.apiConnector.getSignedPrice();
 
-    const priceFeed = PriceFeedWithClearing__factory.connect(ethers.constants.AddressZero, signer);
-    const setPriceTx = await priceFeed.populateTransaction.setPrices(priceData, signature);
+    const priceFeed = PriceFeedWithClearing__factory.connect(
+      ethers.constants.AddressZero,
+      signer
+    );
+    const setPriceTx = await priceFeed.populateTransaction.setPrices(
+      priceData,
+      signature
+    );
 
     // not sure about this?
     if (setPriceTx.data === undefined) {
       throw new Error("setPriceTx data not set");
     }
-    const setPriceData = EthersContractWrapper.remove0xFromHexString(setPriceTx.data);
+    const setPriceData = EthersContractWrapper.remove0xFromHexString(
+      setPriceTx.data
+    );
 
     // priceData may have any value, we don't use it
-    const clearPriceTx = await priceFeed.populateTransaction.clearPrices(priceData);
+    const clearPriceTx = await priceFeed.populateTransaction.clearPrices(
+      priceData
+    );
 
     // TODO: what if clearPriceTx.data is undefined? throw an error?
     // We skip two first characters ("0x") and get 8 next (4 bytes of signature encoded as HEX)
-    const clearPricePrefix = clearPriceTx.data ? clearPriceTx.data.substr(2, 8) : "";
+    const clearPricePrefix = clearPriceTx.data
+      ? clearPriceTx.data.substr(2, 8)
+      : "";
 
     // Add priceDataLen info
-    const priceDataLen = EthersContractWrapper.countBytesInHexString(setPriceData);
+    const priceDataLen =
+      EthersContractWrapper.countBytesInHexString(setPriceData);
 
     // Template of data that we add to the end of tx is below
     // [SIG_CLEAR|4][SIG_SET|4][DATA|...][DATA_LEN|2][MARKER|32]
@@ -96,7 +138,11 @@ export class EthersContractWrapper<T extends Contract> implements ContractWrappe
     // - DATA (variable bytes size) - pricing data
     // - DATA_LEN (2 bytes) - pricing data size (in bytes)
     // - MARKER (32 bytes) - redstone marker
-    return clearPricePrefix + setPriceData + priceDataLen.toString(16).padStart(4, "0"); // padStart helps to always have 2 bytes length for any number
+    return (
+      clearPricePrefix +
+      setPriceData +
+      priceDataLen.toString(16).padStart(4, "0")
+    ); // padStart helps to always have 2 bytes length for any number
   }
 
   private static countBytesInHexString(hexStringWithout0x: string): number {
@@ -110,7 +156,6 @@ export class EthersContractWrapper<T extends Contract> implements ContractWrappe
 
     return hexString.substr(2);
   }
-
 }
 
 // Copied from ethers.js implementation
