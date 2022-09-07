@@ -113,7 +113,7 @@ After applying the mentioned change you will be able to access the data calling 
 uint256 ethPrice = getPriceFromMsg(bytes32("ETH"));
 ```
 
-You can see all available assets and symbols [in our web app.](https://app.redstone.finance/#/app/providers)
+You can see all available assets and symbols [in our web app.](https://app.redstone.finance/#/app/data-feeds)
 
 ### 2. Updating the interface
 
